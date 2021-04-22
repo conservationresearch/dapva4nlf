@@ -1,0 +1,23 @@
+Package: dapva4nlf
+Type: Package
+Title: Decision Analytic Population Viability Analysis for Northern Leopard Frog
+Version: 1.1.0
+Authors@R: person("Laura", "Keating", email = "LauraK@calgaryzoo.com",
+                  role = c("aut", "cre"))
+Description: A package and wrapper script to run a decision-analytic population 
+    viability analysis (PVA) for northern leopard frog reintroduction into northern 
+    Idaho. The goal statement for this feasibility analysis is: The Idaho Department of
+    Fish and Game, Wildlife Bureau is trying to gain insight into the likelihood
+    of success of reintroducing northern leopard frogs to achieve local recovery
+    of the species in the Boundary Smith Creek Wildlife Management Area in
+    northern Idaho given that they are currently extirpated from the region.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.1
+Imports: 
+    dapva
+Suggests:
+    testthat
+Depends: 
+    R (>= 2.10)
