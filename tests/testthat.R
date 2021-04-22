@@ -1,4 +1,4 @@
 library(testthat)
-library(dapva4btpd)
+library(dapva4nlf)
 
-test_check("dapva4btpd")
+test_check("dapva4nlf")
