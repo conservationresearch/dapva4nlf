@@ -46,6 +46,10 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
 
 #---- Get the inputs.  -------------
 
+  inputs_all <- getBTPDinputs_statusQuo(scenario_climate = scenarios_to_run$climate[row_to_run],
+                                        scenario_plague = scenarios_to_run$plague[row_to_run])
+  
+  
 #---- Choose the parameters for each iteration (i.e. parametric uncertainty). ----
 
 
