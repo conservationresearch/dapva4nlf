@@ -31,8 +31,8 @@
 #' @export
 runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
                                  # dispersal_edge_list,dispersal_tracking, 
-                                 initial_year, wetlands,
-                                 K, percentilesEV) {
+                                 initial_year, wetlands,stage_classes,
+                                 percentilesEV, alternative_details) {
   # start.time <- Sys.time()
   # Rprof()    ## Turn on the profiler
   # Collect some info
@@ -41,7 +41,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
   # Make a data frame to track the results
   resultsTracking_popSize_females <- dapva::makeResultsTracking(i,
     yrs = yrs, initial_year = initial_year,
-    pops = colonies, class_names = unique(initialPopSizes_female$stage),
+    pops = wetlands, class_names = stage_classes,
     sex = "female"
   )
 
@@ -49,16 +49,69 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
   for (j in 1:yrs) {
     print(paste("iteration", i, "run", q, "year", j))
 
-    ######### In the first year, populate with initial conditions. #########
-    # Starting Population Size and Sex & Stage Distribution
+    ######### Apply environmental stochasticity (EV) to select survival and reproductive rates. #########
+    
+    # Note: for now, the various wetlands are perfectly correlated. Discuss again with Lea and Rebecca.
+    # If want to have different EVs for each wetland, see how did it for pdogs with lapply
+    
+    s_eggs_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_eggs_no_threats")])
+    s_eggs_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_eggs_no_threats")])
+    s_eggs <- dapva::selectPercentileBetaDistribution(mean = s_eggs_mean, sd = s_eggs_sd, EV_percentile = percentilesEV$eggs[j])
+    
+    s_tadpoles_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_tadpoles_no_threats")])
+    s_tadpoles_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_tadpoles_no_threats")])
+    s_tadpoles <- dapva::selectPercentileBetaDistribution(mean = s_tadpoles_mean, sd = s_tadpoles_sd, EV_percentile = percentilesEV$tadpoles[j])
+    
+    s_yoy_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_yoy_no_threats")])
+    s_yoy_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_yoy_no_threats")])
+    s_yoy <- dapva::selectPercentileBetaDistribution(mean = s_yoy_mean, sd = s_yoy_sd, EV_percentile = percentilesEV$yoy[j])
+    
+    s_juv_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_juv_no_threats")])
+    s_juv_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_juv_no_threats")])
+    s_juv <- dapva::selectPercentileBetaDistribution(mean = s_juv_mean, sd = s_juv_sd, EV_percentile = percentilesEV$adult[j])
+    
+    s_adult_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_adult_no_threats")])
+    s_adult_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_adult_no_threats")])
+    s_adult <- dapva::selectPercentileBetaDistribution(mean = s_adult_mean, sd = s_adult_sd, EV_percentile = percentilesEV$adult[j])
+    
+    
+    # NEXT TO DO - do this for reproduction parameters
+    
+    
+    ######### In the first year, add any translocated tadpoles #########
 
+    # No NLF there at the moment so no other initial condition
+    
     if (j == 1) {
 
       # populate with initial conditions
+      # Tadpoles get translocated in!
+      
+      if(alternative_details$release_location == "cell7"){
+        rows <- which(resultsTracking_popSize_females$class == "tadpoles") &&
+          which(resultsTracking_popSize_females$pop == "cell7")
+      }
+      if(alternative_details$release_location == "all_three"){
+        rows <- intersect(which(resultsTracking_popSize_females$class == "tadpoles"),
+          (which(resultsTracking_popSize_females$pop == "cell7" | 
+                   resultsTracking_popSize_females$pop == "cell3" |
+                           resultsTracking_popSize_females$pop == "cell4")
+                   )
+        )
+      }
 
-      # Record the results - Females
+      resultsTracking_popSize_females[rows, "1"] <- as.numeric(alternative_details$n_tadpoles_per_year)/length(rows)
 
     }
+    
+    ######### Then move through the life cycle for this year #########
+    
+    # tadpoles survive (or not) to become yoy
+    resultsTracking_popSize_females[paste(j)]
+    
+    
+    
+    ### OLD - from pdog model, left her for now for reference
     ######### Second year and beyond. #########
     if (j > 1) { #  If in the second year and beyond, apply survival and reproduction logic.
 

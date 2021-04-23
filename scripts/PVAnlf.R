@@ -34,16 +34,21 @@ doParallel::registerDoParallel(cl)
 # Set the seed in a way that works for parallel computing (each core needs a separate random seed) (e.g. https://www.r-bloggers.com/2020/09/future-1-19-1-making-sure-proper-random-numbers-are-produced-in-parallel-processing/)
 clusterSetRNGStream(cl, iseed = 29) # without parallel computing can just do set.seed(1234)
 
-#---- Specify the scenarios to run.  -------------
-rows_to_run <- 1
+#---- Specify the alternatives to run.  -------------
+alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are preloaded in for easy calling
+
+rows_to_run <- 2
 #---- Specify number of iterations and number of runs per iterations.  -------------
 n_iter  <- 10
 max_n_runs_per_iter <- 10
 
 #---- Start the scenario loop.  -------------
 for(m in 1:length(rows_to_run)){ # loop through the different scenarios requested in the scenarios_to_run file
-
-
+m <- 1
+  row_to_run <- rows_to_run[m]
+  print(paste0("Running alternative ", alternatives_to_run$alt_name_short[row_to_run]))
+  alternative_details <- alternatives_to_run[row_to_run,]
+  
 #---- Get the inputs.  -------------
 
   inputs_all <- dapva4nlf::getNLFIdahoFeasinputs()
@@ -116,11 +121,17 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                                               percentilesEV_survival_yoy_adult, 
                                                                                               percentilesEV_reproduction)
                                                                        
+                                                                       wetlands <- c("cell7", "cell4", "cell3", "outside")
+                                                                       
+                                                                       initial_year <- parameterByIterTracking$initial_year[i]
+                                                                       yrs <- parameterByIterTracking$yrs[i]
+                                                                       stage_classes <- c("eggs", "tadpoles", "yoy", "juv", "A2", "A3", "A4plus")
+                                                                       
                                                                        # Run the annual loop
                                                                        results_annual[[q]] <- runAnnualLoopNLFIdahoPVA(parameterByIterTracking, yrs, i, q,
                                                                                                                        # dispersal_edge_list,dispersal_tracking, 
-                                                                                                                       initial_year, wetlands,
-                                                                                                                       K, percentilesEV) 
+                                                                                                                       initial_year, wetlands,stage_classes,
+                                                                                                                       percentilesEV, alternative_details) 
                                                                        
                                                                        if(q == max_n_runs_per_iter*0.1){ # if we have run 10% of the max number of runs per iterations
                                                                          

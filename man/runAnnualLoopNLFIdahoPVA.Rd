@@ -17,7 +17,7 @@ runAnnualLoopNLFIdahoPVA(
   q,
   initial_year,
   wetlands,
-  K,
+  stage_classes,
   percentilesEV
 )
 }
@@ -35,10 +35,10 @@ format of selectBTPDparameterByIterTracking().}
 
 \item{wetlands}{Wetland cell names/abbreviations.}
 
-\item{K}{Carrying capacity .}
-
 \item{percentilesEV}{A vector of lenth years with percentiles to use for
 environmental variation (EV) in each iteration (e.g. output from selectEVPercentilesNormal()).}
+
+\item{K}{Carrying capacity .}
 }
 \description{
 This functions contains the annual loop of the Idaho Feasability 

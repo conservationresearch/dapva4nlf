@@ -38,44 +38,178 @@ getNLFIdahoFeasinputs <- function() {
     )
   )
 
-  #---- Reproduction: proportion of females reproductively active for each stage.  -------------
+  #---- Reproduction: proportion of females reproductively active for each stage - mean.  -------------
   
   # LK PLACEHOLDERS FOR TESTING
   
-  repro_prop_active <- list(
+  repro_prop_active_mean <- list(
     c(input = "p_females_lay_eggs_mean_A2", type = "reproduction", 
-      lcl = 0.25, best_guess = 0.4, ucl = 0.6, confidence = 0.95,
+      lcl = 0.25, best_guess = 0.4, ucl = 0.6, confidence = 95,
       lower_bound = 0, upper_bound = 1,
       best_guess_type = "median", management_alternative = "status_quo", source = "", comments = ""),
     c(input = "p_females_lay_eggs_mean_A3", type = "reproduction", 
-      lcl = 0.5, best_guess = 0.6, ucl = 0.7, confidence = 0.95,
+      lcl = 0.5, best_guess = 0.6, ucl = 0.7, confidence = 95,
       lower_bound = 0, upper_bound = 1,
       best_guess_type = "median", management_alternative = "status_quo", source = "", comments = "" ),
     c(input = "p_females_lay_eggs_mean_A4plus", type = "reproduction", 
-      lcl = 0.5, best_guess = 0.6, ucl = 0.7, confidence = 0.95,
+      lcl = 0.5, best_guess = 0.6, ucl = 0.7, confidence = 95,
       lower_bound = 0, upper_bound = 1,
       best_guess_type = "median", management_alternative = "status_quo", source = "", comments = "")
   )
+  
+  #---- Reproduction: proportion of females reproductively active for each stage - sd (temporal variation).  -------------
+  
+  repro_prop_active_sd <- list(
+    c(input = "p_females_lay_eggs_sd_A2", type = "survival", 
+      lcl = 0, ucl = 0.28,
+      best_guess_type = "NA", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 2021", comments = "no information on this; use uniform distribution from 0 to 0.28, where 0.28 is the largest std dev for a beta distribution"),
+    
+    c(input = "p_females_lay_eggs_sd_A3", type = "survival", 
+      lcl = 0, ucl = 0.28,
+      best_guess_type = "NA", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 2021", comments = "no information on this; use uniform distribution from 0 to 0.28, where 0.28 is the largest std dev for a beta distribution"),
+    
+    c(input = "p_females_lay_eggs_sd_A4plus", type = "survival", 
+      lcl = 0, ucl = 0.28,
+      best_guess_type = "NA", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 2021", comments = "no information on this; use uniform distribution from 0 to 0.28, where 0.28 is the largest std dev for a beta distribution")
+  )
+  
   
   #---- Reproduction: number of eggs per female.  -------------
   
   repro_clutch_size <- list(
     c(input = "num_eggs_per_active_female_mean_A2", type = "reproduction", 
-      lcl = 2000, best_guess = 3000, ucl = 4000, confidence = 0.95,
+      lcl = 2000, best_guess = 3000, ucl = 4000, confidence = 95,
       best_guess_type = "median", management_alternative = "status_quo", source = "", comments = ""),
     c(input = "num_eggs_per_active_female_mean_A3", type = "reproduction", 
-      lcl = 3000, best_guess = 4000, ucl = 5000, confidence = 0.95,
+      lcl = 3000, best_guess = 4000, ucl = 5000, confidence = 95,
       best_guess_type = "median", management_alternative = "status_quo", source = "", comments = ""),
     c(input = "num_eggs_per_active_female_mean_A4plus", type = "reproduction", 
-      lcl = 6000, best_guess = 7000, ucl = 8000, confidence = 0.95,
+      lcl = 6000, best_guess = 7000, ucl = 8000, confidence = 95,
       best_guess_type = "median", management_alternative = "status_quo", source = "", comments = "")
   )
+  
+  #---- Survival: mean, no threats.  -------------
+  
+  survival_rate_mean_no_threats <- list(
+    c(input = "s_mean_eggs_no_threats", type = "survival", 
+      lcl = 0.12, best_guess = 0.75, ucl = 0.9, confidence = 95,
+      lower_bound = 0, upper_bound = 0.95,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 23, 2021", comments = "survival from eggs to tadpoles"),
+    
+    c(input = "s_mean_tadpoles_no_threats", type = "survival", 
+      lcl = 0.01, best_guess = 0.04, ucl = 0.1, confidence = 80,
+      lower_bound = 0, upper_bound = 0.25,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 23, 2021", comments = "survival from tadpoles to yoy"),
+    
+    c(input = "s_mean_yoy_no_threats", type = "survival", 
+      lcl = 0.05, best_guess = 0.1, ucl = 0.31, confidence = 80,
+      lower_bound = 0, upper_bound = 0.5,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 23, 2021", comments = "annual survival from yoy to juv (one year old adult), includes overwinter survival"),
+    
+    c(input = "s_mean_juv_no_threats", type = "survival", 
+      lcl = 0.2, best_guess = 0.4, ucl = 0.6, confidence = 80,
+      lower_bound = 0, upper_bound = 0.9,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 23, 2021", comments = "annual survival from juv (one year old adult) to adult (2 years), includes overwinter survival"),
+    
+    c(input = "s_mean_adult_no_threats", type = "survival", 
+      lcl = 0.36, best_guess = 0.6, ucl = 0.7, confidence = 80,
+      lower_bound = 0, upper_bound = 0.9,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 23, 2021", comments = "annual survival for adults (age 2 and older), includes overwinter survival")
+    
+  )
+  
+  #---- Survival: standard deviation (temporal variation), no threats.  -------------
+  
+  survival_rate_sd_no_threats <- list(
+    c(input = "s_sd_eggs_no_threats", type = "survival", 
+      lcl = 0, ucl = 0.28,
+      best_guess_type = "NA", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 2021", comments = "no information on this; use uniform distribution from 0 to 0.28, where 0.28 is the largest std dev for a beta distribution"),
+    
+    c(input = "s_sd_tadpoles_no_threats", type = "survival", 
+      lcl = 0, ucl = 0.28,
+      best_guess_type = "NA", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 2021", comments = "no information on this; use uniform distribution from 0 to 0.28, where 0.28 is the largest std dev for a beta distribution"),
+    
+    c(input = "s_sd_yoy_no_threats", type = "survival", 
+      lcl = 0, ucl = 0.28,
+      best_guess_type = "NA", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 2021", comments = "no information on this; use uniform distribution from 0 to 0.28, where 0.28 is the largest std dev for a beta distribution"),
+    
+    c(input = "s_sd_juv_no_threats", type = "survival", 
+      lcl = 0, ucl = 0.28,
+      best_guess_type = "NA", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 2021", comments = "no information on this; use uniform distribution from 0 to 0.28, where 0.28 is the largest std dev for a beta distribution"),
+    
+    c(input = "s_sd_adult_no_threats", type = "survival", 
+      lcl = 0, ucl = 0.28,
+      best_guess_type = "NA", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 2021", comments = "no information on this; use uniform distribution from 0 to 0.28, where 0.28 is the largest std dev for a beta distribution")
+    
+  )
+  
+  #---- Survival: % reduction due to bullfrogs.  -------------
+  
+  survival_pctReduction_bullfrogs <- list(
+    c(input = "s_pct_reduced_eggs_bullfrogs", type = "survival", 
+      lcl = 10, best_guess = 50, ucl = 90, confidence = 95,
+      lower_bound = 0, upper_bound = 100,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "LK PLACEHOLDER", comments = "% reduction in survival due to bullfrog presence"),
+
+    c(input = "s_pct_reduced_tadpoles_bullfrogs", type = "survival", 
+      lcl = 15, best_guess = 35, ucl = 50, confidence = 70,
+      lower_bound = 0, upper_bound = 100,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 23, 2021", comments = "% reduction in survival due to bullfrog presence"),
+    
+    c(input = "s_pct_reduced_yoy_bullfrogs", type = "survival", 
+      lcl = 12, best_guess = 22, ucl = 35, confidence = 70,
+      lower_bound = 0, upper_bound = 100,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 23, 2021", comments = "% reduction in survival due to bullfrog presence"),
+
+    c(input = "s_pct_reduced_juvenile_bullfrogs", type = "survival", 
+      lcl = 10, best_guess = 20, ucl = 30, confidence = 70,
+      lower_bound = 0, upper_bound = 100,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 23, 2021", comments = "% reduction in survival due to bullfrog presence"),
+    
+    c(input = "s_pct_reduced_adult_bullfrogs", type = "survival", 
+      lcl = 5, best_guess = 10, ucl = 15, confidence = 70,
+      lower_bound = 0, upper_bound = 100,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 23, 2021", comments = "% reduction in survival due to bullfrog presence")
+  )
+  
+  #---- Human management: probability that bullfrog management will be effective.  -------------
+  
+  prob_bullfrog_mgmt_effective <- list(
+    c(input = "bullfrogMgmt_effective", type = "human_management", 
+      best_guess = 0.8, 
+      best_guess_type = "probability", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 23, 2021", comments = "8/10 chance that bullfrog managmenet efforts will keep bullfrog #s low enough that they will not affect NLF survival rates")
+    )
+  
 
   #---- Compile the inputs and set up tracking objects.  -------------
   inputs <- dapva::makeInputsDF(parameters = c(
     year_inputs,
-    repro_prop_active,
-    repro_clutch_size
+    repro_prop_active_mean,
+    repro_prop_active_sd,
+    repro_clutch_size,
+    survival_rate_mean_no_threats,
+    survival_rate_sd_no_threats,
+    survival_pctReduction_bullfrogs,
+    prob_bullfrog_mgmt_effective
   ))
 
 
@@ -140,16 +274,52 @@ selectNLFIdahoParameterByIterTracking <- function(inputs) {
 
   ######### Select the reproduction parameters for this iteration - proportion of repro active females. #########
 
-  # Choose and record the reproduction parameters for this iteration - mean
-  parameterByIterTracking[i, "p_females_lay_eggs_mean_A2"] <- dapva::selectParamMetalogDistribution(input_name = "p_females_lay_eggs_mean_A2", inputsDF = inputs, term = 3)
-  parameterByIterTracking[i, "p_females_lay_eggs_mean_A3"] <- dapva::selectParamMetalogDistribution(input_name = "p_females_lay_eggs_mean_A2", inputsDF = inputs)
-  parameterByIterTracking[i, "p_females_lay_eggs_mean_A4plus"] <- dapva::selectParamMetalogDistribution(input_name = "p_females_lay_eggs_mean_A2", inputsDF = inputs)
+  # Choose and record the reproduction parameters for this iteration - mean proportion of females who lay eggs
+  parameterByIterTracking[i, "p_females_lay_eggs_mean_A2"] <- dapva::selectParamMetalogDistribution(input_name = "p_females_lay_eggs_mean_A2", inputsDF = inputs)
+  parameterByIterTracking[i, "p_females_lay_eggs_mean_A3"] <- dapva::selectParamMetalogDistribution(input_name = "p_females_lay_eggs_mean_A3", inputsDF = inputs)
+  parameterByIterTracking[i, "p_females_lay_eggs_mean_A4plus"] <- dapva::selectParamMetalogDistribution(input_name = "p_females_lay_eggs_mean_A4plus", inputsDF = inputs)
+  
+  # Choose and record the reproduction parameters for this iteration - sd proportion of females who lay eggs
+  parameterByIterTracking[i, "p_females_lay_eggs_sd_A2"] <- dapva::selectParamUniformDistribution(input_name = "p_females_lay_eggs_sd_A2", inputsDF = inputs)
+  parameterByIterTracking[i, "p_females_lay_eggs_sd_A3"] <- dapva::selectParamUniformDistribution(input_name = "p_females_lay_eggs_sd_A3", inputsDF = inputs)
+  parameterByIterTracking[i, "p_females_lay_eggs_sd_A4plus"] <- dapva::selectParamUniformDistribution(input_name = "p_females_lay_eggs_sd_A4plus", inputsDF = inputs)
   
   ######### Select the reproduction parameters for this iteration - number of offspring per female. #########
   parameterByIterTracking[i, "num_eggs_per_active_female_mean_A2"] <- dapva::selectParamMetalogDistribution(input_name = "num_eggs_per_active_female_mean_A2", inputsDF = inputs)
-  parameterByIterTracking[i, "num_eggs_per_active_female_mean_A3"] <- dapva::selectParamMetalogDistribution(input_name = "num_eggs_per_active_female_mean_A2", inputsDF = inputs)
-  parameterByIterTracking[i, "num_eggs_per_active_female_mean_A4plus"] <- dapva::selectParamMetalogDistribution(input_name = "num_eggs_per_active_female_mean_A2", inputsDF = inputs)
+  parameterByIterTracking[i, "num_eggs_per_active_female_mean_A3"] <- dapva::selectParamMetalogDistribution(input_name = "num_eggs_per_active_female_mean_A3", inputsDF = inputs)
+  parameterByIterTracking[i, "num_eggs_per_active_female_mean_A4plus"] <- dapva::selectParamMetalogDistribution(input_name = "num_eggs_per_active_female_mean_A4plus", inputsDF = inputs)
   
+  ######### Select the survival parameters for this iteration - mean survival rates no threats. #########
+  parameterByIterTracking[i, "s_mean_eggs_no_threats"] <- dapva::selectParamMetalogDistribution(input_name = "s_mean_eggs_no_threats", inputsDF = inputs)
+  parameterByIterTracking[i, "s_mean_tadpoles_no_threats"] <- dapva::selectParamMetalogDistribution(input_name = "s_mean_tadpoles_no_threats", inputsDF = inputs)
+  parameterByIterTracking[i, "s_mean_yoy_no_threats"] <- dapva::selectParamMetalogDistribution(input_name = "s_mean_yoy_no_threats", inputsDF = inputs)
+  parameterByIterTracking[i, "s_mean_juv_no_threats"] <- dapva::selectParamMetalogDistribution(input_name = "s_mean_juv_no_threats", inputsDF = inputs)
+  parameterByIterTracking[i, "s_mean_adult_no_threats"] <- dapva::selectParamMetalogDistribution(input_name = "s_mean_adult_no_threats", inputsDF = inputs)
+  
+  ######### Select the survival parameters for this iteration - temporal variance in survival rates no threats. #########
+  parameterByIterTracking[i, "s_sd_eggs_no_threats"] <- dapva::selectParamUniformDistribution(input_name = "s_sd_eggs_no_threats", inputsDF = inputs)
+  parameterByIterTracking[i, "s_sd_tadpoles_no_threats"] <- dapva::selectParamUniformDistribution(input_name = "s_sd_tadpoles_no_threats", inputsDF = inputs)
+  parameterByIterTracking[i, "s_sd_yoy_no_threats"] <- dapva::selectParamUniformDistribution(input_name = "s_sd_yoy_no_threats", inputsDF = inputs)
+  parameterByIterTracking[i, "s_sd_juv_no_threats"] <- dapva::selectParamUniformDistribution(input_name = "s_sd_juv_no_threats", inputsDF = inputs)
+  parameterByIterTracking[i, "s_sd_adult_no_threats"] <- dapva::selectParamUniformDistribution(input_name = "s_sd_adult_no_threats", inputsDF = inputs)
+  
+  
+  ######### Select the survival parameters for this iteration - % reduction in survival due to bullfrogs. #########
+  parameterByIterTracking[i, "s_pct_reduced_eggs_bullfrogs"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_eggs_bullfrogs", inputsDF = inputs)
+  parameterByIterTracking[i, "s_pct_reduced_tadpoles_bullfrogs"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_tadpoles_bullfrogs", inputsDF = inputs)
+  parameterByIterTracking[i, "s_pct_reduced_yoy_bullfrogs"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_yoy_bullfrogs", inputsDF = inputs)
+  parameterByIterTracking[i, "s_pct_reduced_juvenile_bullfrogs"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_juvenile_bullfrogs", inputsDF = inputs)
+  parameterByIterTracking[i, "s_pct_reduced_adult_bullfrogs"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_adult_bullfrogs", inputsDF = inputs)
+  
+  
+  
+  ######### Select the human management parameters for this iteration - bullfrog management effective or not. #########
+  
+  parameterByIterTracking[i, "bullfrogMgmt_effective"] <- sample(c("yes", "no"),
+                                                          size = 1,
+                                                          prob = c(as.numeric(inputs$best_guess[which(inputs$input == "bullfrogMgmt_effective")]),
+                                                                   (1-as.numeric(inputs$best_guess[which(inputs$input == "bullfrogMgmt_effective")]))
+                                                                   ), replace = T)
   
   
   ######### Select the carrying capacity parameters for this iteration. #########
