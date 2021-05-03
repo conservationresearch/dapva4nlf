@@ -107,15 +107,15 @@ m <- 1
                                                                        # It is not a perfect algoritm but appropriate for the level of randomness we need I think
 
                                                                        
-                                                                       percentilesEV_survival_eggs_tad <- selectEVPercentilesNormal(input_names_w_EV = c("cell7", "cell4", "cell3", "ephemeral_wetlands"),
+                                                                       percentilesEV_survival_eggs_tad <- selectEVPercentilesNormal(input_names_w_EV = c("cell3", "cell4", "cell7", "ephemeral_wetlands"),
                                                                                                                                     correlation = parameterByIterTracking$wetland_vitalrate_correlations[i],
                                                                                                                                     n_years = parameterByIterTracking$yrs[i])
                                                                        
-                                                                       percentilesEV_survival_yoy_adult <- selectEVPercentilesNormal(input_names_w_EV = c("cell7", "cell4", "cell3", "ephemeral_wetlands"),
+                                                                       percentilesEV_survival_yoy_adult <- selectEVPercentilesNormal(input_names_w_EV = c("cell3", "cell4", "cell7", "ephemeral_wetlands"),
                                                                                                                                     correlation = parameterByIterTracking$wetland_vitalrate_correlations[i],
                                                                                                                                     n_years = parameterByIterTracking$yrs[i])
                                                                        
-                                                                       percentilesEV_reproduction <- selectEVPercentilesNormal(input_names_w_EV = c("cell7", "cell4", "cell3", "ephemeral_wetlands"),
+                                                                       percentilesEV_reproduction <- selectEVPercentilesNormal(input_names_w_EV = c("cell3", "cell4", "cell7", "ephemeral_wetlands"),
                                                                                                                               correlation = parameterByIterTracking$wetland_vitalrate_correlations[i],
                                                                                                                               n_years = parameterByIterTracking$yrs[i])
 
@@ -123,7 +123,7 @@ m <- 1
                                                                        initial_year <- parameterByIterTracking$initial_year[i]
                                                                        yrs <- parameterByIterTracking$yrs[i]
                                                                        stage_classes <- c("eggs", "tadpoles", "yoy", "juv", "A2", "A3", "A4plus")
-                                                                       wetlands <- c("cell7", "cell4", "cell3", "ephemeral_wetlands", "outside")
+                                                                       wetlands <- c("cell3", "cell4", "cell7", "ephemeral_wetlands", "outside")
                                                                        
                                                                        
                                                                        # Run the annual loop

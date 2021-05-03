@@ -442,9 +442,17 @@ selectNLFIdahoParameterByIterTracking <- function(inputs) {
   parameterByIterTracking[i, "p_females_lay_eggs_mean_A4plus"] <- dapva::selectParamMetalogDistribution(input_name = "p_females_lay_eggs_mean_A4plus", inputsDF = inputs)
   
   # Choose and record the reproduction parameters for this iteration - sd proportion of females who lay eggs
+  # UPDATE: use just one SD for all age classes to reflect level of temporal variation across all age classes
+  # Otherwise get some unintended consequences where in some years could be much better repro for the younger ones, which is counterintiutive
   parameterByIterTracking[i, "p_females_lay_eggs_sd_A2"] <- dapva::selectParamUniformDistribution(input_name = "p_females_lay_eggs_sd_A2", inputsDF = inputs)
-  parameterByIterTracking[i, "p_females_lay_eggs_sd_A3"] <- dapva::selectParamUniformDistribution(input_name = "p_females_lay_eggs_sd_A3", inputsDF = inputs)
-  parameterByIterTracking[i, "p_females_lay_eggs_sd_A4plus"] <- dapva::selectParamUniformDistribution(input_name = "p_females_lay_eggs_sd_A4plus", inputsDF = inputs)
+  parameterByIterTracking[i, "p_females_lay_eggs_sd_A3"] <- parameterByIterTracking[i, "p_females_lay_eggs_sd_A2"]
+  parameterByIterTracking[i, "p_females_lay_eggs_sd_A4plus"] <- parameterByIterTracking[i, "p_females_lay_eggs_sd_A2"]
+  
+  # OLD - if each age class had a separate sd
+  # parameterByIterTracking[i, "p_females_lay_eggs_sd_A2"] <- dapva::selectParamUniformDistribution(input_name = "p_females_lay_eggs_sd_A2", inputsDF = inputs)
+  # parameterByIterTracking[i, "p_females_lay_eggs_sd_A3"] <- dapva::selectParamUniformDistribution(input_name = "p_females_lay_eggs_sd_A3", inputsDF = inputs)
+  # parameterByIterTracking[i, "p_females_lay_eggs_sd_A4plus"] <- dapva::selectParamUniformDistribution(input_name = "p_females_lay_eggs_sd_A4plus", inputsDF = inputs)
+  # 
   
   ######### Select the reproduction parameters for this iteration - number of offspring per female. #########
   parameterByIterTracking[i, "num_eggs_per_active_female_mean_A2"] <- dapva::selectParamMetalogDistribution(input_name = "num_eggs_per_active_female_mean_A2", inputsDF = inputs)
