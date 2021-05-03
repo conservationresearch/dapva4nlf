@@ -98,40 +98,42 @@ m <- 1
                                                                      for(q in 1:max_n_runs_per_iter){# not in parallel here; in parallel at the iteration level
                                                                        
                                                                        #Select the EV percentiles for each year in this run.
+ 
+                                                                       # Survival for eggs and tadpoles correlated 100% (i.e. use the same percentiles)
+                                                                       # Survival for the other life stages correlated (but not correlated with eggs/tadpoles)  (i.e. use the same percentiles)
                                                                        # No correlation between survival and reproduction
-                                                                       # Survival for eggs and tadpoles correlated
-                                                                       # Survival for the other life stages correlated (but not correlated with eggs/tadpoles)
-                                                                       # Left seperate here in case want to play with partial correlation later
-              
+                                                                       # There is partially correlated variation in the vital rates between wetlands as some may be better than others from year to year
+                                                                       # To see that the data is in fact correlated, try increasing the n_years to 10000 and run cor(x) or library(lattice) splom(x)
+                                                                       # It is not a perfect algoritm but appropriate for the level of randomness we need I think
 
-                                                                       percentilesEV_survival_eggs_tad <- selectEVPercentilesNormal(c("eggs", "tadpoles"),
-                                                                                                                             correlation = 1,
-                                                                                                                             n_years = parameterByIterTracking$yrs[i])
                                                                        
-                                                                       percentilesEV_survival_yoy_adult <- selectEVPercentilesNormal(c("yoy", "adult"),
-                                                                                                                                    correlation = 1,
+                                                                       percentilesEV_survival_eggs_tad <- selectEVPercentilesNormal(input_names_w_EV = c("cell7", "cell4", "cell3", "ephemeral_wetlands"),
+                                                                                                                                    correlation = parameterByIterTracking$wetland_vitalrate_correlations[i],
                                                                                                                                     n_years = parameterByIterTracking$yrs[i])
                                                                        
-                                                                       percentilesEV_reproduction <- selectEVPercentilesNormal("reproduction",
-                                                                                                                              correlation = 0,
+                                                                       percentilesEV_survival_yoy_adult <- selectEVPercentilesNormal(input_names_w_EV = c("cell7", "cell4", "cell3", "ephemeral_wetlands"),
+                                                                                                                                    correlation = parameterByIterTracking$wetland_vitalrate_correlations[i],
+                                                                                                                                    n_years = parameterByIterTracking$yrs[i])
+                                                                       
+                                                                       percentilesEV_reproduction <- selectEVPercentilesNormal(input_names_w_EV = c("cell7", "cell4", "cell3", "ephemeral_wetlands"),
+                                                                                                                              correlation = parameterByIterTracking$wetland_vitalrate_correlations[i],
                                                                                                                               n_years = parameterByIterTracking$yrs[i])
-                                                                       
-                                                                       
-                                                                       percentilesEV <- cbind(percentilesEV_survival_eggs_tad, 
-                                                                                              percentilesEV_survival_yoy_adult, 
-                                                                                              percentilesEV_reproduction)
-                                                                       
-                                                                       wetlands <- c("cell7", "cell4", "cell3", "outside")
-                                                                       
+
+                                                                       # Specify a few more inputs for this iteration
                                                                        initial_year <- parameterByIterTracking$initial_year[i]
                                                                        yrs <- parameterByIterTracking$yrs[i]
                                                                        stage_classes <- c("eggs", "tadpoles", "yoy", "juv", "A2", "A3", "A4plus")
+                                                                       wetlands <- c("cell7", "cell4", "cell3", "ephemeral_wetlands", "outside")
+                                                                       
                                                                        
                                                                        # Run the annual loop
                                                                        results_annual[[q]] <- runAnnualLoopNLFIdahoPVA(parameterByIterTracking, yrs, i, q,
                                                                                                                        # dispersal_edge_list,dispersal_tracking, 
                                                                                                                        initial_year, wetlands,stage_classes,
-                                                                                                                       percentilesEV, alternative_details) 
+                                                                                                                       percentilesEV_survival_eggs_tad,
+                                                                                                                       percentilesEV_survival_yoy_adult,
+                                                                                                                       percentilesEV_reproduction,
+                                                                                                                       alternative_details) 
                                                                        
                                                                        if(q == max_n_runs_per_iter*0.1){ # if we have run 10% of the max number of runs per iterations
                                                                          

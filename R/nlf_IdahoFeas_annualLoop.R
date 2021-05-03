@@ -24,15 +24,30 @@
 #' @param initial_year First year of the model.
 #' @param wetlands Wetland cell names/abbreviations.
 #' @param K Carrying capacity .
-#' @param percentilesEV A vector of lenth years with percentiles to use for
-#' environmental variation (EV) in each iteration (e.g. output from selectEVPercentilesNormal()).
+#' @param percentilesEV_survival_eggs_tad Columns are the different wetlands, rows 
+#' are a vector of length years with percentiles to use for environmental variation (EV) 
+#' in each iteration (e.g. output from selectEVPercentilesNormal()).
+#' @param percentilesEV_survival_yoy_adult Columns are the different wetlands, rows 
+#' are a vector of length years with percentiles to use for environmental variation (EV) 
+#' in each iteration (e.g. output from selectEVPercentilesNormal())..
+#' @param percentilesEV_reproduction Columns are the different wetlands, rows 
+#' are a vector of length years with percentiles to use for environmental variation (EV) 
+#' in each iteration (e.g. output from selectEVPercentilesNormal()).
+#' 
 #' @importFrom dplyr %>%
 #'
 #' @export
 runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
                                  # dispersal_edge_list,dispersal_tracking, 
                                  initial_year, wetlands,stage_classes,
-                                 percentilesEV, alternative_details) {
+                                 percentilesEV_survival_eggs_tad,
+                                 percentilesEV_survival_yoy_adult,
+                                 percentilesEV_reproduction,
+                                 alternative_details) {
+  
+  # STILL MISSING - DISPERSAL
+  
+  
   # start.time <- Sys.time()
   # Rprof()    ## Turn on the profiler
   # Collect some info
@@ -57,6 +72,15 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
     s_eggs_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_eggs_no_threats")])
     s_eggs_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_eggs_no_threats")])
     s_eggs <- dapva::selectPercentileBetaDistribution(mean = s_eggs_mean, sd = s_eggs_sd, EV_percentile = percentilesEV$eggs[j])
+    
+    s_eggs <- unlist(lapply(1:n_wetlands, function(x) {
+      dapva::selectPercentileBetaDistribution(
+        mean = s_eggs_mean,
+        sd = s_eggs_sd,
+        EV_percentile = percentilesEV_survival_eggs_tad[j, paste(wetlands[x])]
+      )
+    }))
+    
     
     s_tadpoles_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_tadpoles_no_threats")])
     s_tadpoles_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_tadpoles_no_threats")])

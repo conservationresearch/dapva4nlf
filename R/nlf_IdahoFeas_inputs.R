@@ -40,21 +40,19 @@ getNLFIdahoFeasinputs <- function() {
 
   #---- Reproduction: proportion of females reproductively active for each stage - mean.  -------------
   
-  # LK PLACEHOLDERS FOR TESTING
-  
   repro_prop_active_mean <- list(
     c(input = "p_females_lay_eggs_mean_A2", type = "reproduction", 
-      lcl = 0.25, best_guess = 0.4, ucl = 0.6, confidence = 95,
+      lcl = 0.1, best_guess = 0.75, ucl = 0.9, confidence = 90,
       lower_bound = 0, upper_bound = 1,
-      best_guess_type = "median", management_alternative = "status_quo", source = "", comments = ""),
+      best_guess_type = "median", management_alternative = "status_quo", source = "Lea and Rebecca on April 26, 2021", comments = "Absolute min of 0 is that in captivity don't ever get A2s breeding (at least in Vancouver aquariam, I guess we'll see with Edmonton Valley zoo); Hine et al. 1981 found that 23% of A2 females did not lay eggs in Wisconsin, as you get further north things take longer to grow but Wisconson should be pretty similar to Idaho; at the low end if the previous year was tough and the A1s didn't grow fully to full A2, high end not much higher than 77"),
     c(input = "p_females_lay_eggs_mean_A3", type = "reproduction", 
-      lcl = 0.5, best_guess = 0.6, ucl = 0.7, confidence = 95,
+      lcl = 0.5, best_guess = 0.9, ucl = 0.95, confidence = 90,
       lower_bound = 0, upper_bound = 1,
-      best_guess_type = "median", management_alternative = "status_quo", source = "", comments = "" ),
+      best_guess_type = "median", management_alternative = "status_quo", source = "Lea and Rebecca on April 26, 2021", comments = "Most of the older females lay eggs" ),
     c(input = "p_females_lay_eggs_mean_A4plus", type = "reproduction", 
-      lcl = 0.5, best_guess = 0.6, ucl = 0.7, confidence = 95,
+      lcl = 0.5, best_guess = 0.9, ucl = 0.95, confidence = 90,
       lower_bound = 0, upper_bound = 1,
-      best_guess_type = "median", management_alternative = "status_quo", source = "", comments = "")
+      best_guess_type = "median", management_alternative = "status_quo", source = "Lea and Rebecca on April 26, 2021", comments = "Most of the older females lay eggs" )
   )
   
   #---- Reproduction: proportion of females reproductively active for each stage - sd (temporal variation).  -------------
@@ -81,14 +79,17 @@ getNLFIdahoFeasinputs <- function() {
   
   repro_clutch_size <- list(
     c(input = "num_eggs_per_active_female_mean_A2", type = "reproduction", 
-      lcl = 2000, best_guess = 3000, ucl = 4000, confidence = 95,
-      best_guess_type = "median", management_alternative = "status_quo", source = "", comments = ""),
+      lcl = 750, best_guess = 1729, ucl = 2750, confidence = 95,
+      lower_bound = 300, upper_bound = 3000,
+      best_guess_type = "median", management_alternative = "status_quo", source = "Lea and Rebecca on April 26, 2021", comments = "Reading off the graph in Corn and Liveo 1989 - study from Colorado and Wyoming"),
     c(input = "num_eggs_per_active_female_mean_A3", type = "reproduction", 
-      lcl = 3000, best_guess = 4000, ucl = 5000, confidence = 95,
-      best_guess_type = "median", management_alternative = "status_quo", source = "", comments = ""),
+      lcl = 1850, best_guess = 3418, ucl = 4733, confidence = 95,
+      lower_bound = 1000, upper_bound = 5500,
+      best_guess_type = "median", management_alternative = "status_quo", source = "Lea and Rebecca on April 26, 2021", comments = "Reading off the graph in Corn and Liveo 1989 - study from Colorado and Wyoming"),
     c(input = "num_eggs_per_active_female_mean_A4plus", type = "reproduction", 
-      lcl = 6000, best_guess = 7000, ucl = 8000, confidence = 95,
-      best_guess_type = "median", management_alternative = "status_quo", source = "", comments = "")
+      lcl = 2500, best_guess = 4733, ucl = 6700, confidence = 95,
+      lower_bound = 1700, upper_bound = 7500,
+      best_guess_type = "median", management_alternative = "status_quo", source = "Lea and Rebecca on April 26, 2021", comments = "Reading off the graph in Corn and Liveo 1989 - study from Colorado and Wyoming")
   )
   
   #---- Survival: mean, no threats.  -------------
@@ -160,16 +161,16 @@ getNLFIdahoFeasinputs <- function() {
   
   survival_pctReduction_bullfrogs <- list(
     c(input = "s_pct_reduced_eggs_bullfrogs", type = "survival", 
-      lcl = 10, best_guess = 50, ucl = 90, confidence = 95,
+      lcl = 1, best_guess = 7.5, ucl = 50, confidence = 75,
       lower_bound = 0, upper_bound = 100,
       best_guess_type = "median", management_alternative = "status_quo", 
-      source = "LK PLACEHOLDER", comments = "% reduction in survival due to bullfrog presence"),
+      source = "Lea and Rebecca on April 26, 2021", comments = "% reduction in survival due to bullfrog presence; Basically no info in the literature on this, bullfrogs do breed later than NLF so they might not be hanging out there at the same time, could be some from the previous year, bet guess is between 5 and 10%"),
 
     c(input = "s_pct_reduced_tadpoles_bullfrogs", type = "survival", 
       lcl = 15, best_guess = 35, ucl = 50, confidence = 70,
       lower_bound = 0, upper_bound = 100,
       best_guess_type = "median", management_alternative = "status_quo", 
-      source = "Lea and Rebecca, April 23, 2021", comments = "% reduction in survival due to bullfrog presence"),
+      source = "Lea and Rebecca, April 23, 2021", comments = "% reduction in survival due to bullfrog presence; Redlegged frog tadpoles survival was reduced from 40% in ponds without bullfrogs to 5% with bullfrogs (35% preduction), another one said 48% reduction of yellow legged frogs in presence of bullfrogs; redlegged frogs are similar size and yellow legged are smaller to leopard frogs; another redlegged frog paper had a 15% reduction of tadpoles"),
     
     c(input = "s_pct_reduced_yoy_bullfrogs", type = "survival", 
       lcl = 12, best_guess = 22, ucl = 35, confidence = 70,
@@ -181,14 +182,106 @@ getNLFIdahoFeasinputs <- function() {
       lcl = 10, best_guess = 20, ucl = 30, confidence = 70,
       lower_bound = 0, upper_bound = 100,
       best_guess_type = "median", management_alternative = "status_quo", 
-      source = "Lea and Rebecca, April 23, 2021", comments = "% reduction in survival due to bullfrog presence"),
+      source = "Lea and Rebecca, April 23, 2021", comments = "% reduction in survival due to bullfrog presence; Slightly bigger than yoy so harder to eat; reduction in survival for other species 0.17 to 0.27"),
     
     c(input = "s_pct_reduced_adult_bullfrogs", type = "survival", 
       lcl = 5, best_guess = 10, ucl = 15, confidence = 70,
       lower_bound = 0, upper_bound = 100,
       best_guess_type = "median", management_alternative = "status_quo", 
-      source = "Lea and Rebecca, April 23, 2021", comments = "% reduction in survival due to bullfrog presence")
+      source = "Lea and Rebecca, April 23, 2021", comments = "% reduction in survival due to bullfrog presence; Half of the rate for juveniles given that adults are bigger")
   )
+  
+  #---- Survival: % reduction due to chytrid.  -------------
+  
+  survival_pctReduction_chytrid <- list(
+    c(input = "s_pct_reduced_eggs_chytrid", type = "survival",
+      lcl = 0, ucl = 0, confidence = 100,
+      best_guess_type = "N/A", management_alternative = "status_quo", 
+      source = "Lea and Rebecca on April 26, 2021", comments = "Shouldn't affect the eggs"),
+    
+    c(input = "s_pct_reduced_tadpoles_chytrid", type = "survival", 
+      lcl = 0, ucl = 0, confidence = 100,
+      best_guess_type = "N/A", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 26, 2021", comments = "Can affect the mouthparts of tadpoles but shouldn't affect the mortality; literature suggests mortality was post-metamorphisis (Marantelli et al. 2004)"),
+    
+    c(input = "s_pct_reduced_yoy_chytrid", type = "survival", 
+      lcl = 1, best_guess = 10, ucl = 20, confidence = 60,
+      lower_bound = 0, upper_bound = 100,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 26, 2021", comments = "In Brisco, the worst they saw was 30% of metamorphis had evidence of it (but did not necessarily die from it; literature suggests that mortalities of chytrid may be restricted to metamorphis (and juv, but overweintering?) (see one note page on Chytrid for references); For absolute max - In a lab settiung shown that it can wipe them out entirely, some other examples in Arizona (word of mouth) where it was causing their sites to fail"),
+    
+    c(input = "s_pct_reduced_juvenile_chytrid", type = "survival", 
+      lcl = 1, best_guess = 8, ucl = 20, confidence = 60,
+      lower_bound = 0, upper_bound = 100,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 26, 2021", comments = "Literature suggests that chytrid mortality in adults is generally low (see SDM one note page on chytrid)"),
+    
+    c(input = "s_pct_reduced_adult_chytrid", type = "survival", 
+      lcl = 1, best_guess = 8, ucl = 20, confidence = 60,
+      lower_bound = 0, upper_bound = 100,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 26, 2021", comments = "Literature suggests that chytrid mortality in adults is generally low (see SDM one note page on chytrid)")
+    )
+  
+  #---- Survival: % reduction due to roads.  -------------
+  
+  # Only affects terrestrial life stages, so yoy up
+  survival_pctReduction_roads <- list(
+    c(input = "s_pct_reduced_eggs_roads", type = "survival", 
+      lcl = 0, ucl = 0, confidence = 100,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "Lea and Rebecca on April 26, 2021", comments = "These life stages aren’t on roads :)"),
+    
+    c(input = "s_pct_reduced_tadpoles_roads", type = "survival", 
+      lcl = 0, ucl = 0, confidence = 100,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "Lea and Rebecca on April 26, 2021", comments = "These life stages aren’t on roads :)"),
+    
+    c(input = "s_pct_reduced_yoy_roads", type = "survival", 
+      lcl = 8, best_guess = 12, ucl = 28, confidence = 80,
+      lower_bound = 0, upper_bound = 50,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 26, 2021", comments = "Based on number of road mortalities in Creston; same for all mobile life stages; can't imagine would wack more than half of the pop"),
+    
+    c(input = "s_pct_reduced_juvenile_roads", type = "survival", 
+      lcl = 8, best_guess = 12, ucl = 28, confidence = 80,
+      lower_bound = 0, upper_bound = 50,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 26, 2021", comments = "Based on number of road mortalities in Creston; same for all mobile life stages; can't imagine would wack more than half of the pop"),
+    
+    c(input = "s_pct_reduced_adult_roads", type = "survival", 
+      lcl = 8, best_guess = 12, ucl = 28, confidence = 80,
+      lower_bound = 0, upper_bound = 50,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 26, 2021", comments = "Based on number of road mortalities in Creston; same for all mobile life stages; can't imagine would wack more than half of the pop")
+    )
+  
+  #---- Survival: % reduction due to drawdown.  -------------
+
+  # Only affects tadpoles since they can't move to get out of the wetland as it dries up;
+  # drawdowns start after the eggs have hatched
+  
+  
+  survival_pctReduction_drawdowns <- list(
+
+    c(input = "s_pct_reduced_tadpoles_drawdownPartial", type = "survival", 
+      lcl = 5, best_guess = 20, ucl = 35, confidence = 70,
+      lower_bound = 0, upper_bound = 75,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 26, 2021", comments = "If complete drawdown happens, all die. But if just a partial, good chance that most survive. These are pretty big drawdowns so even with some water left. Ome will proibably get stuck behing the vegetation or get stranded as the water is drawing down though. Depends on how fast the water leaves the wetland, fast water means that more could die."),
+    
+    c(input = "s_pct_reduced_tadpoles_drawdownComplete", type = "survival", 
+      lcl = 100, ucl = 100, confidence = 100,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 26, 2021", comments = "If complete drawdown happens, all die. "),
+    
+    c(input = "drawdown_completeVSpartial_freq", type = "survival", 
+      lcl = 50, best_guess = 80, ucl = 90, confidence = 70,
+      lower_bound = 20, upper_bound = 100,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 26, 2021", comments = "Reasons for low: for the deeper wetlands, wouldn't need to do a complete drawdown for the cattail controls; Trying for the complete every year so that is more likely (80/20)")
+    
+    )
   
   #---- Human management: probability that bullfrog management will be effective.  -------------
   
@@ -199,7 +292,72 @@ getNLFIdahoFeasinputs <- function() {
       source = "Lea and Rebecca, April 23, 2021", comments = "8/10 chance that bullfrog managmenet efforts will keep bullfrog #s low enough that they will not affect NLF survival rates")
     )
   
+  #---- Human management: probability of an early drawdown.  -------------
+  
+  prob_drawdown_beforeMidJuly <- list(
+    c(input = "drawdown_beforeMidJuly", type = "human_management", 
+      best_guess = 0.2, 
+      best_guess_type = "probability", management_alternative = "status_quo", 
+      source = "Casey McCormack on April 29, 2021", comments = "1/5 chance best guess, general vibe from the managers is they would want to and try to postpone it but there may be unforseen circumstances that make it difficult.")
+  )
+  
+  
+  #---- Ephemeral wetlands: frequency of dry years.  -------------
+  
+  ephemeral_freq_dry <- list(
+    
+    c(input = "ephemeral_freq_dry", type = "epehmeral_wetlands", 
+      lcl = 1/5,
+      best_guess = 1/3,
+      ucl = 1/2, confidence = 75,
+      lower_bound = 0, upper_bound = 1,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "Casey McCormack on April 29, 2021", comments = "Low: one out of every other year is possible, especially 50 years out, in big trouble for other reasons too if more than that!; High - one out of every 5 years; best guess - stick ")
+  )
 
+  #---- Carrying Capacity for the BSCWMA.  -------------
+  
+  carrying_capacity <- list(
+    c(input = "carrying_capacity_BSCWMA", type = "carrying capacity", 
+      lcl = 500000, best_guess = 2000000, ucl = 5000000, confidence = 80,
+      lower_bound = 5000, upper_bound = 11000000,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "Lea and Rebecca on April 26, 2021", comments = "These numbers were guided by the available literature above; in general we don't think the populations will ever get this big!! Absolute min, decinitly can support some!")
+  )
+  
+  #---- Quasi-extinction threshold.  -------------
+  
+  quasi_extinction_threshold <- list(
+    
+    c(input = "quasi_extinction_threshold", type = "quasi-extinction threshold", 
+      lcl = 0, ucl = 0, confidence = 100,
+      best_guess_type = "n/a, uniform distribution", management_alternative = "status_quo", 
+      source = "Lea and Rebecca on April 23, 2021", comments = "decided not to use a quasi-extinction threshold for now, instead model actual extinction (i.e. quasi extinction threshold of 0)")
+  )
+  
+  #---- Inter-wetland vital rate correlation.  -------------
+  
+  # The survival rates for eggs and tadpoles will be 100% correlated.
+  # The survival rates for you to adult will be 100% correlated.
+  # No correlation between survival and reproduction.
+  # These 100% and 0% correlations will be achieved by either using the same or different EV percentile draw
+  # However, the wetlands themselves may not have exactly the same situation and should vary from each other year to year.
+  # That is what this correlation range is for
+  # Imagine this as a degree of similarity between wetlands
+  # correlation of 1 is that the conditions in each of the wetlands are the same
+  # correlation of 0 is that conditions in each of the wetlands are not related
+  
+  # THESE NUMBERS ARE LK PLACEHOLDERS FOR NOW TO TEST IT OUT, REVISIT WITH LEA/REBECCA
+  
+  
+  wetland_vitalrate_correlations <- list(
+    c(input = "wetland_vitalrate_correlations", type = "wetland_vitalrate_correlations", 
+      lcl = 0.5, best_guess = 0.7, ucl = 0.9, confidence = 80,
+      lower_bound = 0, upper_bound = 1,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "LK PLACEHOLDERS", comments = "")
+  )
+  
   #---- Compile the inputs and set up tracking objects.  -------------
   inputs <- dapva::makeInputsDF(parameters = c(
     year_inputs,
@@ -209,7 +367,15 @@ getNLFIdahoFeasinputs <- function() {
     survival_rate_mean_no_threats,
     survival_rate_sd_no_threats,
     survival_pctReduction_bullfrogs,
-    prob_bullfrog_mgmt_effective
+    survival_pctReduction_roads,
+    survival_pctReduction_chytrid,
+    survival_pctReduction_drawdowns,
+    prob_bullfrog_mgmt_effective,
+    prob_drawdown_beforeMidJuly,
+    ephemeral_freq_dry,
+    carrying_capacity,
+    quasi_extinction_threshold,
+    wetland_vitalrate_correlations
   ))
 
 
@@ -268,10 +434,6 @@ selectNLFIdahoParameterByIterTracking <- function(inputs) {
   parameterByIterTracking <- parameterByIterTracking_empty # initialize with the empty one each time for clarity (perhaps not necessary)
   # rownames(parameterByIterTracking) <- m # record which iteration it is with the col number
 
-  ######### Select the survival parameters for this iteration. #########
-
-  # Choose and record the survival parameters for this iteration - mean
-
   ######### Select the reproduction parameters for this iteration - proportion of repro active females. #########
 
   # Choose and record the reproduction parameters for this iteration - mean proportion of females who lay eggs
@@ -311,6 +473,30 @@ selectNLFIdahoParameterByIterTracking <- function(inputs) {
   parameterByIterTracking[i, "s_pct_reduced_juvenile_bullfrogs"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_juvenile_bullfrogs", inputsDF = inputs)
   parameterByIterTracking[i, "s_pct_reduced_adult_bullfrogs"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_adult_bullfrogs", inputsDF = inputs)
   
+  ######### Select the survival parameters for this iteration - % reduction in survival due to chytrid. #########
+  parameterByIterTracking[i, "s_pct_reduced_eggs_chytrid"] <- dapva::selectParamUniformDistribution(input_name = "s_pct_reduced_eggs_chytrid", inputsDF = inputs)
+  parameterByIterTracking[i, "s_pct_reduced_tadpoles_chytrid"] <- dapva::selectParamUniformDistribution(input_name = "s_pct_reduced_tadpoles_chytrid", inputsDF = inputs)
+  parameterByIterTracking[i, "s_pct_reduced_yoy_chytrid"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_yoy_chytrid", inputsDF = inputs)
+  parameterByIterTracking[i, "s_pct_reduced_juvenile_chytrid"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_juvenile_chytrid", inputsDF = inputs)
+  parameterByIterTracking[i, "s_pct_reduced_adult_chytrid"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_adult_chytrid", inputsDF = inputs)
+  
+  ######### Select the survival parameters for this iteration - % reduction in survival due to roads. #########
+  parameterByIterTracking[i, "s_pct_reduced_eggs_roads"] <- dapva::selectParamUniformDistribution(input_name = "s_pct_reduced_eggs_roads", inputsDF = inputs)
+  parameterByIterTracking[i, "s_pct_reduced_tadpoles_roads"] <- dapva::selectParamUniformDistribution(input_name = "s_pct_reduced_tadpoles_roads", inputsDF = inputs)
+  parameterByIterTracking[i, "s_pct_reduced_yoy_roads"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_yoy_roads", inputsDF = inputs)
+  parameterByIterTracking[i, "s_pct_reduced_juvenile_roads"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_juvenile_roads", inputsDF = inputs)
+  parameterByIterTracking[i, "s_pct_reduced_adult_roads"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_adult_roads", inputsDF = inputs)
+  
+  ######### Select the survival parameters for this iteration - % reduction in survival due to drawdown. #########
+  parameterByIterTracking[i, "drawdown_beforeMidJuly"] <- sample(c("yes", "no"),
+                                                                 size = 1,
+                                                                 prob = c(as.numeric(inputs$best_guess[which(inputs$input == "drawdown_beforeMidJuly")]),
+                                                                          (1-as.numeric(inputs$best_guess[which(inputs$input == "drawdown_beforeMidJuly")]))
+                                                                 ), replace = T)
+  
+  parameterByIterTracking[i, "drawdown_completeVSpartial_freq"] <- dapva::selectParamMetalogDistribution(input_name = "drawdown_completeVSpartial_freq", inputsDF = inputs)
+  parameterByIterTracking[i, "s_pct_reduced_tadpoles_drawdownPartial"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_tadpoles_drawdownPartial", inputsDF = inputs)
+  parameterByIterTracking[i, "s_pct_reduced_tadpoles_drawdownComplete"] <- dapva::selectParamUniformDistribution(input_name = "s_pct_reduced_tadpoles_drawdownComplete", inputsDF = inputs)
   
   
   ######### Select the human management parameters for this iteration - bullfrog management effective or not. #########
@@ -321,12 +507,18 @@ selectNLFIdahoParameterByIterTracking <- function(inputs) {
                                                                    (1-as.numeric(inputs$best_guess[which(inputs$input == "bullfrogMgmt_effective")]))
                                                                    ), replace = T)
   
+  ######### Select the parameters for this iteration - freq ephemeral wetlands dry. #########
+  parameterByIterTracking[i, "ephemeral_freq_dry"] <- dapva::selectParamMetalogDistribution(input_name = "ephemeral_freq_dry", inputsDF = inputs)
   
-  ######### Select the carrying capacity parameters for this iteration. #########
-  # parameterByIterTracking[i, "colony_extent_K_scenario"] <- selectBTPDColonyExtentScenario(inputs)
-  # parameterByIterTracking[i, "density_K_med_high_env_stress"] <- max(3.81, dapva::selectParamNormalDistribution(input_name = "density_K_med_high_env_stress", inputsDF = inputs)) # 3.81 is a placeholder for a lower bound, from Sian 2013 visitual counts, may want to revisit shape of this distribution
-  # parameterByIterTracking[i, "density_K_low_env_stress"] <- max(3.81, dapva::selectParamNormalDistribution(input_name = "density_K_low_env_stress", inputsDF = inputs)) # 3.81 is a placeholder for a lower bound, from Sian 2013 visitual counts, may want to revisit shape of this distribution
-
+  ######### Select the parameters for this iteration - carrying capacity (cap). #########
+  parameterByIterTracking[i, "carrying_capacity_BSCWMA"] <- dapva::selectParamMetalogDistribution(input_name = "carrying_capacity_BSCWMA", inputsDF = inputs)
+  
+  ######### Select the parameters for this iteration - correlation between wetlands for vital rates. #########
+  parameterByIterTracking[i, "wetland_vitalrate_correlations"] <- dapva::selectParamMetalogDistribution(input_name = "wetland_vitalrate_correlations", inputsDF = inputs)
+  
+  ######### Select the parameters for this iteration - quasi extinction threshold. #########
+  parameterByIterTracking[i, "quasi_extinction_threshold"] <- dapva::selectParamUniformDistribution(input_name = "quasi_extinction_threshold", inputsDF = inputs)
+  
   ######### Fill in some inputs that will stay the same across iterations. Important to show for clarity and for use in the tornados (no uncertainty in these but if we put multiple runs with different inputs together it may be useful to have them in here) #########
 
   # parameterByIterTracking[i, "max_dispersal_distance_m"] <- as.numeric(inputs$best_guess[which(inputs$input == "max_dispersal_distance_m")])
