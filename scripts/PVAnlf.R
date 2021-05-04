@@ -37,7 +37,7 @@ clusterSetRNGStream(cl, iseed = 29) # without parallel computing can just do set
 #---- Specify the alternatives to run.  -------------
 alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are preloaded in for easy calling
 
-rows_to_run <- c(3)
+rows_to_run <- c(3,4)
 #---- Specify number of iterations and number of runs per iterations.  -------------
 n_iter  <- 10
 max_n_runs_per_iter <- 10

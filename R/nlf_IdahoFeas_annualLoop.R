@@ -377,7 +377,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       }
 
       n_female_tadpoles_released <- round(as.numeric(alternative_details$n_tadpoles_per_year)/2) # assume 50/50 sex ratio, round so release whole individuals :)
-      resultsTracking_popSize_females[rows_for_trans, "1"] <- n_female_tadpoles_released /length(rows_for_trans)
+      resultsTracking_popSize_females[rows_for_trans, "1"] <- round(n_female_tadpoles_released /length(rows_for_trans)) # round so that releasing whole individuals :)
       
       # Then apply survival rates to see how many of the tadpoles survive to be yoy
       
