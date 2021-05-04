@@ -58,8 +58,8 @@ m <- 1
   print("Selecting the parameters for each iteration in parallel.")
   parameterByIterTracking <- foreach::foreach(m=1:n_iter,  .combine=rbind,
                                               .packages='dapva4nlf'
-                                              # ) %dopar% {
-                                                ) %do% {
+                                               ) %dopar% {
+                                                # ) %do% {
 
                                                 print(paste("Choosing parameters for interation # ", m))
                                                 parameterByIterTracking <- selectNLFIdahoParameterByIterTracking(inputs)
@@ -105,27 +105,32 @@ m <- 1
                                                                        # There is partially correlated variation in the vital rates between wetlands as some may be better than others from year to year
                                                                        # To see that the data is in fact correlated, try increasing the n_years to 10000 and run cor(x) or library(lattice) splom(x)
                                                                        # It is not a perfect algoritm but appropriate for the level of randomness we need I think
-
                                                                        
+                                                                       # Note: increased nyears to 1000 and then just select first 50 since the permute algorithm sometimes gets stuck if there are not enough draws
                                                                        percentilesEV_survival_eggs_tad <- selectEVPercentilesNormal(input_names_w_EV = c("cell3", "cell4", "cell7", "ephemeral_wetlands"),
                                                                                                                                     correlation = parameterByIterTracking$wetland_vitalrate_correlations[i],
-                                                                                                                                    n_years = parameterByIterTracking$yrs[i])
+                                                                                                                                    n_years = 1000)[1:parameterByIterTracking$yrs[i],]
                                                                        
                                                                        percentilesEV_survival_yoy_adult <- selectEVPercentilesNormal(input_names_w_EV = c("cell3", "cell4", "cell7", "ephemeral_wetlands"),
                                                                                                                                     correlation = parameterByIterTracking$wetland_vitalrate_correlations[i],
-                                                                                                                                    n_years = parameterByIterTracking$yrs[i])
+                                                                                                                                    n_years = 1000)[1:parameterByIterTracking$yrs[i],]
                                                                        
                                                                        percentilesEV_reproduction <- selectEVPercentilesNormal(input_names_w_EV = c("cell3", "cell4", "cell7", "ephemeral_wetlands"),
                                                                                                                               correlation = parameterByIterTracking$wetland_vitalrate_correlations[i],
-                                                                                                                              n_years = parameterByIterTracking$yrs[i])
+                                                                                                                              n_years = 1000)[1:parameterByIterTracking$yrs[i],]
 
                                                                        # Specify a few more inputs for this iteration
                                                                        initial_year <- parameterByIterTracking$initial_year[i]
                                                                        yrs <- parameterByIterTracking$yrs[i]
                                                                        stage_classes <- c("eggs", "tadpoles", "yoy", "juv", "A2", "A3", "A4plus")
-                                                                       wetlands <- c("cell3", "cell4", "cell7", "ephemeral_wetlands", "outside")
                                                                        
-                                                                       
+                                                                       if(alternative_details$restore_ephemeralWetlands == "yes"){
+                                                                         wetlands <- c("cell3", "cell4", "cell7", "ephemeral_wetlands", "outside")
+                                                                       }
+                                                                       if(alternative_details$restore_ephemeralWetlands == "no"){
+                                                                         wetlands <- c("cell3", "cell4", "cell7", "outside")
+                                                                       }                                                              
+
                                                                        # Run the annual loop
                                                                        results_annual[[q]] <- runAnnualLoopNLFIdahoPVA(parameterByIterTracking, yrs, i, q,
                                                                                                                        # dispersal_edge_list,dispersal_tracking, 
@@ -148,9 +153,7 @@ m <- 1
                                                                                                                                 yrs = parameterByIterTracking$yrs[i],
                                                                                                                                 n_iter,
                                                                                                                                 n_runs_per_iter = q,
-                                                                                                                                alternative = paste0("Climate scenario: ", scenarios_to_run$climate[row_to_run],
-                                                                                                                                                     ";\nPlague scenario: ", scenarios_to_run$plague[row_to_run],
-                                                                                                                                                     ";\nManagement scenario: ", scenarios_to_run$management[row_to_run]),
+                                                                                                                                alternative = paste0(alternative_details$alt_name_full),
                                                                                                                                 iteration_number = i)
                                                                          
                                                                          prob_of_persis_so_far <- check_if_enough_runs[which(check_if_enough_runs$metric == "probability of persistence"),
@@ -178,9 +181,7 @@ m <- 1
                                                                                                                                                   yrs = parameterByIterTracking$yrs[i],
                                                                                                                                                   n_iter,
                                                                                                                                                   n_runs_per_iter = q,
-                                                                                                                                                  alternative = paste0("Climate scenario: ", scenarios_to_run$climate[row_to_run],
-                                                                                                                                                                       ";\nPlague scenario: ", scenarios_to_run$plague[row_to_run],
-                                                                                                                                                                       ";\nManagement scenario: ", scenarios_to_run$management[row_to_run]),
+                                                                                                                                                  alternative = paste0(alternative_details$alt_name_full),
                                                                                                                                                   iteration_number = i)
                                                                      
                                                                      # Results by colony
@@ -190,9 +191,7 @@ m <- 1
                                                                                                                                                  yrs = parameterByIterTracking$yrs[i],
                                                                                                                                                  n_iter,
                                                                                                                                                  n_runs_per_iter = q,
-                                                                                                                                                 alternative = paste0("Climate scenario: ", scenarios_to_run$climate[row_to_run],
-                                                                                                                                                                      ";\nPlague scenario: ", scenarios_to_run$plague[row_to_run],
-                                                                                                                                                                      ";\nManagement scenario: ", scenarios_to_run$management[row_to_run]),
+                                                                                                                                                 alternative = paste0(alternative_details$alt_name_full),
                                                                                                                                                  iteration_number = i)
                                                                      
                                                                      return(list(results_summary_for_this_iteration_overall, results_summary_for_this_iteration_by_pop))

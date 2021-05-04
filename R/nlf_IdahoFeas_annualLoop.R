@@ -46,10 +46,13 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
                                  alternative_details) {
   
   # STILL MISSING - DISPERSAL
+  # REMEMBER TO ACCOUNT FOR ALTERNATIVE WITH AND WITHOUT EPHEMERAL WETLANDS
+  # WHEN IMPLEMENTING DISPERSAL
   
   
   # start.time <- Sys.time()
   # Rprof()    ## Turn on the profiler
+  
   # Collect some info
   n_wetlands <- length(wetlands)
   wetlands_without_outside <- wetlands[which(wetlands != "outside")]
@@ -62,10 +65,8 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
     sex = "female"
   )
 
-
   for (j in 1:yrs) { # start the annual loop
     print(paste("iteration", i, "run", q, "year", j))
-
 
     ######### Apply environmental stochasticity (EV) to select survival rates in the absence of threats. #########
     # Note that the wetlands have different rates for each life stage
@@ -128,7 +129,6 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
     
     
     ######### Identify if bullfrogs are a threat for this iteration. #########
-    
     bullfrog_management_happening <- alternative_details$bullfrog_management
     
     if(bullfrog_management_happening == "no"){
@@ -180,10 +180,9 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       if (j > as.numeric(alternative_details$n_years_transplocation)){translocation_year <- "no"}
       
       # NLF wetland affected
-      int2 <- which(wetlands_without_outside == drawdown_location_this_year)
-      if(is.na(int2) == TRUE){nlf_wetland_affected <- "no"}
+      nlf_wetland_affected <- "no" # initalize
+      int2 <- match(drawdown_location_this_year, wetlands_without_outside)
       if(is.na(int2) == FALSE){ nlf_wetland_affected <- "yes"}
-      
       
       if(nlf_wetland_affected == "no"| translocation_year == "yes"){
         drawdown_relevant <- "no"
@@ -217,7 +216,6 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       
     
     ######### Apply threat reductions to survival rates. #########
-    
     # treat multiple threats multiplicitively
     # we know roads, are all present all the time
     survival_rates_afterThreats <- survival_rates_noThreats# initalize
@@ -271,14 +269,12 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
     rownames(survival_rates_afterThreats) <- wetlands_without_outside
     colnames(survival_rates_afterThreats) <- stage_classes
     
-    
     ######### Make the survival matrix. #########
     # Make the overall survival matrix. Note that survival from eggs to tadpoles 
     # and tadpoles to yoy will need to be treated seperately from the others becaue they happen within a timestep (year)
     survivalMatrix <- makeSurvivalMatrixMultiplePop(class_names = stage_classes, 
                                                     pop_names = wetlands_without_outside, 
                                                     survival_rates_afterThreats)
-    
     
     ######### Apply environmental stochasticity (EV) to select reproductive rates - prop of females who lay eggs. #########
     # Note that the wetlands have different rates for each life stage    
@@ -318,8 +314,6 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
     rownames(p_females_lay_eggs) <- wetlands_without_outside
     colnames(p_females_lay_eggs) <- stage_classes
 
-    
-    
     ######### Clarify # of eggs per female - using mean, no temporal variation applied. #########
     
     # No SD assessed by experts; agreed to just use mean estimates with the parametric variation
@@ -340,9 +334,6 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
     rownames(num_eggs_per_active_female) <- wetlands_without_outside
     colnames(num_eggs_per_active_female) <- stage_classes
     
-    
-    
-    
     ######### Combine reproduction values into a large vector for all wetlands #########
     # We will need this format to apply the reproduction values.
     
@@ -360,9 +351,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
   
     
     ######### In the first year, add any translocated tadpoles and see how many survive to yoy #########
-
     # No NLF there at the moment so no other initial condition
-    
     if (j == 1) {
       
       # Initialize with no frogs since currently extirpated
@@ -410,14 +399,14 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
     ######### For the second year and beyond #########
     if (j != 1)  { 
       
-      # Get the population sizes from the fall last year
+      ######### Get the population sizes from the fall last year #########
       popSizeVector_fallLastYear <- makePopSizeVector(
         pop_class_names = paste(resultsTracking_popSize_females$pop, resultsTracking_popSize_females$class),
         num_indiv_per_pop_class = as.numeric(resultsTracking_popSize_females[,paste(j-1)]),
         sex = "female"
       )
       
-      # Each spring, check to see how many of each stage class survived the winter
+      ######### Each spring, check to see how many of each stage class survived the winter #########
       survived_the_winter <- survivalOverwinter(popSizeVector_fallLastYear, 
                                                 survivalMatrix,
                                                 demographic_stochasticity = TRUE)
@@ -431,7 +420,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
         num_indiv_per_pop_class =  as.numeric(resultsTracking_popSize_females[,paste(j)]),
         sex = "female")
       
-      # Then see how many eggs are laid
+      ######### Then see how many eggs are laid #########
       
       # future to do, update this function so don't need the number of males
       # future to do - fix so that wetland names don't need to be in alphabetical order to work...
@@ -454,7 +443,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
         num_indiv_per_pop_class =  as.numeric(resultsTracking_popSize_females[,paste(j)]),
         sex = "female")
       
-      # See how many eggs hatch into tadpoles
+      ######### See how many eggs hatch into tadpoles #########
       eggs_survive_to_tadpoles <- survivalEggs(round(popSizeVector_withEggs), 
                                                  survivalMatrix,
                                                  demographic_stochasticity = TRUE)
@@ -473,27 +462,46 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
         num_indiv_per_pop_class =  as.numeric(resultsTracking_popSize_females[,paste(j)]),
         sex = "female")
       
-      # See how many tadpoles survive to be yoy
+      ######### See how many tadpoles survive to be yoy #########
       tapoles_survive_to_yoy <- survivalTadpoles(round(popSizeVector_withTadpoles), 
                                                  survivalMatrix,
                                                  demographic_stochasticity = TRUE)
       yoy_rows <- which(resultsTracking_popSize_females$class == "yoy")
       resultsTracking_popSize_females[yoy_rows, paste(j)] <- tapoles_survive_to_yoy[grepl("yoy" , rownames(tapoles_survive_to_yoy))]
       
-      # Then apply dispersal
-      # STILL TO DO
+      ######### Then apply dispersal - STILL TO DO #########
+
       
-      # Then apply carrying capacity
-      # Add up the total terrestrial pop size (that is what the carrying capacity estimate is for)
-      # Do this later, unlikely to get close to it for a while
+      ######### Then apply carrying capacity #########
+      carrying_capacity <- as.numeric(parameterByIterTracking[i, paste0("carrying_capacity_BSCWMA")])
       
+      yoy_rows <- which(resultsTracking_popSize_females$class == "yoy")
+      juv_rows <- which(resultsTracking_popSize_females$class == "juv")
+      A2_rows <- which(resultsTracking_popSize_females$class == "A2")
+      A3_rows <- which(resultsTracking_popSize_females$class == "A3")
+      A4plus_rows <- which(resultsTracking_popSize_females$class == "A4plus")
+      # outside_rows <- which(resultsTracking_popSize_females$pop == "outside")
+      # Note: not tracking numbers outside anyways so don't need to exclude here
       
-      # Record results and prep for next round
+      terrestrial_rows <- c(yoy_rows, juv_rows, A2_rows, A3_rows, A4plus_rows)
+      terrestrial_pop_size_each_stage_wetland <- resultsTracking_popSize_females[terrestrial_rows, paste(j)]
+      terrestrial_pop_size <- sum(terrestrial_pop_size_each_stage_wetland)
+      
+      above_K <- "no" # initalize
+      if(terrestrial_pop_size > carrying_capacity){
+        above_K <- "yes"
+      }
+      
+      if(above_K == "yes"){
+        # then reduce all terrestrial age classes proportionally 
+        prop_of_total_each_stage <- terrestrial_pop_size_each_stage_wetland/terrestrial_pop_size
+        new_pop_terrestrial_each_stage_wetland <- prop_of_total_each_stage*carrying_capacity
+        resultsTracking_popSize_females[terrestrial_rows, paste(j)] <- new_pop_terrestrial_each_stage_wetland
+      }
+
+      ######### Record results and prep for next round #########
       # Nothing to do here I don't think as it is coded above
-      
-      
-      
-      
+
     }
     
   # Rprof(NULL)    ## Turn off the profiler
