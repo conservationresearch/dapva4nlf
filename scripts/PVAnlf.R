@@ -58,8 +58,8 @@ m <- 1
   print("Selecting the parameters for each iteration in parallel.")
   parameterByIterTracking <- foreach::foreach(m=1:n_iter,  .combine=rbind,
                                               .packages='dapva4nlf'
-                                               ) %dopar% {
-                                                # ) %do% {
+                                              # ) %dopar% {
+                                                 ) %do% {
 
                                                 print(paste("Choosing parameters for interation # ", m))
                                                 parameterByIterTracking <- selectNLFIdahoParameterByIterTracking(inputs)
@@ -76,7 +76,7 @@ m <- 1
   results_summary_all_iterations_overall_int  <- list() # initialize
   results_summary_all_iterations_by_pop_int  <- list() # initialize
   
-  batch_size <- n_iter/5
+  batch_size <- n_iter #n_iter/5
   batches <- split(1:n_iter, ceiling(seq_along(1:n_iter)/batch_size ))
   
   for(batch in 1:length(batches)){
@@ -87,7 +87,7 @@ m <- 1
                                                        # .verbose = T, # print out which iterations have been completed
                                                        .errorhandling = c("remove"), # remove/skip if the result has an error
                                                        .packages=c('foreach', # need foreach in here as per https://stackoverflow.com/questions/21128122/function-do-not-found-on-win-platform-only-when-using-plyr-and-doparallel
-                                                                   'dapva4nlf')) %dopar% {  # change 'dopar' to 'do' if don't want to do the parallel computing
+                                                                   'dapva4nlf')) %do% {  # change 'dopar' to 'do' if don't want to do the parallel computing
                                                                      
                                                                      # print(paste0("Iteration ", i, " - scenario ", 'climate_', scenarios_to_run$climate[row_to_run],
                                                                      #              '_plague_', scenarios_to_run$plague[row_to_run],

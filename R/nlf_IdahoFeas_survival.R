@@ -86,8 +86,8 @@ survivalTadpoles <- function(popSizeVector,
 #'
 #' INSERT
 #' 
-#' @param popSizeVector Female population sizes formatted in the style
-#' of makePopSizeVector() for the relevant year.
+#' @param popSizeVector_fallLastYear Female population sizes formatted in the style
+#' of makePopSizeVector() for the previous year.
 #' @param survivalMatrix Survival matrix formatted in INSERT.
 #' @param demographic_stochasticity TRUE or FALSE, defaults to TRUE
 #'

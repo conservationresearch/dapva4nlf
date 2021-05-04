@@ -23,7 +23,8 @@
 #' @param q The run number. For results tracking purposes.
 #' @param initial_year First year of the model.
 #' @param wetlands Wetland cell names/abbreviations.
-#' @param K Carrying capacity .
+#' @param stage_classes ADD DESCRIPTION LATER
+#' @param alternative_details ADD DESCRIPTION LATER
 #' @param percentilesEV_survival_eggs_tad Columns are the different wetlands, rows 
 #' are a vector of length years with percentiles to use for environmental variation (EV) 
 #' in each iteration (e.g. output from selectEVPercentilesNormal()).
@@ -272,7 +273,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
     ######### Make the survival matrix. #########
     # Make the overall survival matrix. Note that survival from eggs to tadpoles 
     # and tadpoles to yoy will need to be treated seperately from the others becaue they happen within a timestep (year)
-    survivalMatrix <- makeSurvivalMatrixMultiplePop(class_names = stage_classes, 
+    survivalMatrix <- dapva::makeSurvivalMatrixMultiplePop(class_names = stage_classes, 
                                                     pop_names = wetlands_without_outside, 
                                                     survival_rates_afterThreats)
     
@@ -379,7 +380,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       # Then apply survival rates to see how many of the tadpoles survive to be yoy
       
       # Pull out the population sizes for this year
-      popSizeVector <- makePopSizeVector(
+      popSizeVector <- dapva::makePopSizeVector(
         pop_class_names = paste(resultsTracking_popSize_females$pop, resultsTracking_popSize_females$class),
         num_indiv_per_pop_class = resultsTracking_popSize_females[,paste(j)],
         sex = "female"
@@ -400,7 +401,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
     if (j != 1)  { 
       
       ######### Get the population sizes from the fall last year #########
-      popSizeVector_fallLastYear <- makePopSizeVector(
+      popSizeVector_fallLastYear <- dapva::makePopSizeVector(
         pop_class_names = paste(resultsTracking_popSize_females$pop, resultsTracking_popSize_females$class),
         num_indiv_per_pop_class = as.numeric(resultsTracking_popSize_females[,paste(j-1)]),
         sex = "female"
@@ -415,7 +416,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       resultsTracking_popSize_females[,paste(j)] <- survived_the_winter
       
       # Make a population size vector for the situation in the spring
-      popSizeVector_springThisYear <- makePopSizeVector(
+      popSizeVector_springThisYear <- dapva::makePopSizeVector(
         pop_class_names = paste(resultsTracking_popSize_females$pop, resultsTracking_popSize_females$class),
         num_indiv_per_pop_class =  as.numeric(resultsTracking_popSize_females[,paste(j)]),
         sex = "female")
@@ -438,7 +439,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       resultsTracking_popSize_females[,paste(j)] <- int[[1]]
       
       # Update the pop size vector
-      popSizeVector_withEggs <- makePopSizeVector(
+      popSizeVector_withEggs <- dapva::makePopSizeVector(
         pop_class_names = paste(resultsTracking_popSize_females$pop, resultsTracking_popSize_females$class),
         num_indiv_per_pop_class =  as.numeric(resultsTracking_popSize_females[,paste(j)]),
         sex = "female")
@@ -457,7 +458,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       }
 
       # Update the pop size vector
-      popSizeVector_withTadpoles <- makePopSizeVector(
+      popSizeVector_withTadpoles <- dapva::makePopSizeVector(
         pop_class_names = paste(resultsTracking_popSize_females$pop, resultsTracking_popSize_females$class),
         num_indiv_per_pop_class =  as.numeric(resultsTracking_popSize_females[,paste(j)]),
         sex = "female")

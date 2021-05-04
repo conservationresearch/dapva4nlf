@@ -18,7 +18,10 @@ runAnnualLoopNLFIdahoPVA(
   initial_year,
   wetlands,
   stage_classes,
-  percentilesEV
+  percentilesEV_survival_eggs_tad,
+  percentilesEV_survival_yoy_adult,
+  percentilesEV_reproduction,
+  alternative_details
 )
 }
 \arguments{
@@ -35,10 +38,21 @@ format of selectBTPDparameterByIterTracking().}
 
 \item{wetlands}{Wetland cell names/abbreviations.}
 
-\item{percentilesEV}{A vector of lenth years with percentiles to use for
-environmental variation (EV) in each iteration (e.g. output from selectEVPercentilesNormal()).}
+\item{stage_classes}{ADD DESCRIPTION LATER}
 
-\item{K}{Carrying capacity .}
+\item{percentilesEV_survival_eggs_tad}{Columns are the different wetlands, rows 
+are a vector of length years with percentiles to use for environmental variation (EV) 
+in each iteration (e.g. output from selectEVPercentilesNormal()).}
+
+\item{percentilesEV_survival_yoy_adult}{Columns are the different wetlands, rows 
+are a vector of length years with percentiles to use for environmental variation (EV) 
+in each iteration (e.g. output from selectEVPercentilesNormal())..}
+
+\item{percentilesEV_reproduction}{Columns are the different wetlands, rows 
+are a vector of length years with percentiles to use for environmental variation (EV) 
+in each iteration (e.g. output from selectEVPercentilesNormal()).}
+
+\item{alternative_details}{ADD DESCRIPTION LATER}
 }
 \description{
 This functions contains the annual loop of the Idaho Feasability 

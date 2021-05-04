@@ -3,4 +3,7 @@
 export(getNLFIdahoFeasinputs)
 export(runAnnualLoopNLFIdahoPVA)
 export(selectNLFIdahoParameterByIterTracking)
+export(survivalEggs)
+export(survivalOverwinter)
+export(survivalTadpoles)
 importFrom(dplyr,"%>%")
