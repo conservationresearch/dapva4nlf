@@ -65,6 +65,8 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
     pops = wetlands_without_outside , class_names = stage_classes,
     sex = "female"
   )
+  
+  resultsTracking_popSize_females$run <- q # this isn't included in the original makeResultsTracking function, could update later
 
   for (j in 1:yrs) { # start the annual loop
     print(paste("iteration", i, "run", q, "year", j))
@@ -374,7 +376,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
         )
       }
 
-      n_female_tadpoles_released <- as.numeric(alternative_details$n_tadpoles_per_year)/2 # assume 50/50 sex ratio
+      n_female_tadpoles_released <- round(as.numeric(alternative_details$n_tadpoles_per_year)/2) # assume 50/50 sex ratio, round so release whole individuals :)
       resultsTracking_popSize_females[rows_for_trans, "1"] <- n_female_tadpoles_released /length(rows_for_trans)
       
       # Then apply survival rates to see how many of the tadpoles survive to be yoy
