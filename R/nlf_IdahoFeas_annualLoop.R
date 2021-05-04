@@ -456,7 +456,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       # If it is a translocation year, add the translocated tadpoles
       if(j <= as.numeric(alternative_details$n_years_transplocation)){ # then it is a transloication year
         # see n_female_tadpoles_released from year 1 above
-        resultsTracking_popSize_females[rows_for_trans, paste(j)] <- resultsTracking_popSize_females[rows_for_trans, paste(j)] + n_female_tadpoles_released /length(rows_for_trans)
+        resultsTracking_popSize_females[rows_for_trans, paste(j)] <- resultsTracking_popSize_females[rows_for_trans, paste(j)] + round(n_female_tadpoles_released /length(rows_for_trans)) # round so that releasing whole individuals :)
       }
 
       # Update the pop size vector

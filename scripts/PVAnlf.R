@@ -27,8 +27,8 @@ library(foreach) # for %do% nd %dopar%; this might come as part of DoParallel wh
 # Set up for parallel computing - e.g. https://privefl.github.io/blog/a-guide-to-parallelism-in-r/
 library(doParallel)  # see https://www.r-bloggers.com/2016/07/lets-be-faster-and-more-parallel-in-r-with-doparallel-package/
 no_cores <- detectCores() - 1  # one less than max to be safe and prevent crashing
-# cl <- parallel::makeCluster(no_cores, type="FORK") # if on windows, try this instead: cl <- parallel::makeCluster(no_cores)
-cl <- parallel::makeCluster(no_cores)
+cl <- parallel::makeCluster(no_cores, type="FORK") # if on windows, try this instead: cl <- parallel::makeCluster(no_cores)
+# cl <- parallel::makeCluster(no_cores)
 doParallel::registerDoParallel(cl)
 
 # Set the seed in a way that works for parallel computing (each core needs a separate random seed) (e.g. https://www.r-bloggers.com/2020/09/future-1-19-1-making-sure-proper-random-numbers-are-produced-in-parallel-processing/)
@@ -37,7 +37,7 @@ clusterSetRNGStream(cl, iseed = 29) # without parallel computing can just do set
 #---- Specify the alternatives to run.  -------------
 alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are preloaded in for easy calling
 
-rows_to_run <- c(3,4)
+rows_to_run <- c(3) # gets stuck with 3; note that can't call 1 but just 0s anyways; all the rest seem to run fine
 #---- Specify number of iterations and number of runs per iterations.  -------------
 n_iter  <- 10
 max_n_runs_per_iter <- 10
