@@ -37,7 +37,7 @@ clusterSetRNGStream(cl, iseed = 29) # without parallel computing can just do set
 #---- Specify the alternatives to run.  -------------
 alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are preloaded in for easy calling
 
-rows_to_run <- c(3) # gets stuck with 3; note that can't call 1 but just 0s anyways; all the rest seem to run fine
+rows_to_run <- c(3) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
 #---- Specify number of iterations and number of runs per iterations.  -------------
 n_iter  <- 10
 max_n_runs_per_iter <- 10
@@ -75,7 +75,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   results_summary_all_iterations_overall_int  <- list() # initialize
   results_summary_all_iterations_by_pop_int  <- list() # initialize
   
-  batch_size <- n_iter/2
+  batch_size <- n_iter/5
   batches <- split(1:n_iter, ceiling(seq_along(1:n_iter)/batch_size ))
   
   for(batch in 1:length(batches)){
@@ -87,7 +87,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                        .errorhandling = c("remove"), # remove/skip if the result has an error
                                                        .packages=c('foreach', 
                                                                    'dapva',# need foreach in here as per https://stackoverflow.com/questions/21128122/function-do-not-found-on-win-platform-only-when-using-plyr-and-doparallel
-                                                                   'dapva4nlf')) %do% {  # change 'dopar' to 'do' if don't want to do the parallel computing
+                                                                   'dapva4nlf')) %dopar% {  # change 'dopar' to 'do' if don't want to do the parallel computing
            
                                                                      results_annual <- list() # initalize
                                                                      finish <- FALSE # initalize
