@@ -430,7 +430,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
         propFemalesReproVector, meanNumOffspringPerFemaleVector,
         sex_ratio_prop_female_at_birth = 0.5, # assume 50 50 sex ratio, to do later - update so this is an input
         demographic_stochasticity_NumOffspringPerFemale = TRUE,
-        demographic_stochasticity_sex_ratio = FALSE, # turn this off for now
+        demographic_stochasticity_sex_ratio = TRUE, 
         name_of_baby_class = "eggs"
       )
       int[[1]]
@@ -497,7 +497,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
         # then reduce all terrestrial age classes proportionally 
         prop_of_total_each_stage <- terrestrial_pop_size_each_stage_wetland/terrestrial_pop_size
         new_pop_terrestrial_each_stage_wetland <- prop_of_total_each_stage*carrying_capacity
-        resultsTracking_popSize_females[terrestrial_rows, paste(j)] <- new_pop_terrestrial_each_stage_wetland
+        resultsTracking_popSize_females[terrestrial_rows, paste(j)] <- round(new_pop_terrestrial_each_stage_wetland) # round so don't have partial individuals
       }
 
       ######### Record results and prep for next round #########

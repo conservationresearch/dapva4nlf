@@ -58,8 +58,8 @@ m <- 1
   print("Selecting the parameters for each iteration in parallel.")
   parameterByIterTracking <- foreach::foreach(m=1:n_iter,  .combine=rbind,
                                               .packages='dapva4nlf'
-                                              # ) %dopar% {
-                                                 ) %do% {
+                                               ) %dopar% {
+                                                # ) %do% {
 
                                                 print(paste("Choosing parameters for interation # ", m))
                                                 parameterByIterTracking <- selectNLFIdahoParameterByIterTracking(inputs)
@@ -76,7 +76,7 @@ m <- 1
   results_summary_all_iterations_overall_int  <- list() # initialize
   results_summary_all_iterations_by_pop_int  <- list() # initialize
   
-  batch_size <- n_iter #n_iter/5
+  batch_size <- n_iter/5
   batches <- split(1:n_iter, ceiling(seq_along(1:n_iter)/batch_size ))
   
   for(batch in 1:length(batches)){
@@ -84,15 +84,11 @@ m <- 1
     
     results_summary_all_iterations <- foreach::foreach(i=batches[[batch]],
                                                        .combine=rbind,
-                                                       # .verbose = T, # print out which iterations have been completed
+                                                        .verbose = T, # print out which iterations have been completed
                                                        .errorhandling = c("remove"), # remove/skip if the result has an error
                                                        .packages=c('foreach', # need foreach in here as per https://stackoverflow.com/questions/21128122/function-do-not-found-on-win-platform-only-when-using-plyr-and-doparallel
-                                                                   'dapva4nlf')) %do% {  # change 'dopar' to 'do' if don't want to do the parallel computing
-                                                                     
-                                                                     # print(paste0("Iteration ", i, " - scenario ", 'climate_', scenarios_to_run$climate[row_to_run],
-                                                                     #              '_plague_', scenarios_to_run$plague[row_to_run],
-                                                                     #              '_managment_', scenarios_to_run$management[row_to_run]))
-                                                                  
+                                                                   'dapva4nlf')) %dopar% {  # change 'dopar' to 'do' if don't want to do the parallel computing
+           
                                                                      results_annual <- list() # initalize
                                                                      finish <- FALSE # initalize
                                                                      for(q in 1:max_n_runs_per_iter){# not in parallel here; in parallel at the iteration level
@@ -107,15 +103,15 @@ m <- 1
                                                                        # It is not a perfect algoritm but appropriate for the level of randomness we need I think
                                                                        
                                                                        # Note: increased nyears to 1000 and then just select first 50 since the permute algorithm sometimes gets stuck if there are not enough draws
-                                                                       percentilesEV_survival_eggs_tad <- selectEVPercentilesNormal(input_names_w_EV = c("cell3", "cell4", "cell7", "ephemeral_wetlands"),
+                                                                       percentilesEV_survival_eggs_tad <- dapva::selectEVPercentilesNormal(input_names_w_EV = c("cell3", "cell4", "cell7", "ephemeral_wetlands"),
                                                                                                                                     correlation = parameterByIterTracking$wetland_vitalrate_correlations[i],
                                                                                                                                     n_years = 1000)[1:parameterByIterTracking$yrs[i],]
                                                                        
-                                                                       percentilesEV_survival_yoy_adult <- selectEVPercentilesNormal(input_names_w_EV = c("cell3", "cell4", "cell7", "ephemeral_wetlands"),
+                                                                       percentilesEV_survival_yoy_adult <- dapva::selectEVPercentilesNormal(input_names_w_EV = c("cell3", "cell4", "cell7", "ephemeral_wetlands"),
                                                                                                                                     correlation = parameterByIterTracking$wetland_vitalrate_correlations[i],
                                                                                                                                     n_years = 1000)[1:parameterByIterTracking$yrs[i],]
                                                                        
-                                                                       percentilesEV_reproduction <- selectEVPercentilesNormal(input_names_w_EV = c("cell3", "cell4", "cell7", "ephemeral_wetlands"),
+                                                                       percentilesEV_reproduction <- dapva::selectEVPercentilesNormal(input_names_w_EV = c("cell3", "cell4", "cell7", "ephemeral_wetlands"),
                                                                                                                               correlation = parameterByIterTracking$wetland_vitalrate_correlations[i],
                                                                                                                               n_years = 1000)[1:parameterByIterTracking$yrs[i],]
 
@@ -132,69 +128,70 @@ m <- 1
                                                                        }                                                              
 
                                                                        # Run the annual loop
-                                                                       results_annual[[q]] <- runAnnualLoopNLFIdahoPVA(parameterByIterTracking, yrs, i, q,
-                                                                                                                       # dispersal_edge_list,dispersal_tracking, 
+                                                                       results_annual[[q]] <- dapva4nlf::runAnnualLoopNLFIdahoPVA(parameterByIterTracking, yrs, i, q,
+                                                                                                                       # dispersal_edge_list,dispersal_tracking,
                                                                                                                        initial_year, wetlands,stage_classes,
                                                                                                                        percentilesEV_survival_eggs_tad,
                                                                                                                        percentilesEV_survival_yoy_adult,
                                                                                                                        percentilesEV_reproduction,
-                                                                                                                       alternative_details) 
-                                                                       
-                                                                       if(q == max_n_runs_per_iter*0.1){ # if we have run 10% of the max number of runs per iterations
-                                                                         
-                                                                         # Check to see if within 5% of either 0 or 1 since we noticed from covergence
-                                                                         # plots that if it is at either of these two extremes, more iterations are typically not necessary
-                                                                         
-                                                                         results_all_so_far <- plyr::rbind.fill(results_annual)
-                                                                         
-                                                                         check_if_enough_runs <- makeResultsSummaryOneIteration(results_all_so_far,
-                                                                                                                                by_pop = 'no',
-                                                                                                                                initial_year = parameterByIterTracking$initial_year[i],
-                                                                                                                                yrs = parameterByIterTracking$yrs[i],
-                                                                                                                                n_iter,
-                                                                                                                                n_runs_per_iter = q,
-                                                                                                                                alternative = paste0(alternative_details$alt_name_full),
-                                                                                                                                iteration_number = i)
-                                                                         
-                                                                         prob_of_persis_so_far <- check_if_enough_runs[which(check_if_enough_runs$metric == "probability of persistence"),
-                                                                                                                       paste(parameterByIterTracking$initial_year[i] + parameterByIterTracking$yrs[i]-1)]
-                                                                         
-                                                                         # if with 5% of 0 or 1, then no need to do more runs
-                                                                         if(prob_of_persis_so_far <= 0.05){finish <- TRUE}
-                                                                         if(prob_of_persis_so_far >= 0.95){finish <- TRUE}
-                                                                       }
-                                                                       
-                                                                       if(finish == TRUE){
-                                                                         print(paste('Iteration', i, "stopped at", q, "runs"))
-                                                                         break
-                                                                       }
-                                                                       # Return the results for this run
-                                                                       # return(results_annual)
+                                                                                                                       alternative_details)
+
+                                                                       # if(q == max_n_runs_per_iter*0.1){ # if we have run 10% of the max number of runs per iterations
+                                                                       #   
+                                                                       #   # Check to see if within 5% of either 0 or 1 since we noticed from covergence
+                                                                       #   # plots that if it is at either of these two extremes, more iterations are typically not necessary
+                                                                       #   
+                                                                       #   results_all_so_far <- plyr::rbind.fill(results_annual)
+                                                                       #   
+                                                                       #   check_if_enough_runs <- makeResultsSummaryOneIteration(results_all_so_far,
+                                                                       #                                                          by_pop = 'no',
+                                                                       #                                                          initial_year = parameterByIterTracking$initial_year[i],
+                                                                       #                                                          yrs = parameterByIterTracking$yrs[i],
+                                                                       #                                                          n_iter,
+                                                                       #                                                          n_runs_per_iter = q,
+                                                                       #                                                          alternative = paste0(alternative_details$alt_name_full),
+                                                                       #                                                          iteration_number = i)
+                                                                       #   
+                                                                       #   prob_of_persis_so_far <- check_if_enough_runs[which(check_if_enough_runs$metric == "probability of persistence"),
+                                                                       #                                                 paste(parameterByIterTracking$initial_year[i] + parameterByIterTracking$yrs[i]-1)]
+                                                                       #   
+                                                                       #   # if with 5% of 0 or 1, then no need to do more runs
+                                                                       #   if(prob_of_persis_so_far <= 0.05){finish <- TRUE}
+                                                                       #   if(prob_of_persis_so_far >= 0.95){finish <- TRUE}
+                                                                       # }
+                                                                       # 
+                                                                       # if(finish == TRUE){
+                                                                       #   print(paste('Iteration', i, "stopped at", q, "runs"))
+                                                                       #   break
+                                                                       # }
+                                                                       # # Return the results for this run
+                                                                       # # return(results_annual)
+                                                                       return(wetlands )
                                                                      }
                                                                      
-                                                                     results_all_for_this_iteration <- plyr::rbind.fill(results_annual)
+                                                                     # results_all_for_this_iteration <- plyr::rbind.fill(results_annual)
                                                                      
                                                                      # Overall results
-                                                                     results_summary_for_this_iteration_overall <- makeResultsSummaryOneIteration(results_all_for_this_iteration,
-                                                                                                                                                  by_pop = 'no',
-                                                                                                                                                  initial_year = parameterByIterTracking$initial_year[i],
-                                                                                                                                                  yrs = parameterByIterTracking$yrs[i],
-                                                                                                                                                  n_iter,
-                                                                                                                                                  n_runs_per_iter = q,
-                                                                                                                                                  alternative = paste0(alternative_details$alt_name_full),
-                                                                                                                                                  iteration_number = i)
-                                                                     
+                                                                     # results_summary_for_this_iteration_overall <- makeResultsSummaryOneIteration(results_all_for_this_iteration,
+                                                                     #                                                                              by_pop = 'no',
+                                                                     #                                                                              initial_year = parameterByIterTracking$initial_year[i],
+                                                                     #                                                                              yrs = parameterByIterTracking$yrs[i],
+                                                                     #                                                                              n_iter,
+                                                                     #                                                                              n_runs_per_iter = q,
+                                                                     #                                                                              alternative = paste0(alternative_details$alt_name_full),
+                                                                     #                                                                              iteration_number = i)
+                                                                     # 
                                                                      # Results by colony
-                                                                     results_summary_for_this_iteration_by_pop <- makeResultsSummaryOneIteration(results_all_for_this_iteration,
-                                                                                                                                                 by_pop = 'yes',
-                                                                                                                                                 initial_year = parameterByIterTracking$initial_year[i],
-                                                                                                                                                 yrs = parameterByIterTracking$yrs[i],
-                                                                                                                                                 n_iter,
-                                                                                                                                                 n_runs_per_iter = q,
-                                                                                                                                                 alternative = paste0(alternative_details$alt_name_full),
-                                                                                                                                                 iteration_number = i)
-                                                                     
-                                                                     return(list(results_summary_for_this_iteration_overall, results_summary_for_this_iteration_by_pop))
+                                                                     # results_summary_for_this_iteration_by_pop <- makeResultsSummaryOneIteration(results_all_for_this_iteration,
+                                                                     #                                                                             by_pop = 'yes',
+                                                                     #                                                                             initial_year = parameterByIterTracking$initial_year[i],
+                                                                     #                                                                             yrs = parameterByIterTracking$yrs[i],
+                                                                     #                                                                             n_iter,
+                                                                     #                                                                             n_runs_per_iter = q,
+                                                                     #                                                                             alternative = paste0(alternative_details$alt_name_full),
+                                                                     #                                                                             iteration_number = i)
+                                                                     # 
+                                                                     # return(list(results_summary_for_this_iteration_overall, results_summary_for_this_iteration_by_pop))
                                                                    } # end iteration loop
     
     results_summary_all_iterations_overall_int[[batch]] <- do.call("rbind", results_summary_all_iterations[1:batch_size])
