@@ -52,9 +52,15 @@ for (i in 1:length(files)){
   results_summary_num_indiv_by_pop <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations = results_summary_all_iterations_by_pop,
                                                              metric = "mean total number of individuals",
                                                              initial_year = parameterByIterTracking$initial_year[1])
+  
   results_summary_prob_persist_by_pop <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations  = results_summary_all_iterations_by_pop,
                                                                 metric = "probability of persistence",
                                                                 initial_year = parameterByIterTracking$initial_year[1])
+  
+  results_summary_prob_selfsustaining_by_pop <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations  = results_summary_all_iterations_by_pop,
+                                                                              metric = "probability of self-sustaining population",
+                                                                              initial_year = parameterByIterTracking$initial_year[1])
+  
   # Graph
   abundance_graph <- dapva::graphResultsSummary(results_summary_num_indiv_by_pop)
   abundance_flyingBars <- dapva::graphFlyingBars(results_summary_all_iterations = results_summary_all_iterations_by_pop,
@@ -64,6 +70,10 @@ for (i in 1:length(files)){
   persistence_flyingBars <- dapva::graphFlyingBars(results_summary_all_iterations = results_summary_all_iterations_by_pop,
                                             metric = "probability of persistence", year = parameterByIterTracking$initial_year[1] + parameterByIterTracking$yrs[1] - 1) # year is initial_year + yrs - 1
 
+  selfsustaining_graph <- dapva::graphResultsSummary(results_summary_prob_selfsustaining_by_pop)
+  selfsustaining_flyingBars <- dapva::graphFlyingBars(results_summary_all_iterations = results_summary_all_iterations_by_pop,
+                                                   metric = "probability of self-sustaining population", year = parameterByIterTracking$initial_year[1] + parameterByIterTracking$yrs[1] - 1) # year is initial_year + yrs - 1
+  
   # Export the graphs
 
   filename <- paste("graph_ab_overTime_by_pop_", name, version, "_iter_", n_iter, ".tiff", sep="")
@@ -85,6 +95,17 @@ for (i in 1:length(files)){
   tiff(filename, width=12, height=6, units="in",pointsize=8, compression="lzw", bg="white", res=600)
   print(persistence_flyingBars)
   dev.off()
+  
+  
+  filename <- paste("graph_ss_overTime_by_pop_", name, version, "_iter_", n_iter, ".tiff", sep="")
+  tiff(filename, width=12, height=6, units="in",pointsize=8, compression="lzw", bg="white", res=600)
+  print(selfsustaining_graph)
+  dev.off()
+  
+  filename <- paste("graph_ss_flyingBars_by_pop_", name, version, "_iter_", n_iter, ".tiff", sep="")
+  tiff(filename, width=12, height=6, units="in",pointsize=8, compression="lzw", bg="white", res=600)
+  print(selfsustaining_flyingBars)
+  dev.off()
 
 }
 
@@ -100,8 +121,13 @@ colnames(results_all_iter)[7:ncol(results_all_iter)] <- 1:50
 results_summary_num_indiv <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations = results_all_iter,
                                                                   metric = "mean total number of individuals",
                                                                   initial_year = 1, credible_interval = 0.95)
+
 results_summary_prob_persist <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations  = results_all_iter,
                                                                      metric = "probability of persistence",
+                                                                     initial_year = 1, credible_interval = 0.95)
+
+results_summary_prob_selfsustaining <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations  = results_all_iter,
+                                                                     metric = "probability of self-sustaining population",
                                                                      initial_year = 1, credible_interval = 0.95)
 
 # Graph the overall results
@@ -115,6 +141,12 @@ results_summary_prob_persist <- dapva::makeResultsSummaryMultipleAlt(results_sum
                                            metric = "probability of persistence",
                                            year = 50,
                                            credible_interval = 0.95))
+
+(selfsustaining_graph <- dapva::graphResultsSummary(results_summary_prob_selfsustaining))
+(selfsustaining_flyingBars <- dapva::graphFlyingBars(results_summary_all_iterations = results_all_iter,
+                                                  metric = "probability of self-sustaining population",
+                                                  year = 50,
+                                                  credible_interval = 0.95))
 
 # Export the graphs
 
@@ -138,8 +170,19 @@ tiff(filename, width=12, height=6, units="in",pointsize=8, compression="lzw", bg
 print(persistence_flyingBars)
 dev.off()
 
+filename <- paste("graph_selfsustaining_overTime", version, "_iter_", n_iter, ".tiff", sep="")
+tiff(filename, width=12, height=6, units="in",pointsize=8, compression="lzw", bg="white", res=600)
+print(selfsustaining_graph)
+dev.off()
+
+filename <- paste("graph_selfsustaining_flyingBars", version, "_iter_", n_iter, ".tiff", sep="")
+tiff(filename, width=12, height=6, units="in",pointsize=8, compression="lzw", bg="white", res=600)
+print(selfsustaining_flyingBars)
+dev.off()
+
+
 # Make an output table with the format we want for the report
-results_summary_prob_persist_table <- results_summary_prob_persist[which(results_summary_prob_persist$year == 2017 + 50 - 1),] # year is initial_year + yrs - 1
+# results_summary_prob_persist_table <- results_summary_prob_persist[which(results_summary_prob_persist$year == 2017 + 50 - 1),] # year is initial_year + yrs - 1
 # 
 # # Add climate scenario
 # int <- sapply(strsplit(as.character(results_summary_prob_persist_table$alternative), "\\;\n"), function(x) x[[1]])
