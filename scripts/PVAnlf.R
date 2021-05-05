@@ -37,7 +37,7 @@ clusterSetRNGStream(cl, iseed = 29) # without parallel computing can just do set
 #---- Specify the alternatives to run.  -------------
 alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are preloaded in for easy calling
 
-rows_to_run <- c(3) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
+rows_to_run <- c(2) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
 #---- Specify number of iterations and number of runs per iterations.  -------------
 n_iter  <- 10
 max_n_runs_per_iter <- 10
@@ -171,28 +171,38 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                      }
                                                                      
                                                                       results_all_for_this_iteration <- plyr::rbind.fill(results_annual)
-
+                                                                      
+                                                                      # Remove eggs and tadpoles as they are intermediate stages in the year and we just want the pop size at the fall census
+                                                                      results_all_for_this_iteration_fall <- results_all_for_this_iteration # initalize
+                                                                      results_all_for_this_iteration_fall[which(results_all_for_this_iteration_fall$class == "eggs"),paste(1:yrs)] <- 0
+                                                                      results_all_for_this_iteration_fall[which(results_all_for_this_iteration_fall$class == "tadpoles"),paste(1:yrs)] <- 0
+                                                                      
                                                                      # Overall results
-                                                                      results_summary_for_this_iteration_overall <- makeResultsSummaryOneIteration(results_all_for_this_iteration,
+                                                                      results_summary_for_this_iteration_overall <- dapva::makeResultsSummaryOneIteration(results_all_for_this_iteration_fall,
                                                                                                                                                    by_pop = 'no',
                                                                                                                                                    initial_year = parameterByIterTracking$initial_year[i],
                                                                                                                                                    yrs = parameterByIterTracking$yrs[i],
                                                                                                                                                    n_iter,
                                                                                                                                                    n_runs_per_iter = q,
                                                                                                                                                    alternative = paste0(alternative_details$alt_name_full),
-                                                                                                                                                   iteration_number = i)
+                                                                                                                                                   iteration_number = i,
+                                                                                                                                                   prob_self_sustain = TRUE,
+                                                                                                                                                   lambda_over_x_years = 10)
 
                                                                      # Results by colony
-                                                                      results_summary_for_this_iteration_by_pop <- makeResultsSummaryOneIteration(results_all_for_this_iteration,
+                                                                      results_summary_for_this_iteration_by_pop <- dapva::makeResultsSummaryOneIteration( results_all_for_this_iteration_fall,
                                                                                                                                                   by_pop = 'yes',
                                                                                                                                                   initial_year = parameterByIterTracking$initial_year[i],
                                                                                                                                                   yrs = parameterByIterTracking$yrs[i],
                                                                                                                                                   n_iter,
                                                                                                                                                   n_runs_per_iter = q,
                                                                                                                                                   alternative = paste0(alternative_details$alt_name_full),
-                                                                                                                                                  iteration_number = i)
+                                                                                                                                                  iteration_number = i,
+                                                                                                                                                  prob_self_sustain = TRUE,
+                                                                                                                                                  lambda_over_x_years = 10)
 
-                                                                      return(list(results_summary_for_this_iteration_overall, results_summary_for_this_iteration_by_pop))
+                                                                      return(list(results_summary_for_this_iteration_overall, results_summary_for_this_iteration_by_pop,
+                                                                                  results_all_for_this_iteration))
                                                                    
                                                                    # return(results_all_for_this_iteration)   
                                                                       } # end iteration loop
