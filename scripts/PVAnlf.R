@@ -15,7 +15,7 @@ system.time({ # turn on the timer
 
 #---- Clear the workspace. ----
 rm(list = ls())
-version <- "_v1testing" # insert short description to append to results to help identify
+version <- "_v1test2" # insert short description to append to results to help identify
 
 #---- Load libraries, and set the random seed.  -------------
 ## Import libraries
@@ -38,6 +38,8 @@ clusterSetRNGStream(cl, iseed = 29) # without parallel computing can just do set
 alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are preloaded in for easy calling
 
 rows_to_run <- c(2) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
+# later 5 seemed to get stuck . don't lnow why
+
 #---- Specify number of iterations and number of runs per iterations.  -------------
 n_iter  <- 10
 max_n_runs_per_iter <- 10
