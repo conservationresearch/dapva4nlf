@@ -281,6 +281,12 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   parameterByIterTracking_this_alt_clean <- parameterByIterTracking_this_alt[ , !(names(parameterByIterTracking_this_alt) %in% drops)]
   
   # Add order to the ones that are factors
+  parameterByIterTracking_this_alt_clean$drawdown_beforeMidJuly <- ordered(parameterByIterTracking_this_alt_clean$drawdown_beforeMidJuly, 
+                                                                           levels = c("yes", "no"))
+  parameterByIterTracking_this_alt_clean$dispersal_CSF_vs_MoreGoShort <- ordered(parameterByIterTracking_this_alt_clean$dispersal_CSF_vs_MoreGoShort, 
+                                                                                 levels = c("CSF", "MoreGoShort"))
+  parameterByIterTracking_this_alt_clean$bullfrogMgmt_effective <- ordered(parameterByIterTracking_this_alt_clean$bullfrogMgmt_effective, 
+                                                                           levels = c("no", "yes"))
 
   # Do the sensitivity analysis
   paramSens <- makeParameterSens(parameterByIterTracking = parameterByIterTracking_this_alt_clean,
