@@ -372,6 +372,47 @@ getNLFIdahoFeasinputs <- function() {
       source = "Lea and Rebecca on May 5, 2021", comments = "Here it is really the difference with the epehemral wetlands driving it.")
   )
   
+  #---- Dispersal inputs.  -------------
+  dispersal_inputs <- list(
+    c(input = "p_yoy_disperse", type = "dispersal", 
+      lcl = 0.05, best_guess = 0.11, ucl = 0.3, confidence = 90,
+      lower_bound = 0, upper_bound = 0.4,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "Lea and Rebecca on May 5, 2021", comments = "At the low end, prob not too low because seems reasonable that they would move around between wetlands in the WMA. Go with the 11% from the Seburn 1997 paper as the best guess. Lower the low end to a bit lower than the Cayela paper.."),
+    
+    c(input = "dispersal_CSF_vs_MoreGoShort", type = "dispersal", 
+      best_guess = 0.4, # probability of CSF, prob of MoreGoSHort is 1-0.4 = 0.6
+      best_guess_type = "probability", management_alternative = "status_quo", 
+      source = "Lea and Rebecca on May 5, 2021", comments = "CSF is short for Columbia spotted frogs, based on the Funk et al. 2005. We think it is more likely that they will go shorter distances than longer ones."),
+    
+    c(input = "dispersal_CSFmodel_lessEqual1km", type = "dispersal", 
+      best_guess = 0.44, 
+      best_guess_type = "probability", management_alternative = "status_quo", 
+      source = "Lea and Rebecca on May 5, 2021", comments = "CSF is short for Columbia spotted frogs, based on the Funk et al. 2005."),
+    c(input = "dispersal_CSFmodel_greater1kmlessequal2km", type = "dispersal", 
+      best_guess = 0.2, 
+      best_guess_type = "probability", management_alternative = "status_quo", 
+      source = "Lea and Rebecca on May 5, 2021", comments = "CSF is short for Columbia spotted frogs, based on the Funk et al. 2005."),
+    c(input = "dispersal_CSFmodel_greater2km", type = "dispersal", 
+      best_guess = 0.36, 
+      best_guess_type = "probability", management_alternative = "status_quo", 
+      source = "Lea and Rebecca on May 5, 2021", comments = "CSF is short for Columbia spotted frogs, based on the Funk et al. 2005."),
+    
+    c(input = "dispersal_MoreGoShortmodel_lessEqual1km", type = "dispersal", 
+      best_guess = 0.8, 
+      best_guess_type = "probability", management_alternative = "status_quo", 
+      source = "Lea and Rebecca on May 5, 2021", comments = "We think it is more likely that they will go shorter distances than longer ones."),
+    c(input = "dispersal_MoreGoShortmodel_greater1kmlessequal2km", type = "dispersal", 
+      best_guess = 0.12, 
+      best_guess_type = "probability", management_alternative = "status_quo", 
+      source = "Lea and Rebecca on May 5, 2021", comments = "We think it is more likely that they will go shorter distances than longer ones."),
+    c(input = "dispersal_MoreGoShortmodel_greater2km", type = "dispersal", 
+      best_guess = 0.08, 
+      best_guess_type = "probability", management_alternative = "status_quo", 
+      source = "Lea and Rebecca on May 5, 2021", comments = "We think it is more likely that they will go shorter distances than longer ones.")
+    
+  )
+  
   #---- Compile the inputs and set up tracking objects.  -------------
   inputs <- dapva::makeInputsDF(parameters = c(
     year_inputs,
@@ -389,17 +430,22 @@ getNLFIdahoFeasinputs <- function() {
     ephemeral_freq_dry,
     carrying_capacity,
     quasi_extinction_threshold,
-    wetland_vitalrate_correlations
+    wetland_vitalrate_correlations,
+    dispersal_inputs
   ))
+  
 
-
-  #---- Make the dispersal edge list and tracking object.  -------------
-  # dispersal_edge_list <- createDispersalEdgeList(
-  #   distance_btwn_pops = distance_btwn_colonies_m,
-  #   max_dispersal_distance = as.numeric(inputs$best_guess[which(inputs$input == "max_dispersal_distance_m")])
-  # ) # only needs to be made once; distances in m
-  # dispersal_tracking <- createDispersalTracking(dispersal_edge_list, class_names = unique(initialPopSizes_female$stage))
-
+  
+  #---- Make the wetland distance matrix for dispersal.  -------------
+  wetland_distances_km <- as.data.frame(matrix(nrow = 5, ncol = 5))
+  colnames(wetland_distances_km) <- c("cell7", "cell3", "cell4", "outside", "ephemeral_wetlands")
+  rownames(wetland_distances_km) <- c("cell7", "cell3", "cell4", "outside", "ephemeral_wetlands")
+  wetland_distances_km[1,] <- c(0, 2050/1000, 1230/1000, 150/1000, 350/1000)
+  wetland_distances_km[2,] <- c(2050/1000, 0, 300/1000, 260/1000, 3170/1000)
+  wetland_distances_km[3,] <- c(1230/1000, 300/1000, 0, 400/1000, 2370/1000)
+  wetland_distances_km[4,] <- c(150/1000, 260/1000, 400/1000, 0, 400/1000)
+  wetland_distances_km[5,] <- c(350/1000, 3170/1000, 2370/1000, 400/1000, 0)
+  
   #---- Return the results.  -------------
 
   # Address warning in devtools::check() (i.e. RMD check) re 'no visible binding for global variable'.
@@ -409,7 +455,7 @@ getNLFIdahoFeasinputs <- function() {
 
 
   # return(list(inputs, dispersal_edge_list, dispersal_tracking))
-  return(list(inputs))
+  return(list(inputs, wetland_distances_km))
   
 }
 
@@ -541,6 +587,25 @@ selectNLFIdahoParameterByIterTracking <- function(inputs) {
   
   ######### Select the parameters for this iteration - quasi extinction threshold. #########
   parameterByIterTracking[i, "quasi_extinction_threshold"] <- dapva::selectParamUniformDistribution(input_name = "quasi_extinction_threshold", inputsDF = inputs)
+  
+  ######### Select the parameters for this iteration - dispersal. #########
+  parameterByIterTracking[i, "p_yoy_disperse"] <- dapva::selectParamMetalogDistribution(input_name = "p_yoy_disperse", inputsDF = inputs)
+  
+  parameterByIterTracking[i, "dispersal_CSF_vs_MoreGoShort"] <- sample(c("CSF", "MoreGoShort"),
+                                                                 size = 1,
+                                                                 prob = c(as.numeric(inputs$best_guess[which(inputs$input == "dispersal_CSF_vs_MoreGoShort")]),
+                                                                          (1-as.numeric(inputs$best_guess[which(inputs$input == "dispersal_CSF_vs_MoreGoShort")]))
+                                                                 ), replace = T)
+  
+  # No uncertainty in these but record for easy access through parameterByIterTracking
+  
+  parameterByIterTracking[i, "dispersal_CSFmodel_lessEqual1km"] <- as.numeric(inputs$best_guess[which(inputs$input == "dispersal_CSFmodel_lessEqual1km")])
+  parameterByIterTracking[i, "dispersal_CSFmodel_greater1kmlessequal2km"] <- as.numeric(inputs$best_guess[which(inputs$input == "dispersal_CSFmodel_greater1kmlessequal2km")])
+  parameterByIterTracking[i, "dispersal_CSFmodel_greater2km"] <- as.numeric(inputs$best_guess[which(inputs$input == "dispersal_CSFmodel_greater2km")])
+  
+  parameterByIterTracking[i, "dispersal_MoreGoShortmodel_lessEqual1km"] <- as.numeric(inputs$best_guess[which(inputs$input == "dispersal_MoreGoShortmodel_lessEqual1km")])
+  parameterByIterTracking[i, "dispersal_MoreGoShortmodel_greater1kmlessequal2km"] <- as.numeric(inputs$best_guess[which(inputs$input == "dispersal_MoreGoShortmodel_greater1kmlessequal2km")])
+  parameterByIterTracking[i, "dispersal_MoreGoShortmodel_greater2km"] <- as.numeric(inputs$best_guess[which(inputs$input == "dispersal_MoreGoShortmodel_greater2km")])
   
   ######### Fill in some inputs that will stay the same across iterations. Important to show for clarity and for use in the tornados (no uncertainty in these but if we put multiple runs with different inputs together it may be useful to have them in here) #########
 

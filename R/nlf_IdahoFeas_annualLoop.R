@@ -21,6 +21,7 @@
 #' @param yrs The number of years to run the model for (e.g. 50).
 #' @param i The iteration number. For results tracking purposes.
 #' @param q The run number. For results tracking purposes.
+#' @param wetland_distances_km Matrix of distances between wetlands in kilometers.
 #' @param initial_year First year of the model.
 #' @param wetlands Wetland cell names/abbreviations.
 #' @param stage_classes ADD DESCRIPTION LATER
@@ -39,7 +40,7 @@
 #'
 #' @export
 runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
-                                 # dispersal_edge_list,dispersal_tracking, 
+                                     wetland_distances_km,
                                  initial_year, wetlands,stage_classes,
                                  percentilesEV_survival_eggs_tad,
                                  percentilesEV_survival_yoy_adult,
@@ -392,13 +393,24 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
                                survivalMatrix,
                                demographic_stochasticity = TRUE)
       yoy_rows <- which(resultsTracking_popSize_females$class == "yoy")
-      resultsTracking_popSize_females[yoy_rows, "1"] <- tapoles_survive_to_yoy[grepl("yoy" , rownames(tapoles_survive_to_yoy))]
+      resultsTracking_popSize_females[yoy_rows, paste(j)] <- tapoles_survive_to_yoy[grepl("yoy" , rownames(tapoles_survive_to_yoy))]
+
+      # And now those yoy disperse
+      dispersal_results <- dispersalTracking(resultsTracking_popSize_females, yoy_rows, i, j,
+                                             wetlands,
+                                             wetland_distances_km,
+                                             parameterByIterTracking)
+
+      # for each wetland, remove the # that left and then add them to the wetland they went to
+      for(z in 1:length(yoy_rows)){
+        wetland <- resultsTracking_popSize_females$pop[yoy_rows[z]]
+        n_left <- sum(dispersal_results[paste(wetland),]) # rowsum for this wetland
+        n_arrived <- sum(dispersal_results[,paste(wetland)]) # colsum for this wetland
+        resultsTracking_popSize_females[yoy_rows[z], paste(j)] <- resultsTracking_popSize_females[yoy_rows[z], paste(j)] - n_left + n_arrived
+      }
     }  
     
-    # Then apply dispersal
-    
-    # STILL TO DO
-    
+
     ######### For the second year and beyond #########
     if (j != 1)  { 
       
@@ -472,8 +484,21 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       yoy_rows <- which(resultsTracking_popSize_females$class == "yoy")
       resultsTracking_popSize_females[yoy_rows, paste(j)] <- tapoles_survive_to_yoy[grepl("yoy" , rownames(tapoles_survive_to_yoy))]
       
-      ######### Then apply dispersal - STILL TO DO #########
+      ######### And now those yoy disperse  #########
 
+      dispersal_results <- dispersalTracking(resultsTracking_popSize_females, yoy_rows, i, j,
+                                             wetlands,
+                                             wetland_distances_km,
+                                             parameterByIterTracking)
+      
+      # for each wetland, remove the # that left and then add them to the wetland they went to
+      for(z in 1:length(yoy_rows)){
+        wetland <- resultsTracking_popSize_females$pop[yoy_rows[z]]
+        n_left <- sum(dispersal_results[paste(wetland),]) # rowsum for this wetland
+        n_arrived <- sum(dispersal_results[,paste(wetland)]) # colsum for this wetland
+        resultsTracking_popSize_females[yoy_rows[z], paste(j)] <- resultsTracking_popSize_females[yoy_rows[z], paste(j)] - n_left + n_arrived
+      }
+      
       
       ######### Then apply carrying capacity #########
       carrying_capacity <- as.numeric(parameterByIterTracking[i, paste0("carrying_capacity_BSCWMA")])

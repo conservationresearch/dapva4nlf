@@ -15,7 +15,7 @@ system.time({ # turn on the timer
 
 #---- Clear the workspace. ----
 rm(list = ls())
-version <- "_v1test2" # insert short description to append to results to help identify
+version <- "_v1test3" # insert short description to append to results to help identify
 
 #---- Load libraries, and set the random seed.  -------------
 ## Import libraries
@@ -54,6 +54,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
 
   inputs_all <- dapva4nlf::getNLFIdahoFeasinputs()
   inputs <- inputs_all[[1]]
+  wetland_distances_km <- inputs_all[[2]]
   
 #---- Choose the parameters for each iteration (i.e. parametric uncertainty). ----
   print("Selecting the parameters for each iteration in parallel.")
@@ -163,12 +164,12 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
 
                                                                        # Run the annual loop
                                                                        results_annual[[q]] <- dapva4nlf::runAnnualLoopNLFIdahoPVA(parameterByIterTracking, yrs, i, q,
-                                                                                                                       # dispersal_edge_list,dispersal_tracking,
-                                                                                                                       initial_year, wetlands,stage_classes,
-                                                                                                                       percentilesEV_survival_eggs_tad,
-                                                                                                                       percentilesEV_survival_yoy_adult,
-                                                                                                                       percentilesEV_reproduction,
-                                                                                                                       alternative_details)
+                                                                                                                                  wetland_distances_km,
+                                                                                                                                  initial_year, wetlands,stage_classes,
+                                                                                                                                  percentilesEV_survival_eggs_tad,
+                                                                                                                                  percentilesEV_survival_yoy_adult,
+                                                                                                                                  percentilesEV_reproduction,
+                                                                                                                                  alternative_details)
 
                                                                         # if(q == max_n_runs_per_iter*0.1){ # if we have run 10% of the max number of runs per iterations
                                                                         # 
@@ -261,8 +262,14 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   print("Running the sensitivity analysis.")
   
   # Specify which variables don't make sense to include in the sensitivity analysis
-  drops <- c("yrs",
-             "initial_year"
+  drops <- c("yrs",#no uncertainty here; 
+             "initial_year",#no uncertainty here; 
+             "dispersal_CSFmodel_lessEqual1km", #no uncertainty here; part of larger model uncertainty
+             "dispersal_CSFmodel_greater1kmlessequal2km", #no uncertainty here; part of larger model uncertainty
+             "dispersal_CSFmodel_greater1kmlessequal2km", #no uncertainty here; part of larger model uncertainty
+             "dispersal_MoreGoShortmodel_lessEqual1km", #no uncertainty here; part of larger model uncertainty
+             "dispersal_MoreGoShortmodel_greater1kmlessequal2km", #no uncertainty here; part of larger model uncertainty
+             "dispersal_MoreGoShortmodel_greater1kmlessequal2km"#no uncertainty here; part of larger model uncertainty
              )
   
   # Do the sensitivity analysis and make a tornado for each alternative
