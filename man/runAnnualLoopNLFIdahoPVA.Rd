@@ -15,6 +15,7 @@ runAnnualLoopNLFIdahoPVA(
   yrs,
   i,
   q,
+  wetland_distances_km,
   initial_year,
   wetlands,
   stage_classes,
@@ -33,6 +34,8 @@ format of selectBTPDparameterByIterTracking().}
 \item{i}{The iteration number. For results tracking purposes.}
 
 \item{q}{The run number. For results tracking purposes.}
+
+\item{wetland_distances_km}{Matrix of distances between wetlands in kilometers.}
 
 \item{initial_year}{First year of the model.}
 

@@ -105,8 +105,12 @@ dispersalTracking <- function(resultsTracking_popSize_females, yoy_rows, i, j,
       dispersal_tracking[paste(wetland),"cell3"] <- length(which(destinations == "cell3"))
       dispersal_tracking[paste(wetland),"cell4"] <- length(which(destinations == "cell4"))
       dispersal_tracking[paste(wetland),"cell7"] <- length(which(destinations == "cell7"))
-      dispersal_tracking[paste(wetland),"ephemeral_wetlands"] <- length(which(destinations == "ephemeral_wetlands"))
+      if(length(which(wetlands == "ephemeral_wetlands")) > 0){ # i.e. this alternative has restoration for the ephemeral wetlands
+        dispersal_tracking[paste(wetland),"ephemeral_wetlands"] <- length(which(destinations == "ephemeral_wetlands"))
+      }
       dispersal_tracking[paste(wetland),"outside"] <- length(which(destinations == "outside"))
+      
+
     }
     
     if(n_dispersing == 0){ # then none to disperse

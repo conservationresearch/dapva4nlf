@@ -396,7 +396,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       resultsTracking_popSize_females[yoy_rows, paste(j)] <- tapoles_survive_to_yoy[grepl("yoy" , rownames(tapoles_survive_to_yoy))]
 
       # And now those yoy disperse
-      dispersal_results <- dispersalTracking(resultsTracking_popSize_females, yoy_rows, i, j,
+      dispersal_results <- dapva4nlf::dispersalTracking(resultsTracking_popSize_females, yoy_rows, i, j,
                                              wetlands,
                                              wetland_distances_km,
                                              parameterByIterTracking)
@@ -486,7 +486,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       
       ######### And now those yoy disperse  #########
 
-      dispersal_results <- dispersalTracking(resultsTracking_popSize_females, yoy_rows, i, j,
+      dispersal_results <- dapva4nlf::dispersalTracking(resultsTracking_popSize_females, yoy_rows, i, j,
                                              wetlands,
                                              wetland_distances_km,
                                              parameterByIterTracking)
