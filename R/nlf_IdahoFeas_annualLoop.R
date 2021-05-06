@@ -100,7 +100,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       dapva::selectPercentileBetaDistribution(
         mean = s_yoy_mean,
         sd = s_yoy_sd,
-        EV_percentile = percentilesEV_survival_yoy_adult[j, paste(wetlands_without_outside[x])]
+        EV_percentile = percentilesEV_survival_yoy_adult$all_wetlands[j]
       )
     }))
     
@@ -110,7 +110,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       dapva::selectPercentileBetaDistribution(
         mean = s_juv_mean,
         sd = s_juv_sd,
-        EV_percentile = percentilesEV_survival_yoy_adult[j, paste(wetlands_without_outside[x])]
+        EV_percentile = percentilesEV_survival_yoy_adult$all_wetlands[j]
       )
     }))
     
@@ -120,7 +120,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       dapva::selectPercentileBetaDistribution(
         mean = s_adult_mean,
         sd = s_adult_sd,
-        EV_percentile = percentilesEV_survival_yoy_adult[j, paste(wetlands_without_outside[x])]
+        EV_percentile = percentilesEV_survival_yoy_adult$all_wetlands[j]
       )
     }))    
     
@@ -288,7 +288,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       dapva::selectPercentileBetaDistribution(
         mean = p_females_lay_eggs_mean_A2,
         sd = p_females_lay_eggs_sd_A2,
-        EV_percentile = percentilesEV_reproduction[j, paste(wetlands_without_outside[x])]
+        EV_percentile = percentilesEV_reproduction$all_wetlands[j]
       )
     })) 
     
@@ -298,7 +298,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       dapva::selectPercentileBetaDistribution(
         mean = p_females_lay_eggs_mean_A3,
         sd = p_females_lay_eggs_sd_A3,
-        EV_percentile = percentilesEV_reproduction[j, paste(wetlands_without_outside[x])]
+        EV_percentile = percentilesEV_reproduction$all_wetlands[j]
       )
     })) 
     
@@ -308,7 +308,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       dapva::selectPercentileBetaDistribution(
         mean = p_females_lay_eggs_mean_A4plus,
         sd = p_females_lay_eggs_sd_A4plus,
-        EV_percentile = percentilesEV_reproduction[j, paste(wetlands_without_outside[x])]
+        EV_percentile = percentilesEV_reproduction$all_wetlands[j]
       )
     })) 
     

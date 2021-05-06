@@ -347,15 +347,29 @@ getNLFIdahoFeasinputs <- function() {
   # correlation of 1 is that the conditions in each of the wetlands are the same
   # correlation of 0 is that conditions in each of the wetlands are not related
   
-  # THESE NUMBERS ARE LK PLACEHOLDERS FOR NOW TO TEST IT OUT, REVISIT WITH LEA/REBECCA
+
+  # Survival for eggs and tadpoles correlated 100% (i.e. use the same percentiles)
+  # Survival for the other life stages correlated (but not correlated with eggs/tadpoles)  (i.e. use the same percentiles)
+  # No correlation between survival and reproduction
+  # Wetland quality (which is partially correlated) will affect the egg/tadpole stage but not the terrestrial life stages or reproduction since that depends on 
+  # female body condition coming out of winter. 
+  # Re partially correlated EV for the egg/tadpole stage, no reason to think cells 3 and 4 will be any different so use the same there.
+  # Cell 7 may be different because closer to agriculture. Ephemeral wetlands is a different type of system so definitly have the potential to be different.
+  
+  # Current approach re ephemeral wetlands is to have a different range on correlation inputs for the alternatives where the ephemeral wetlands have been restored
   
   
   wetland_vitalrate_correlations <- list(
-    c(input = "wetland_vitalrate_correlations", type = "wetland_vitalrate_correlations", 
-      lcl = 0.5, best_guess = 0.7, ucl = 0.9, confidence = 80,
-      lower_bound = 0, upper_bound = 1,
+    c(input = "wetland_eggTadSurv_TempCor_noEph", type = "wetland_vitalrate_EVcorrelations", 
+      lcl = 0.4, best_guess = 0.7, ucl = 0.9, confidence = 70,
+      lower_bound = 0.2, upper_bound = 1,
       best_guess_type = "median", management_alternative = "status_quo", 
-      source = "LK PLACEHOLDERS", comments = "")
+      source = "Lea and Rebecca on May 5, 2021", comments = "Cells 3 and 4 are lumped here so it is the difference between them and Cell 7 in the south, not sure about how agriculture will affect Cell 7, other than that they will all be pretty similar. The south wetland is 200m away from an agriculture field. Depends on what pesticide they are using and how they are applying them. HIghly dependent on the pesticide application method. If use aerial spreaders that can really drift, then that could decimate the quality in that south wetland."),
+    c(input = "wetland_eggTadSurv_TempCor_wEph", type = "wetland_vitalrate_EVcorrelations", 
+      lcl = 0.2, best_guess = 0.6, ucl = 0.8, confidence = 90,
+      lower_bound = 0.1, upper_bound = 0.9,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "Lea and Rebecca on May 5, 2021", comments = "Here it is really the difference with the epehemral wetlands driving it.")
   )
   
   #---- Compile the inputs and set up tracking objects.  -------------
@@ -522,7 +536,8 @@ selectNLFIdahoParameterByIterTracking <- function(inputs) {
   parameterByIterTracking[i, "carrying_capacity_BSCWMA"] <- dapva::selectParamMetalogDistribution(input_name = "carrying_capacity_BSCWMA", inputsDF = inputs)
   
   ######### Select the parameters for this iteration - correlation between wetlands for vital rates. #########
-  parameterByIterTracking[i, "wetland_vitalrate_correlations"] <- dapva::selectParamMetalogDistribution(input_name = "wetland_vitalrate_correlations", inputsDF = inputs)
+  parameterByIterTracking[i, "wetland_eggTadSurv_TempCor_noEph"] <- dapva::selectParamMetalogDistribution(input_name = "wetland_eggTadSurv_TempCor_noEph", inputsDF = inputs)
+  parameterByIterTracking[i, "wetland_eggTadSurv_TempCor_wEph"] <- dapva::selectParamMetalogDistribution(input_name = "wetland_eggTadSurv_TempCor_wEph", inputsDF = inputs)
   
   ######### Select the parameters for this iteration - quasi extinction threshold. #########
   parameterByIterTracking[i, "quasi_extinction_threshold"] <- dapva::selectParamUniformDistribution(input_name = "quasi_extinction_threshold", inputsDF = inputs)

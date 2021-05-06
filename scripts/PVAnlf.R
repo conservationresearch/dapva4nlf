@@ -95,28 +95,6 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                      finish <- FALSE # initalize
                                                                      for(q in 1:max_n_runs_per_iter){# not in parallel here; in parallel at the iteration level
                                                                        
-                                                                       #Select the EV percentiles for each year in this run.
- 
-                                                                       # Survival for eggs and tadpoles correlated 100% (i.e. use the same percentiles)
-                                                                       # Survival for the other life stages correlated (but not correlated with eggs/tadpoles)  (i.e. use the same percentiles)
-                                                                       # No correlation between survival and reproduction
-                                                                       # There is partially correlated variation in the vital rates between wetlands as some may be better than others from year to year
-                                                                       # To see that the data is in fact correlated, try increasing the n_years to 10000 and run cor(x) or library(lattice) splom(x)
-                                                                       # It is not a perfect algoritm but appropriate for the level of randomness we need I think
-                                                                       
-                                                                       # Note: increased nyears to 1000 and then just select first 50 since the permute algorithm sometimes gets stuck if there are not enough draws
-                                                                       percentilesEV_survival_eggs_tad <- dapva::selectEVPercentilesNormal(input_names_w_EV = c("cell3", "cell4", "cell7", "ephemeral_wetlands"),
-                                                                                                                                    correlation = parameterByIterTracking$wetland_vitalrate_correlations[i],
-                                                                                                                                    n_years = 1000)[1:parameterByIterTracking$yrs[i],]
-                                                                       
-                                                                       percentilesEV_survival_yoy_adult <- dapva::selectEVPercentilesNormal(input_names_w_EV = c("cell3", "cell4", "cell7", "ephemeral_wetlands"),
-                                                                                                                                    correlation = parameterByIterTracking$wetland_vitalrate_correlations[i],
-                                                                                                                                    n_years = 1000)[1:parameterByIterTracking$yrs[i],]
-                                                                       
-                                                                       percentilesEV_reproduction <- dapva::selectEVPercentilesNormal(input_names_w_EV = c("cell3", "cell4", "cell7", "ephemeral_wetlands"),
-                                                                                                                              correlation = parameterByIterTracking$wetland_vitalrate_correlations[i],
-                                                                                                                              n_years = 1000)[1:parameterByIterTracking$yrs[i],]
-
                                                                        # Specify a few more inputs for this iteration
                                                                        initial_year <- parameterByIterTracking$initial_year[i]
                                                                        yrs <- parameterByIterTracking$yrs[i]
@@ -127,7 +105,61 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                        }
                                                                        if(alternative_details$restore_ephemeralWetlands == "no"){
                                                                          wetlands <- c("cell3", "cell4", "cell7", "outside")
-                                                                       }                                                              
+                                                                       } 
+                                                                       
+                                                              
+                                                                       #Select the EV percentiles for each year in this run.
+ 
+                                                                       # Survival for eggs and tadpoles correlated 100% (i.e. use the same percentiles)
+                                                                       # Survival for the other life stages correlated (but not correlated with eggs/tadpoles)  (i.e. use the same percentiles)
+                                                                       # No correlation between survival and reproduction
+                                                                       # Wetland quality (which is partially correlated) will affect the egg/tadpole stage but not the terrestrial life stages or reproduction since that depends on 
+                                                                       # female body condition coming out of winter. 
+                                                                       # Re partially correlated EV for the egg/tadpole stage, no reason to think cells 3 and 4 will be any different so use the same there.
+                                                                       # Cell 7 may be different because closer to agriculture. Ephemeral wetlands is a different type of system so definitly have the potential to be different.
+                                                                
+                                                                       # Current approach re ephemeral wetlands is to have a different range on correlation inputs for the alternatives where the ephemeral wetlands have been restored
+                                                                       
+                                                                       # To see that the data is in fact correlated, try increasing the n_years to 10000 and run cor(x) or library(lattice) splom(x)
+                                                                       # It is not a perfect algorithm but appropriate for the level of randomness we need I think
+                                                                       
+                                                                       # Note: increased nyears to 1000 and then just select first 50 since the permute algorithm sometimes gets stuck if there are not enough draws
+                                                                       
+                                                                       if(alternative_details$restore_ephemeralWetlands == "no"){
+                                                                         percentilesEV_survival_eggs_tad <- dapva::selectEVPercentilesNormal(input_names_w_EV = c("cells3and4", "cell7"),
+                                                                                                                                             correlation = parameterByIterTracking$wetland_eggTadSurv_TempCor_noEph[i],
+                                                                                                                                             n_years = 1000)[1:parameterByIterTracking$yrs[i],]
+                                                                         
+                                                                         # Separate out the EVs so that each wetland has its own col that can be called later
+                                                                         percentilesEV_survival_eggs_tad$cell3 <- percentilesEV_survival_eggs_tad$cells3and4
+                                                                         percentilesEV_survival_eggs_tad$cell4 <- percentilesEV_survival_eggs_tad$cells3and4
+                                                                         percentilesEV_survival_eggs_tad <- percentilesEV_survival_eggs_tad[,c("cell3", "cell4", "cell7")]
+                                                                         
+                                                                       }
+                                                                       if(alternative_details$restore_ephemeralWetlands == "yes"){
+                                                                         percentilesEV_survival_eggs_tad <- dapva::selectEVPercentilesNormal(input_names_w_EV = c("cells3and4", "cell7", "ephemeral_wetlands"),
+                                                                                                                                             correlation = parameterByIterTracking$wetland_eggTadSurv_TempCor_wEph[i],
+                                                                                                                                             n_years = 1000)[1:parameterByIterTracking$yrs[i],]
+                                                                         
+                                                                         # Separate out the EVs so that each wetland has its own col that can be called later
+                                                                         percentilesEV_survival_eggs_tad$cell3 <- percentilesEV_survival_eggs_tad$cells3and4
+                                                                         percentilesEV_survival_eggs_tad$cell4 <- percentilesEV_survival_eggs_tad$cells3and4
+                                                                         percentilesEV_survival_eggs_tad <- percentilesEV_survival_eggs_tad[,c("cell3", "cell4", "cell7", "ephemeral_wetlands")]
+                                                                         
+                                                                         }
+                                                             
+                                                                       
+                                                                       percentilesEV_survival_yoy_adult <- dapva::selectEVPercentilesNormal(input_names_w_EV = c("all_wetlands"),
+                                                                                                                                    correlation = 1, n_years = parameterByIterTracking$yrs[i])
+                                                                       
+                                                                       percentilesEV_reproduction <- dapva::selectEVPercentilesNormal(input_names_w_EV = c("all_wetlands"),
+                                                                                                                              correlation = 1,
+                                                                                                                              n_years = parameterByIterTracking$yrs[i])
+
+                                                                       
+                                                                       
+                                                                       
+                                                                                                                             
 
                                                                        # Run the annual loop
                                                                        results_annual[[q]] <- dapva4nlf::runAnnualLoopNLFIdahoPVA(parameterByIterTracking, yrs, i, q,
