@@ -15,7 +15,7 @@ system.time({ # turn on the timer
 
 #---- Clear the workspace. ----
 rm(list = ls())
-version <- "_v1test3" # insert short description to append to results to help identify
+version <- "_v1test4" # insert short description to append to results to help identify
 
 #---- Load libraries, and set the random seed.  -------------
 ## Import libraries
@@ -23,6 +23,9 @@ library(dapva) # this is our own internal library that houses functions used her
 library(dapva4nlf) # this is our own internal library that houses functions used here
 library(dplyr) # for summarise
 library(foreach) # for %do% nd %dopar%; this might come as part of DoParallel which is loaded later, test this later by trying without
+library(R.utils) # for withTimeout
+
+
 
 # Set up for parallel computing - e.g. https://privefl.github.io/blog/a-guide-to-parallelism-in-r/
 library(doParallel)  # see https://www.r-bloggers.com/2016/07/lets-be-faster-and-more-parallel-in-r-with-doparallel-package/
@@ -37,11 +40,11 @@ clusterSetRNGStream(cl, iseed = 29) # without parallel computing can just do set
 #---- Specify the alternatives to run.  -------------
 alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are preloaded in for easy calling
 
-rows_to_run <- c(5,7) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
+rows_to_run <- c(2) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
 
 #---- Specify number of iterations and number of runs per iterations.  -------------
-n_iter  <- 10
-max_n_runs_per_iter <- 10
+n_iter  <- 500
+max_n_runs_per_iter <- 1000
 
 #---- Start the scenario loop.  -------------
 for(m in 1:length(rows_to_run)){ # loop through the different scenarios requested in the scenarios_to_run file
@@ -77,7 +80,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   results_summary_all_iterations_overall_int  <- list() # initialize
   results_summary_all_iterations_by_pop_int  <- list() # initialize
   
-  batch_size <- n_iter/5
+  batch_size <- n_iter/20
   batches <- split(1:n_iter, ceiling(seq_along(1:n_iter)/batch_size ))
   
   for(batch in 1:length(batches)){
@@ -89,10 +92,15 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                        .errorhandling = c("remove"), # remove/skip if the result has an error
                                                        .packages=c('foreach', 
                                                                    'dapva',# need foreach in here as per https://stackoverflow.com/questions/21128122/function-do-not-found-on-win-platform-only-when-using-plyr-and-doparallel
-                                                                   'dapva4nlf')) %dopar% {  # change 'dopar' to 'do' if don't want to do the parallel computing
+                                                                   'dapva4nlf',
+                                                                   'R.utils')) %dopar% {  # change 'dopar' to 'do' if don't want to do the parallel computing
            
                                                                      results_annual <- list() # initalize
                                                                      finish <- FALSE # initalize
+                                                                     
+                                                                  withTimeout( # wrap the run loop in this so that if it gets stuck and is taking too long (more than an hour; should only take half an hour) then will throw an error
+                                                                     
+                                                                   
                                                                      for(q in 1:max_n_runs_per_iter){# not in parallel here; in parallel at the iteration level
                                                                        
                                                                        # Specify a few more inputs for this iteration
@@ -170,39 +178,41 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                                                                                   percentilesEV_reproduction,
                                                                                                                                   alternative_details)
 
-                                                                        # if(q == max_n_runs_per_iter*0.1){ # if we have run 10% of the max number of runs per iterations
-                                                                        # 
-                                                                        #   # Check to see if within 5% of either 0 or 1 since we noticed from covergence
-                                                                        #   # plots that if it is at either of these two extremes, more iterations are typically not necessary
-                                                                        # 
-                                                                        #   results_all_so_far <- plyr::rbind.fill(results_annual)
-                                                                        # 
-                                                                        #   check_if_enough_runs <- makeResultsSummaryOneIteration(results_all_so_far,
-                                                                        #                                                         by_pop = 'no',
-                                                                        #                                                          initial_year = parameterByIterTracking$initial_year[i],
-                                                                        #                                                          yrs = parameterByIterTracking$yrs[i],
-                                                                        #                                                          n_iter,
-                                                                        #                                                          n_runs_per_iter = q,
-                                                                        #                                                          alternative = paste0(alternative_details$alt_name_full),
-                                                                        #                                                          iteration_number = i)
-                                                                        # 
-                                                                        #   prob_of_persis_so_far <- check_if_enough_runs[which(check_if_enough_runs$metric == "probability of persistence"),
-                                                                        #                                                 paste(parameterByIterTracking$initial_year[i] + parameterByIterTracking$yrs[i]-1)]
-                                                                        # 
-                                                                        #   # if with 5% of 0 or 1, then no need to do more runs
-                                                                        #  if(prob_of_persis_so_far <= 0.05){finish <- TRUE}
-                                                                        #   if(prob_of_persis_so_far >= 0.95){finish <- TRUE}
-                                                                        # }
-                                                                        # 
-                                                                        # if(finish == TRUE){
-                                                                        #   print(paste('Iteration', i, "stopped at", q, "runs"))
-                                                                        # break
-                                                                        # }
+                                                                        if(q == max_n_runs_per_iter*0.1){ # if we have run 10% of the max number of runs per iterations
+
+                                                                          # Check to see if within 5% of either 0 or 1 since we noticed from covergence
+                                                                          # plots that if it is at either of these two extremes, more iterations are typically not necessary
+
+                                                                          results_all_so_far <- plyr::rbind.fill(results_annual)
+
+                                                                          check_if_enough_runs <- makeResultsSummaryOneIteration(results_all_so_far,
+                                                                                                                                by_pop = 'no',
+                                                                                                                                 initial_year = parameterByIterTracking$initial_year[i],
+                                                                                                                                 yrs = parameterByIterTracking$yrs[i],
+                                                                                                                                 n_iter,
+                                                                                                                                 n_runs_per_iter = q,
+                                                                                                                                 alternative = paste0(alternative_details$alt_name_full),
+                                                                                                                                 iteration_number = i)
+
+                                                                          prob_of_persis_so_far <- check_if_enough_runs[which(check_if_enough_runs$metric == "probability of persistence"),
+                                                                                                                        paste(parameterByIterTracking$initial_year[i] + parameterByIterTracking$yrs[i]-1)]
+
+                                                                          # if with 5% of 0 or 1, then no need to do more runs
+                                                                         if(prob_of_persis_so_far <= 0.05){finish <- TRUE}
+                                                                          if(prob_of_persis_so_far >= 0.95){finish <- TRUE}
+                                                                        }
+
+                                                                        if(finish == TRUE){
+                                                                          print(paste('Iteration', i, "stopped at", q, "runs"))
+                                                                        break
+                                                                        }
                                                                        
                                                                         # Return the results for this run
                                                                        # return(results_annual)
                                                                      
                                                                      }
+                                                                     
+                                                          , timeout = 3600) #stop execution after 3600 seconds = one hour (1000 runs should take 30 min on my mac)
                                                                      
                                                                       results_all_for_this_iteration <- plyr::rbind.fill(results_annual)
                                                                       
