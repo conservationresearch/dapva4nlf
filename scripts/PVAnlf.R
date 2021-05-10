@@ -15,7 +15,7 @@ system.time({ # turn on the timer
 
 #---- Clear the workspace. ----
 rm(list = ls())
-version <- "_v1test4" # insert short description to append to results to help identify
+version <- "_v1test5" # insert short description to append to results to help identify
 
 #---- Load libraries, and set the random seed.  -------------
 ## Import libraries
@@ -80,7 +80,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   results_summary_all_iterations_overall_int  <- list() # initialize
   results_summary_all_iterations_by_pop_int  <- list() # initialize
   
-  batch_size <- n_iter/20
+  batch_size <- n_iter/5
   batches <- split(1:n_iter, ceiling(seq_along(1:n_iter)/batch_size ))
   
   for(batch in 1:length(batches)){
@@ -95,19 +95,22 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                    'dapva4nlf',
                                                                    'R.utils')) %dopar% {  # change 'dopar' to 'do' if don't want to do the parallel computing
            
+                                                                     
                                                                      results_annual <- list() # initalize
                                                                      finish <- FALSE # initalize
                                                                      
-                                                                  withTimeout( # wrap the run loop in this so that if it gets stuck and is taking too long (more than an hour; should only take half an hour) then will throw an error
                                                                      
                                                                    
                                                                      for(q in 1:max_n_runs_per_iter){# not in parallel here; in parallel at the iteration level
+                                                                       
+                                                                       print("Test - checking if got back up here to start next iteration")
                                                                        
                                                                        # Specify a few more inputs for this iteration
                                                                        initial_year <- parameterByIterTracking$initial_year[i]
                                                                        yrs <- parameterByIterTracking$yrs[i]
                                                                        stage_classes <- c("eggs", "tadpoles", "yoy", "juv", "A2", "A3", "A4plus")
                                                                        
+                                                                       print("Test1")
                                                                        if(alternative_details$restore_ephemeralWetlands == "yes"){
                                                                          wetlands <- c("cell3", "cell4", "cell7", "ephemeral_wetlands", "outside")
                                                                        }
@@ -133,11 +136,13 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                        
                                                                        # Note: increased nyears to 1000 and then just select first 50 since the permute algorithm sometimes gets stuck if there are not enough draws
                                                                        
+                                                                       print("Test2")
+                                                                       
                                                                        if(alternative_details$restore_ephemeralWetlands == "no"){
+                                                                         print("Test2a")
                                                                          percentilesEV_survival_eggs_tad <- dapva::selectEVPercentilesNormal(input_names_w_EV = c("cells3and4", "cell7"),
                                                                                                                                              correlation = parameterByIterTracking$wetland_eggTadSurv_TempCor_noEph[i],
-                                                                                                                                             n_years = 1000)[1:parameterByIterTracking$yrs[i],]
-                                                                         
+                                                                                                                                             n_years = yrs)
                                                                          # Separate out the EVs so that each wetland has its own col that can be called later
                                                                          percentilesEV_survival_eggs_tad$cell3 <- percentilesEV_survival_eggs_tad$cells3and4
                                                                          percentilesEV_survival_eggs_tad$cell4 <- percentilesEV_survival_eggs_tad$cells3and4
@@ -145,10 +150,21 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                          
                                                                        }
                                                                        if(alternative_details$restore_ephemeralWetlands == "yes"){
+                                                                         print("Test2c")
                                                                          percentilesEV_survival_eggs_tad <- dapva::selectEVPercentilesNormal(input_names_w_EV = c("cells3and4", "cell7", "ephemeral_wetlands"),
                                                                                                                                              correlation = parameterByIterTracking$wetland_eggTadSurv_TempCor_wEph[i],
-                                                                                                                                             n_years = 1000)[1:parameterByIterTracking$yrs[i],]
+                                                                                                                                             n_years = yrs)
                                                                          
+                                                                         #test <- selectEVPercentilesNormal(input_names_w_EV = c("cells3and4", "cell7", "ephemeral_wetlands"),
+                                                                        #                                                       correlation = parameterByIterTracking$wetland_eggTadSurv_TempCor_wEph[i],
+                                                                         #                                                      n_years = 50)
+                                                                         
+                                                                         
+                                                                         
+                                                                         
+                                                                         
+                                                                         
+                                                                         print("Test2d")
                                                                          # Separate out the EVs so that each wetland has its own col that can be called later
                                                                          percentilesEV_survival_eggs_tad$cell3 <- percentilesEV_survival_eggs_tad$cells3and4
                                                                          percentilesEV_survival_eggs_tad$cell4 <- percentilesEV_survival_eggs_tad$cells3and4
@@ -156,9 +172,12 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                          
                                                                          }
                                                              
+                                                                       print("Test3")
                                                                        
                                                                        percentilesEV_survival_yoy_adult <- dapva::selectEVPercentilesNormal(input_names_w_EV = c("all_wetlands"),
                                                                                                                                     correlation = 1, n_years = parameterByIterTracking$yrs[i])
+                                                                       
+                                                                       print("Test4")
                                                                        
                                                                        percentilesEV_reproduction <- dapva::selectEVPercentilesNormal(input_names_w_EV = c("all_wetlands"),
                                                                                                                               correlation = 1,
@@ -168,7 +187,8 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                        
                                                                        
                                                                                                                              
-
+                                                                       print("Test5")
+                                                                       
                                                                        # Run the annual loop
                                                                        results_annual[[q]] <- dapva4nlf::runAnnualLoopNLFIdahoPVA(parameterByIterTracking, yrs, i, q,
                                                                                                                                   wetland_distances_km,
@@ -212,7 +232,6 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                      
                                                                      }
                                                                      
-                                                          , timeout = 3600) #stop execution after 3600 seconds = one hour (1000 runs should take 30 min on my mac)
                                                                      
                                                                       results_all_for_this_iteration <- plyr::rbind.fill(results_annual)
                                                                       
@@ -251,8 +270,9 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                    # return(results_all_for_this_iteration)   
                                                                       } # end iteration loop
     
-    results_summary_all_iterations_overall_int[[batch]] <- do.call("rbind", results_summary_all_iterations[1:batch_size])
-    results_summary_all_iterations_by_pop_int[[batch]] <- do.call("rbind", results_summary_all_iterations[(batch_size+1):(batch_size*2)])
+    n_it_w_results <- dim(results_summary_all_iterations)[1] # not the same as batch size as we removed those where there was an error
+    results_summary_all_iterations_overall_int[[batch]] <- do.call("rbind", results_summary_all_iterations[1:n_it_w_results])
+    results_summary_all_iterations_by_pop_int[[batch]] <- do.call("rbind", results_summary_all_iterations[(n_it_w_results+1):(n_it_w_results*2)])
     
   }
   
