@@ -182,24 +182,26 @@ dev.off()
 
 
 # Make an output table with the format we want for the report
-# results_summary_prob_persist_table <- results_summary_prob_persist[which(results_summary_prob_persist$year == 2017 + 50 - 1),] # year is initial_year + yrs - 1
-# 
-# # Add climate scenario
-# int <- sapply(strsplit(as.character(results_summary_prob_persist_table$alternative), "\\;\n"), function(x) x[[1]])
-# results_summary_prob_persist_table$climate_scenario <- sapply(strsplit(as.character(int), "\\: "), function(x) x[[2]])
-# 
-# # Add plague scenario
-# int2 <- sapply(strsplit(as.character(results_summary_prob_persist_table$alternative), "\\;\n"), function(x) x[[2]])
-# results_summary_prob_persist_table$plague_scenario <- sapply(strsplit(as.character(int2), "\\: "), function(x) x[[2]])
-# 
-# # Add management scenario
-# int3 <- sapply(strsplit(as.character(results_summary_prob_persist_table$alternative), "\\;\n"), function(x) x[[3]])
-# results_summary_prob_persist_table$management_scenario <- sapply(strsplit(as.character(int3), "\\: "), function(x) x[[2]])
-# 
-# # Clean it up to match the headings and order we want
-# results_summary_prob_persist_table <- results_summary_prob_persist_table[,c("climate_scenario", "plague_scenario", "management_scenario","pop", "n_iter", "n_runs_per_iter",
-#                                                                             "mean", "median", "lcl", "ucl")]
-# # Export this probability of persistence results summary table
-# filename <- paste("ForReport/probPersist_summary_table", version, "_iter_", n_iter, ".csv", sep="")
-# write.csv(results_summary_prob_persist_table, file = filename)
-# 
+ results_summary_prob_persist_table <- results_summary_prob_persist[which(results_summary_prob_persist$year == yrs),]
+# Export this probability of persistence results summary table
+filename <- paste("probPersist_summary_table", version, "_iter_", n_iter, ".csv", sep="")
+write.csv(results_summary_prob_persist_table, file = filename)
+
+# Make an output table with the format we want for the report
+results_summary_prob_selfsustaining_table <- results_summary_prob_selfsustaining[which(results_summary_prob_selfsustaining$year == yrs),]
+# Export this probability of persistence results summary table
+filename <- paste("probSelfSustain_summary_table", version, "_iter_", n_iter, ".csv", sep="")
+write.csv(results_summary_prob_selfsustaining_table, file = filename)
+
+
+
+
+############## Explore what the results would have looked like if we combined parametric and process uncertainty to one prob value ######
+# Load the Rdata file
+i = 1  
+load(files[i])
+
+
+test <- results_summary_all_iterations
+test1 <- test[[49]]
+test2 <- do.call("rbind", results_summary_all_iterations[49:72])

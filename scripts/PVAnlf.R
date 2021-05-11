@@ -43,8 +43,8 @@ alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are p
 rows_to_run <- c(2) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
 
 #---- Specify number of iterations and number of runs per iterations.  -------------
-n_iter  <- 500
-max_n_runs_per_iter <- 1000
+n_iter  <- 10 #500
+max_n_runs_per_iter <- 10 #1000
 
 #---- Start the scenario loop.  -------------
 for(m in 1:length(rows_to_run)){ # loop through the different scenarios requested in the scenarios_to_run file
@@ -79,6 +79,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   
   results_summary_all_iterations_overall_int  <- list() # initialize
   results_summary_all_iterations_by_pop_int  <- list() # initialize
+  results_all_iterations  <- list() # initialize
   
   batch_size <- n_iter/5
   batches <- split(1:n_iter, ceiling(seq_along(1:n_iter)/batch_size ))
@@ -273,7 +274,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
     n_it_w_results <- dim(results_summary_all_iterations)[1] # not the same as batch size as we removed those where there was an error
     results_summary_all_iterations_overall_int[[batch]] <- do.call("rbind", results_summary_all_iterations[1:n_it_w_results])
     results_summary_all_iterations_by_pop_int[[batch]] <- do.call("rbind", results_summary_all_iterations[(n_it_w_results+1):(n_it_w_results*2)])
-    
+    results_all_iterations[[batch]] <- do.call("rbind", results_summary_all_iterations[(n_it_w_results*2+1):(n_it_w_results*3)])
   }
   
   
@@ -281,6 +282,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   
   results_summary_all_iterations_overall <- do.call("rbind", results_summary_all_iterations_overall_int)
   results_summary_all_iterations_by_pop <- do.call("rbind", results_summary_all_iterations_by_pop_int)
+  results_all_iterations <- do.call("rbind", results_all_iterations)
   
   
   
@@ -322,8 +324,8 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   paramSens <- makeParameterSens(parameterByIterTracking = parameterByIterTracking_this_alt_clean,
                                  results_all_this_alt = results_all_this_alt,
                                  metric = "probability of persistence",
-                                 start_year = parameterByIterTracking$initial_year[1],
-                                 nyrs = parameterByIterTracking$yrs[1])
+                                 start_year = 1,
+                                 nyrs = 50)
   
   
 #---- Store the name of the scenario. ----
