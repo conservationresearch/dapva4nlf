@@ -194,16 +194,9 @@ filename <- paste("probSelfSustain_summary_table", version, "_iter_", n_iter, ".
 write.csv(results_summary_prob_selfsustaining_table, file = filename)
 
 
-############## Graphs of individual runs and iterations to show the process ######
-# Might be useful to make a function where you can plot runs within an iteration by total and pop and stage
-
-# Might also be useful to make a function where you can plot the results of a few iterations
-
-# ALso to do: Make graphs of the survival rates with the different threats to show Lea and Rebecca 
 
 
-
-
+############## Load one alternative to use in the examples in the following sections ######
 # Load the Rdata file
 i = 1  
 load(files[i])
@@ -217,7 +210,19 @@ for(j in 1:yrs){
   results_all_iterations_fall[which(results_all_iterations_fall$class == "tadpoles"),paste(j)] <- 0 
 }
 
+############## Graphs of individual runs and iterations to show the process ######
+# Might be useful to make a function where you can plot runs within an iteration by total and pop and stage
+
+# Might also be useful to make a function where you can plot the results of a few iterations
+
+# ALso to do: Make graphs of the survival rates with the different threats to show Lea and Rebecca 
+
+
+
+
+
 # Graph a few individual iterations to show what it looks like
+# Would be good if these could have base case inputs perhaps
 
 results_all_iterations_fall_iter1_run1 <- results_all_iterations_fall[which(results_all_iterations_fall$iteration == 2 &
                                                                               results_all_iterations_fall$run ==1),]
@@ -297,8 +302,7 @@ graphs <- dapva::graphCongvTestIter(convergence_test, x_location_vertical_line =
 
 
 
-# Export the graphs
-
+# Export the graphss
 # Do later
 
 

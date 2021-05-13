@@ -472,7 +472,12 @@ getNLFIdahoFeasinputs <- function() {
 #' @param inputs model inputs formatted using getNLFIdahoFeasinputs()
 #' and choose the first output in the list (i.e. singular number outputs as this
 #'  is where parametric uncertainty is specified).
-
+#'  
+#' @param base_case TRUE or FALSE if you want all of the parameters just to reflect 
+#' the best guess (for for uniform distributions, half way between the low and 
+#' upper bounds). Defaults to FALSE to allow for probabalistic analysis. TRUE 
+#' can be useful for model troubleshooting or to illustrate deterministic results.
+#' 
 #' @return Returns one value for each parameter, representing the inputs for one
 #'  iteration. Put in a foreach loop and rbind to get it for multiple iterations.
 #'
@@ -485,7 +490,7 @@ getNLFIdahoFeasinputs <- function() {
 #'
 #' selectNLFIdahoParameterByIterTracking(inputs)
 #' @export
-selectNLFIdahoParameterByIterTracking <- function(inputs) {
+selectNLFIdahoParameterByIterTracking <- function(inputs, base_case = FALSE) {
 
   # Initialize an empty tracking sheet
   parameterByIterTracking_empty <- dapva::makeParameterByIterTracking(inputsDF = inputs, n_iter = 1) # just one at a time now that it is inside a foreach loop
@@ -495,107 +500,245 @@ selectNLFIdahoParameterByIterTracking <- function(inputs) {
   # rownames(parameterByIterTracking) <- m # record which iteration it is with the col number
 
   ######### Select the reproduction parameters for this iteration - proportion of repro active females. #########
-
-  # Choose and record the reproduction parameters for this iteration - mean proportion of females who lay eggs
-  parameterByIterTracking[i, "p_females_lay_eggs_mean_A2"] <- dapva::selectParamMetalogDistribution(input_name = "p_females_lay_eggs_mean_A2", inputsDF = inputs)
-  parameterByIterTracking[i, "p_females_lay_eggs_mean_A3"] <- dapva::selectParamMetalogDistribution(input_name = "p_females_lay_eggs_mean_A3", inputsDF = inputs)
-  parameterByIterTracking[i, "p_females_lay_eggs_mean_A4plus"] <- dapva::selectParamMetalogDistribution(input_name = "p_females_lay_eggs_mean_A4plus", inputsDF = inputs)
   
-  # Choose and record the reproduction parameters for this iteration - sd proportion of females who lay eggs
-  # UPDATE: use just one SD for all age classes to reflect level of temporal variation across all age classes
-  # Otherwise get some unintended consequences where in some years could be much better repro for the younger ones, which is counterintiutive
-  parameterByIterTracking[i, "p_females_lay_eggs_sd_A2"] <- dapva::selectParamUniformDistribution(input_name = "p_females_lay_eggs_sd_A2", inputsDF = inputs)
-  parameterByIterTracking[i, "p_females_lay_eggs_sd_A3"] <- parameterByIterTracking[i, "p_females_lay_eggs_sd_A2"]
-  parameterByIterTracking[i, "p_females_lay_eggs_sd_A4plus"] <- parameterByIterTracking[i, "p_females_lay_eggs_sd_A2"]
-  
-  # OLD - if each age class had a separate sd
-  # parameterByIterTracking[i, "p_females_lay_eggs_sd_A2"] <- dapva::selectParamUniformDistribution(input_name = "p_females_lay_eggs_sd_A2", inputsDF = inputs)
-  # parameterByIterTracking[i, "p_females_lay_eggs_sd_A3"] <- dapva::selectParamUniformDistribution(input_name = "p_females_lay_eggs_sd_A3", inputsDF = inputs)
-  # parameterByIterTracking[i, "p_females_lay_eggs_sd_A4plus"] <- dapva::selectParamUniformDistribution(input_name = "p_females_lay_eggs_sd_A4plus", inputsDF = inputs)
-  # 
+  if(base_case == FALSE){
+    # Choose and record the reproduction parameters for this iteration - mean proportion of females who lay eggs
+    parameterByIterTracking[i, "p_females_lay_eggs_mean_A2"] <- dapva::selectParamMetalogDistribution(input_name = "p_females_lay_eggs_mean_A2", inputsDF = inputs)
+    parameterByIterTracking[i, "p_females_lay_eggs_mean_A3"] <- dapva::selectParamMetalogDistribution(input_name = "p_females_lay_eggs_mean_A3", inputsDF = inputs)
+    parameterByIterTracking[i, "p_females_lay_eggs_mean_A4plus"] <- dapva::selectParamMetalogDistribution(input_name = "p_females_lay_eggs_mean_A4plus", inputsDF = inputs)
+    
+    # Choose and record the reproduction parameters for this iteration - sd proportion of females who lay eggs
+    # UPDATE: use just one SD for all age classes to reflect level of temporal variation across all age classes
+    # Otherwise get some unintended consequences where in some years could be much better repro for the younger ones, which is counterintiutive
+    parameterByIterTracking[i, "p_females_lay_eggs_sd_A2"] <- dapva::selectParamUniformDistribution(input_name = "p_females_lay_eggs_sd_A2", inputsDF = inputs)
+    parameterByIterTracking[i, "p_females_lay_eggs_sd_A3"] <- parameterByIterTracking[i, "p_females_lay_eggs_sd_A2"]
+    parameterByIterTracking[i, "p_females_lay_eggs_sd_A4plus"] <- parameterByIterTracking[i, "p_females_lay_eggs_sd_A2"]
+    
+    # OLD - if each age class had a separate sd
+    # parameterByIterTracking[i, "p_females_lay_eggs_sd_A2"] <- dapva::selectParamUniformDistribution(input_name = "p_females_lay_eggs_sd_A2", inputsDF = inputs)
+    # parameterByIterTracking[i, "p_females_lay_eggs_sd_A3"] <- dapva::selectParamUniformDistribution(input_name = "p_females_lay_eggs_sd_A3", inputsDF = inputs)
+    # parameterByIterTracking[i, "p_females_lay_eggs_sd_A4plus"] <- dapva::selectParamUniformDistribution(input_name = "p_females_lay_eggs_sd_A4plus", inputsDF = inputs)
+    # 
+  }
+  if(base_case == TRUE){
+    # Choose and record the reproduction parameters for this iteration - mean proportion of females who lay eggs
+    parameterByIterTracking[i, "p_females_lay_eggs_mean_A2"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "p_females_lay_eggs_mean_A2")]))
+    parameterByIterTracking[i, "p_females_lay_eggs_mean_A3"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "p_females_lay_eggs_mean_A3")]))
+    parameterByIterTracking[i, "p_females_lay_eggs_mean_A4plus"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "p_females_lay_eggs_mean_A4plus")]))
+    
+    # Choose and record the reproduction parameters for this iteration - sd proportion of females who lay eggs
+    # UPDATE: use just one SD for all age classes to reflect level of temporal variation across all age classes
+    # Otherwise get some unintended consequences where in some years could be much better repro for the younger ones, which is counterintiutive
+    # For base case, use halfway between lower and upper of uniform distribution
+    parameterByIterTracking[i, "p_females_lay_eggs_sd_A2"] <- (as.numeric(as.character(inputs$lcl[which(inputs$input == "p_females_lay_eggs_sd_A2")])) + as.numeric(as.character(inputs$ucl[which(inputs$input == "p_females_lay_eggs_sd_A2")])))/2
+    parameterByIterTracking[i, "p_females_lay_eggs_sd_A3"] <- parameterByIterTracking[i, "p_females_lay_eggs_sd_A2"]
+    parameterByIterTracking[i, "p_females_lay_eggs_sd_A4plus"] <- parameterByIterTracking[i, "p_females_lay_eggs_sd_A2"]
+    
+    
+  }
   
   ######### Select the reproduction parameters for this iteration - number of offspring per female. #########
-  parameterByIterTracking[i, "num_eggs_per_active_female_mean_A2"] <- dapva::selectParamMetalogDistribution(input_name = "num_eggs_per_active_female_mean_A2", inputsDF = inputs)
-  parameterByIterTracking[i, "num_eggs_per_active_female_mean_A3"] <- dapva::selectParamMetalogDistribution(input_name = "num_eggs_per_active_female_mean_A3", inputsDF = inputs)
-  parameterByIterTracking[i, "num_eggs_per_active_female_mean_A4plus"] <- dapva::selectParamMetalogDistribution(input_name = "num_eggs_per_active_female_mean_A4plus", inputsDF = inputs)
+  if(base_case == FALSE){
+    parameterByIterTracking[i, "num_eggs_per_active_female_mean_A2"] <- dapva::selectParamMetalogDistribution(input_name = "num_eggs_per_active_female_mean_A2", inputsDF = inputs)
+    parameterByIterTracking[i, "num_eggs_per_active_female_mean_A3"] <- dapva::selectParamMetalogDistribution(input_name = "num_eggs_per_active_female_mean_A3", inputsDF = inputs)
+    parameterByIterTracking[i, "num_eggs_per_active_female_mean_A4plus"] <- dapva::selectParamMetalogDistribution(input_name = "num_eggs_per_active_female_mean_A4plus", inputsDF = inputs)
+  }
   
+  if(base_case == TRUE){
+    parameterByIterTracking[i, "num_eggs_per_active_female_mean_A2"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "num_eggs_per_active_female_mean_A2")]))
+    parameterByIterTracking[i, "num_eggs_per_active_female_mean_A3"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "num_eggs_per_active_female_mean_A3")]))
+    parameterByIterTracking[i, "num_eggs_per_active_female_mean_A4plus"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "num_eggs_per_active_female_mean_A4plus")]))
+  }
   ######### Select the survival parameters for this iteration - mean survival rates no threats. #########
-  parameterByIterTracking[i, "s_mean_eggs_no_threats"] <- dapva::selectParamMetalogDistribution(input_name = "s_mean_eggs_no_threats", inputsDF = inputs)
-  parameterByIterTracking[i, "s_mean_tadpoles_no_threats"] <- dapva::selectParamMetalogDistribution(input_name = "s_mean_tadpoles_no_threats", inputsDF = inputs)
-  parameterByIterTracking[i, "s_mean_yoy_no_threats"] <- dapva::selectParamMetalogDistribution(input_name = "s_mean_yoy_no_threats", inputsDF = inputs)
-  parameterByIterTracking[i, "s_mean_juv_no_threats"] <- dapva::selectParamMetalogDistribution(input_name = "s_mean_juv_no_threats", inputsDF = inputs)
-  parameterByIterTracking[i, "s_mean_adult_no_threats"] <- dapva::selectParamMetalogDistribution(input_name = "s_mean_adult_no_threats", inputsDF = inputs)
+  if(base_case == FALSE){
+    parameterByIterTracking[i, "s_mean_eggs_no_threats"] <- dapva::selectParamMetalogDistribution(input_name = "s_mean_eggs_no_threats", inputsDF = inputs)
+    parameterByIterTracking[i, "s_mean_tadpoles_no_threats"] <- dapva::selectParamMetalogDistribution(input_name = "s_mean_tadpoles_no_threats", inputsDF = inputs)
+    parameterByIterTracking[i, "s_mean_yoy_no_threats"] <- dapva::selectParamMetalogDistribution(input_name = "s_mean_yoy_no_threats", inputsDF = inputs)
+    parameterByIterTracking[i, "s_mean_juv_no_threats"] <- dapva::selectParamMetalogDistribution(input_name = "s_mean_juv_no_threats", inputsDF = inputs)
+    parameterByIterTracking[i, "s_mean_adult_no_threats"] <- dapva::selectParamMetalogDistribution(input_name = "s_mean_adult_no_threats", inputsDF = inputs)
+  }
+  
+  if(base_case == TRUE){
+    parameterByIterTracking[i, "s_mean_eggs_no_threats"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_mean_eggs_no_threats")]))
+    parameterByIterTracking[i, "s_mean_tadpoles_no_threats"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_mean_tadpoles_no_threats")]))
+    parameterByIterTracking[i, "s_mean_yoy_no_threats"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_mean_yoy_no_threats")]))
+    parameterByIterTracking[i, "s_mean_juv_no_threats"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_mean_juv_no_threats")]))
+    parameterByIterTracking[i, "s_mean_adult_no_threats"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_mean_adult_no_threats")]))
+  }
   
   ######### Select the survival parameters for this iteration - temporal variance in survival rates no threats. #########
-  parameterByIterTracking[i, "s_sd_eggs_no_threats"] <- dapva::selectParamUniformDistribution(input_name = "s_sd_eggs_no_threats", inputsDF = inputs)
-  parameterByIterTracking[i, "s_sd_tadpoles_no_threats"] <- dapva::selectParamUniformDistribution(input_name = "s_sd_tadpoles_no_threats", inputsDF = inputs)
-  parameterByIterTracking[i, "s_sd_yoy_no_threats"] <- dapva::selectParamUniformDistribution(input_name = "s_sd_yoy_no_threats", inputsDF = inputs)
-  parameterByIterTracking[i, "s_sd_juv_no_threats"] <- dapva::selectParamUniformDistribution(input_name = "s_sd_juv_no_threats", inputsDF = inputs)
-  parameterByIterTracking[i, "s_sd_adult_no_threats"] <- dapva::selectParamUniformDistribution(input_name = "s_sd_adult_no_threats", inputsDF = inputs)
+  if(base_case == FALSE){
+    parameterByIterTracking[i, "s_sd_eggs_no_threats"] <- dapva::selectParamUniformDistribution(input_name = "s_sd_eggs_no_threats", inputsDF = inputs)
+    parameterByIterTracking[i, "s_sd_tadpoles_no_threats"] <- dapva::selectParamUniformDistribution(input_name = "s_sd_tadpoles_no_threats", inputsDF = inputs)
+    parameterByIterTracking[i, "s_sd_yoy_no_threats"] <- dapva::selectParamUniformDistribution(input_name = "s_sd_yoy_no_threats", inputsDF = inputs)
+    parameterByIterTracking[i, "s_sd_juv_no_threats"] <- dapva::selectParamUniformDistribution(input_name = "s_sd_juv_no_threats", inputsDF = inputs)
+    parameterByIterTracking[i, "s_sd_adult_no_threats"] <- dapva::selectParamUniformDistribution(input_name = "s_sd_adult_no_threats", inputsDF = inputs)
+  }
   
+  if(base_case == TRUE){
+    parameterByIterTracking[i, "s_sd_eggs_no_threats"] <- (as.numeric(as.character(inputs$lcl[which(inputs$input == "s_sd_eggs_no_threats")])) + as.numeric(as.character(inputs$ucl[which(inputs$input == "s_sd_eggs_no_threats")])))/2
+    parameterByIterTracking[i, "s_sd_tadpoles_no_threats"] <- (as.numeric(as.character(inputs$lcl[which(inputs$input == "s_sd_tadpoles_no_threats")])) + as.numeric(as.character(inputs$ucl[which(inputs$input == "s_sd_tadpoles_no_threats")])))/2
+    parameterByIterTracking[i, "s_sd_yoy_no_threats"] <- (as.numeric(as.character(inputs$lcl[which(inputs$input == "s_sd_yoy_no_threats")])) + as.numeric(as.character(inputs$ucl[which(inputs$input == "s_sd_yoy_no_threats")])))/2
+    parameterByIterTracking[i, "s_sd_juv_no_threats"] <- (as.numeric(as.character(inputs$lcl[which(inputs$input == "s_sd_juv_no_threats")])) + as.numeric(as.character(inputs$ucl[which(inputs$input == "s_sd_juv_no_threats")])))/2
+    parameterByIterTracking[i, "s_sd_adult_no_threats"] <- (as.numeric(as.character(inputs$lcl[which(inputs$input == "s_sd_adult_no_threats")])) + as.numeric(as.character(inputs$ucl[which(inputs$input == "s_sd_adult_no_threats")])))/2
+  }
   
   ######### Select the survival parameters for this iteration - % reduction in survival due to bullfrogs. #########
-  parameterByIterTracking[i, "s_pct_reduced_eggs_bullfrogs"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_eggs_bullfrogs", inputsDF = inputs)
-  parameterByIterTracking[i, "s_pct_reduced_tadpoles_bullfrogs"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_tadpoles_bullfrogs", inputsDF = inputs)
-  parameterByIterTracking[i, "s_pct_reduced_yoy_bullfrogs"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_yoy_bullfrogs", inputsDF = inputs)
-  parameterByIterTracking[i, "s_pct_reduced_juvenile_bullfrogs"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_juvenile_bullfrogs", inputsDF = inputs)
-  parameterByIterTracking[i, "s_pct_reduced_adult_bullfrogs"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_adult_bullfrogs", inputsDF = inputs)
+  if(base_case == FALSE){
+    parameterByIterTracking[i, "s_pct_reduced_eggs_bullfrogs"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_eggs_bullfrogs", inputsDF = inputs)
+    parameterByIterTracking[i, "s_pct_reduced_tadpoles_bullfrogs"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_tadpoles_bullfrogs", inputsDF = inputs)
+    parameterByIterTracking[i, "s_pct_reduced_yoy_bullfrogs"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_yoy_bullfrogs", inputsDF = inputs)
+    parameterByIterTracking[i, "s_pct_reduced_juvenile_bullfrogs"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_juvenile_bullfrogs", inputsDF = inputs)
+    parameterByIterTracking[i, "s_pct_reduced_adult_bullfrogs"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_adult_bullfrogs", inputsDF = inputs)
+  }
+  
+  if(base_case == TRUE){
+    parameterByIterTracking[i, "s_pct_reduced_eggs_bullfrogs"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_pct_reduced_eggs_bullfrogs")]))
+    parameterByIterTracking[i, "s_pct_reduced_tadpoles_bullfrogs"] <-  as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_pct_reduced_tadpoles_bullfrogs")]))
+    parameterByIterTracking[i, "s_pct_reduced_yoy_bullfrogs"] <-  as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_pct_reduced_yoy_bullfrogs")]))
+    parameterByIterTracking[i, "s_pct_reduced_juvenile_bullfrogs"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_pct_reduced_juvenile_bullfrogs")]))
+    parameterByIterTracking[i, "s_pct_reduced_adult_bullfrogs"] <-  as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_pct_reduced_adult_bullfrogs")]))
+  }
+  
+
   
   ######### Select the survival parameters for this iteration - % reduction in survival due to chytrid. #########
-  parameterByIterTracking[i, "s_pct_reduced_eggs_chytrid"] <- dapva::selectParamUniformDistribution(input_name = "s_pct_reduced_eggs_chytrid", inputsDF = inputs)
-  parameterByIterTracking[i, "s_pct_reduced_tadpoles_chytrid"] <- dapva::selectParamUniformDistribution(input_name = "s_pct_reduced_tadpoles_chytrid", inputsDF = inputs)
-  parameterByIterTracking[i, "s_pct_reduced_yoy_chytrid"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_yoy_chytrid", inputsDF = inputs)
-  parameterByIterTracking[i, "s_pct_reduced_juvenile_chytrid"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_juvenile_chytrid", inputsDF = inputs)
-  parameterByIterTracking[i, "s_pct_reduced_adult_chytrid"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_adult_chytrid", inputsDF = inputs)
+  if(base_case == FALSE){
+    parameterByIterTracking[i, "s_pct_reduced_eggs_chytrid"] <- dapva::selectParamUniformDistribution(input_name = "s_pct_reduced_eggs_chytrid", inputsDF = inputs)
+    parameterByIterTracking[i, "s_pct_reduced_tadpoles_chytrid"] <- dapva::selectParamUniformDistribution(input_name = "s_pct_reduced_tadpoles_chytrid", inputsDF = inputs)
+    parameterByIterTracking[i, "s_pct_reduced_yoy_chytrid"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_yoy_chytrid", inputsDF = inputs)
+    parameterByIterTracking[i, "s_pct_reduced_juvenile_chytrid"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_juvenile_chytrid", inputsDF = inputs)
+    parameterByIterTracking[i, "s_pct_reduced_adult_chytrid"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_adult_chytrid", inputsDF = inputs)
+  }
+  
+  if(base_case == TRUE){
+    parameterByIterTracking[i, "s_pct_reduced_eggs_chytrid"] <- (as.numeric(as.character(inputs$lcl[which(inputs$input == "s_pct_reduced_eggs_chytrid")])) + as.numeric(as.character(inputs$ucl[which(inputs$input == "s_pct_reduced_eggs_chytrid")])))/2
+    parameterByIterTracking[i, "s_pct_reduced_tadpoles_chytrid"] <- (as.numeric(as.character(inputs$lcl[which(inputs$input == "s_pct_reduced_tadpoles_chytrid")])) + as.numeric(as.character(inputs$ucl[which(inputs$input == "s_pct_reduced_tadpoles_chytrid")])))/2
+    parameterByIterTracking[i, "s_pct_reduced_yoy_chytrid"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_pct_reduced_yoy_chytrid")]))
+    parameterByIterTracking[i, "s_pct_reduced_juvenile_chytrid"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_pct_reduced_juvenile_chytrid")]))
+    parameterByIterTracking[i, "s_pct_reduced_adult_chytrid"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_pct_reduced_adult_chytrid")]))
+  }
   
   ######### Select the survival parameters for this iteration - % reduction in survival due to roads. #########
-  parameterByIterTracking[i, "s_pct_reduced_eggs_roads"] <- dapva::selectParamUniformDistribution(input_name = "s_pct_reduced_eggs_roads", inputsDF = inputs)
-  parameterByIterTracking[i, "s_pct_reduced_tadpoles_roads"] <- dapva::selectParamUniformDistribution(input_name = "s_pct_reduced_tadpoles_roads", inputsDF = inputs)
-  parameterByIterTracking[i, "s_pct_reduced_yoy_roads"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_yoy_roads", inputsDF = inputs)
-  parameterByIterTracking[i, "s_pct_reduced_juvenile_roads"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_juvenile_roads", inputsDF = inputs)
-  parameterByIterTracking[i, "s_pct_reduced_adult_roads"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_adult_roads", inputsDF = inputs)
+  if(base_case == FALSE){
+    parameterByIterTracking[i, "s_pct_reduced_eggs_roads"] <- dapva::selectParamUniformDistribution(input_name = "s_pct_reduced_eggs_roads", inputsDF = inputs)
+    parameterByIterTracking[i, "s_pct_reduced_tadpoles_roads"] <- dapva::selectParamUniformDistribution(input_name = "s_pct_reduced_tadpoles_roads", inputsDF = inputs)
+    parameterByIterTracking[i, "s_pct_reduced_yoy_roads"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_yoy_roads", inputsDF = inputs)
+    parameterByIterTracking[i, "s_pct_reduced_juvenile_roads"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_juvenile_roads", inputsDF = inputs)
+    parameterByIterTracking[i, "s_pct_reduced_adult_roads"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_adult_roads", inputsDF = inputs)
+  }
+  
+  if(base_case == TRUE){
+    parameterByIterTracking[i, "s_pct_reduced_eggs_roads"] <- (as.numeric(as.character(inputs$lcl[which(inputs$input == "s_pct_reduced_eggs_roads")])) + as.numeric(as.character(inputs$ucl[which(inputs$input == "s_pct_reduced_eggs_roads")])))/2
+    parameterByIterTracking[i, "s_pct_reduced_tadpoles_roads"] <- (as.numeric(as.character(inputs$lcl[which(inputs$input == "s_pct_reduced_tadpoles_roads")])) + as.numeric(as.character(inputs$ucl[which(inputs$input == "s_pct_reduced_tadpoles_roads")])))/2
+    parameterByIterTracking[i, "s_pct_reduced_yoy_roads"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_pct_reduced_yoy_roads")]))
+    parameterByIterTracking[i, "s_pct_reduced_juvenile_roads"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_pct_reduced_juvenile_roads")]))
+    parameterByIterTracking[i, "s_pct_reduced_adult_roads"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_pct_reduced_adult_roads")]))
+  }
   
   ######### Select the survival parameters for this iteration - % reduction in survival due to drawdown. #########
-  parameterByIterTracking[i, "drawdown_beforeMidJuly"] <- sample(c("yes", "no"),
+  if(base_case == FALSE){
+    parameterByIterTracking[i, "drawdown_beforeMidJuly"] <- sample(c("yes", "no"),
                                                                  size = 1,
                                                                  prob = c(as.numeric(inputs$best_guess[which(inputs$input == "drawdown_beforeMidJuly")]),
                                                                           (1-as.numeric(inputs$best_guess[which(inputs$input == "drawdown_beforeMidJuly")]))
                                                                  ), replace = T)
   
-  parameterByIterTracking[i, "drawdown_completeVSpartial_freq"] <- dapva::selectParamMetalogDistribution(input_name = "drawdown_completeVSpartial_freq", inputsDF = inputs)
-  parameterByIterTracking[i, "s_pct_reduced_tadpoles_drawdownPartial"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_tadpoles_drawdownPartial", inputsDF = inputs)
-  parameterByIterTracking[i, "s_pct_reduced_tadpoles_drawdownComplete"] <- dapva::selectParamUniformDistribution(input_name = "s_pct_reduced_tadpoles_drawdownComplete", inputsDF = inputs)
+    parameterByIterTracking[i, "drawdown_completeVSpartial_freq"] <- dapva::selectParamMetalogDistribution(input_name = "drawdown_completeVSpartial_freq", inputsDF = inputs)
+    parameterByIterTracking[i, "s_pct_reduced_tadpoles_drawdownPartial"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_tadpoles_drawdownPartial", inputsDF = inputs)
+    parameterByIterTracking[i, "s_pct_reduced_tadpoles_drawdownComplete"] <- dapva::selectParamUniformDistribution(input_name = "s_pct_reduced_tadpoles_drawdownComplete", inputsDF = inputs)
   
+  }
+  
+  if(base_case == TRUE){
+    
+    if(as.numeric(inputs$best_guess[which(inputs$input == "drawdown_beforeMidJuly")]) < 0.5)
+    {parameterByIterTracking[i, "drawdown_beforeMidJuly"] <- "no"}
+    if(as.numeric(inputs$best_guess[which(inputs$input == "drawdown_beforeMidJuly")]) >= 0.5)
+    {parameterByIterTracking[i, "drawdown_beforeMidJuly"] <- "yes"}
+      
+    parameterByIterTracking[i, "drawdown_completeVSpartial_freq"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "drawdown_completeVSpartial_freq")]))
+    parameterByIterTracking[i, "s_pct_reduced_tadpoles_drawdownPartial"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_pct_reduced_tadpoles_drawdownPartial")]))
+    parameterByIterTracking[i, "s_pct_reduced_tadpoles_drawdownComplete"] <- (as.numeric(as.character(inputs$lcl[which(inputs$input == "s_pct_reduced_tadpoles_drawdownComplete")])) + as.numeric(as.character(inputs$ucl[which(inputs$input == "s_pct_reduced_tadpoles_drawdownComplete")])))/2
+    
+  }
   
   ######### Select the human management parameters for this iteration - bullfrog management effective or not. #########
-  
+  if(base_case == FALSE){
+    
   parameterByIterTracking[i, "bullfrogMgmt_effective"] <- sample(c("yes", "no"),
                                                           size = 1,
                                                           prob = c(as.numeric(inputs$best_guess[which(inputs$input == "bullfrogMgmt_effective")]),
                                                                    (1-as.numeric(inputs$best_guess[which(inputs$input == "bullfrogMgmt_effective")]))
                                                                    ), replace = T)
+  }
+  
+  if(base_case == TRUE){
+    
+    if(as.numeric(inputs$best_guess[which(inputs$input == "bullfrogMgmt_effective")]) < 0.5)
+    {parameterByIterTracking[i, "bullfrogMgmt_effective"] <- "no"}
+    if(as.numeric(inputs$best_guess[which(inputs$input == "bullfrogMgmt_effective")]) >= 0.5)
+    {parameterByIterTracking[i, "bullfrogMgmt_effective"] <- "yes"}
+    
+  }
   
   ######### Select the parameters for this iteration - freq ephemeral wetlands dry. #########
-  parameterByIterTracking[i, "ephemeral_freq_dry"] <- dapva::selectParamMetalogDistribution(input_name = "ephemeral_freq_dry", inputsDF = inputs)
+  if(base_case == FALSE){
+    parameterByIterTracking[i, "ephemeral_freq_dry"] <- dapva::selectParamMetalogDistribution(input_name = "ephemeral_freq_dry", inputsDF = inputs)
+  }
+  
+  if(base_case == TRUE){
+    parameterByIterTracking[i, "ephemeral_freq_dry"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "ephemeral_freq_dry")]))
+  }
   
   ######### Select the parameters for this iteration - carrying capacity (cap). #########
-  parameterByIterTracking[i, "carrying_capacity_BSCWMA"] <- dapva::selectParamMetalogDistribution(input_name = "carrying_capacity_BSCWMA", inputsDF = inputs)
+  if(base_case == FALSE){
+    parameterByIterTracking[i, "carrying_capacity_BSCWMA"] <- dapva::selectParamMetalogDistribution(input_name = "carrying_capacity_BSCWMA", inputsDF = inputs)
+  }
+  
+  if(base_case == TRUE){
+    parameterByIterTracking[i, "carrying_capacity_BSCWMA"] <-  as.numeric(as.character(inputs$best_guess[which(inputs$input == "carrying_capacity_BSCWMA")]))
+  }
   
   ######### Select the parameters for this iteration - correlation between wetlands for vital rates. #########
-  parameterByIterTracking[i, "wetland_eggTadSurv_TempCor_noEph"] <- dapva::selectParamMetalogDistribution(input_name = "wetland_eggTadSurv_TempCor_noEph", inputsDF = inputs)
-  parameterByIterTracking[i, "wetland_eggTadSurv_TempCor_wEph"] <- dapva::selectParamMetalogDistribution(input_name = "wetland_eggTadSurv_TempCor_wEph", inputsDF = inputs)
+  if(base_case == FALSE){
+   parameterByIterTracking[i, "wetland_eggTadSurv_TempCor_noEph"] <- dapva::selectParamMetalogDistribution(input_name = "wetland_eggTadSurv_TempCor_noEph", inputsDF = inputs)
+   parameterByIterTracking[i, "wetland_eggTadSurv_TempCor_wEph"] <- dapva::selectParamMetalogDistribution(input_name = "wetland_eggTadSurv_TempCor_wEph", inputsDF = inputs)
+  }
+  
+  if(base_case == TRUE){
+    parameterByIterTracking[i, "wetland_eggTadSurv_TempCor_noEph"] <-  as.numeric(as.character(inputs$best_guess[which(inputs$input == "wetland_eggTadSurv_TempCor_noEph")]))
+    parameterByIterTracking[i, "wetland_eggTadSurv_TempCor_wEph"] <-   as.numeric(as.character(inputs$best_guess[which(inputs$input == "wetland_eggTadSurv_TempCor_wEph")]))
+  }
   
   ######### Select the parameters for this iteration - quasi extinction threshold. #########
-  parameterByIterTracking[i, "quasi_extinction_threshold"] <- dapva::selectParamUniformDistribution(input_name = "quasi_extinction_threshold", inputsDF = inputs)
+  if(base_case == FALSE){
+    parameterByIterTracking[i, "quasi_extinction_threshold"] <- dapva::selectParamUniformDistribution(input_name = "quasi_extinction_threshold", inputsDF = inputs)
+  }
+  
+  if(base_case == TRUE){
+    parameterByIterTracking[i, "quasi_extinction_threshold"] <- (as.numeric(as.character(inputs$lcl[which(inputs$input == "quasi_extinction_threshold")])) + as.numeric(as.character(inputs$ucl[which(inputs$input == "quasi_extinction_threshold")])))/2
+  }
   
   ######### Select the parameters for this iteration - dispersal. #########
-  parameterByIterTracking[i, "p_yoy_disperse"] <- dapva::selectParamMetalogDistribution(input_name = "p_yoy_disperse", inputsDF = inputs)
+  if(base_case == FALSE){
+    parameterByIterTracking[i, "p_yoy_disperse"] <- dapva::selectParamMetalogDistribution(input_name = "p_yoy_disperse", inputsDF = inputs)
   
-  parameterByIterTracking[i, "dispersal_CSF_vs_MoreGoShort"] <- sample(c("CSF", "MoreGoShort"),
+    parameterByIterTracking[i, "dispersal_CSF_vs_MoreGoShort"] <- sample(c("CSF", "MoreGoShort"),
                                                                  size = 1,
                                                                  prob = c(as.numeric(inputs$best_guess[which(inputs$input == "dispersal_CSF_vs_MoreGoShort")]),
                                                                           (1-as.numeric(inputs$best_guess[which(inputs$input == "dispersal_CSF_vs_MoreGoShort")]))
                                                                  ), replace = T)
+  }
+  
+  if(base_case == TRUE){
+    parameterByIterTracking[i, "p_yoy_disperse"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "p_yoy_disperse")]))
+    
+    if(as.numeric(inputs$best_guess[which(inputs$input == "dispersal_CSF_vs_MoreGoShort")]) < 0.5)
+    {parameterByIterTracking[i, "dispersal_CSF_vs_MoreGoShort"] <- "MoreGoShort"}
+    if(as.numeric(inputs$best_guess[which(inputs$input == "dispersal_CSF_vs_MoreGoShort")]) >= 0.5)
+    {parameterByIterTracking[i, "dispersal_CSF_vs_MoreGoShort"] <- "CSF"}
+  }
   
   # No uncertainty in these but record for easy access through parameterByIterTracking
   
