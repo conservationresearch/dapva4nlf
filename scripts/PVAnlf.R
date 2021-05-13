@@ -73,9 +73,9 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   
   # If running using just base case inputs (i.e. one iteration with best guess values),
   # then uncomment the lines below.
-  parameterByIterTracking_baseCase <- selectNLFIdahoParameterByIterTracking(inputs, base_case = TRUE)
-  parameterByIterTracking <-  parameterByIterTracking_baseCase
-  n_iter <- 1
+  # parameterByIterTracking_baseCase <- selectNLFIdahoParameterByIterTracking(inputs, base_case = TRUE)
+  # parameterByIterTracking <-  parameterByIterTracking_baseCase
+  # n_iter <- 1
   
 #---- Run the PVA. ----
   # Need to have run the foreach loop for parameterByIterTracking first
