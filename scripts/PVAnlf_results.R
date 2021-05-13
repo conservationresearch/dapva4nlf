@@ -33,13 +33,13 @@ for (i in 1:length(files)){
 
   # Sensitivity analysis results
   write.csv(paramSens[1], # write the summary, which is the first output (the second is yrs, used in the tornado)
-           file = paste0("paramSens_", name,version,".csv"), row.names = FALSE)
+           file = paste0("paramSens_", name, version,".csv"), row.names = FALSE)
 
   # Draw the associated tornado
   tornado <- dapva::drawTornado(paramSens = paramSens,
                          metric = "probability of persistence",
-                         start_year = parameterByIterTracking$initial_year[1],
-                         title = "Test", breaks = 0.1)
+                         year = 50,
+                         title = paste(name), breaks = 0.1)
 
   # Export the tornado diagram
   tiff(filename = paste0("tornado_", name,version,".tiff"),
@@ -194,14 +194,153 @@ filename <- paste("probSelfSustain_summary_table", version, "_iter_", n_iter, ".
 write.csv(results_summary_prob_selfsustaining_table, file = filename)
 
 
+############## Graphs of individual runs and iterations to show the process ######
+# Might be useful to make a function where you can plot runs within an iteration by total and pop and stage
+
+# Might also be useful to make a function where you can plot the results of a few iterations
+
+# ALso to do: Make graphs of the survival rates with the different threats to show Lea and Rebecca 
 
 
-############## Explore what the results would have looked like if we combined parametric and process uncertainty to one prob value ######
+
+
 # Load the Rdata file
 i = 1  
 load(files[i])
 
+# Remove eggs and tadpoles as they are intermediate stages in the year and we just want the pop size at the fall census
+results_all_iterations_fall <- results_all_iterations # initalize
 
-test <- results_summary_all_iterations
-test1 <- test[[49]]
-test2 <- do.call("rbind", results_summary_all_iterations[49:72])
+for(j in 1:yrs){
+  nrow(results_all_iterations_fall)
+  results_all_iterations_fall[which(results_all_iterations_fall$class == "eggs"),paste(j)] <- 0
+  results_all_iterations_fall[which(results_all_iterations_fall$class == "tadpoles"),paste(j)] <- 0 
+}
+
+# Graph a few individual iterations to show what it looks like
+
+results_all_iterations_fall_iter1_run1 <- results_all_iterations_fall[which(results_all_iterations_fall$iteration == 2 &
+                                                                              results_all_iterations_fall$run ==1),]
+
+results_summary_for_iter1_run1 <- dapva::makeResultsSummaryOneIteration(results_all_iterations_fall_iter1_run1,
+                                                                        by_pop = 'yes',
+                                                                        initial_year = 1,
+                                                                        yrs = 50,
+                                                                        n_iter = 1,
+                                                                        n_runs_per_iter = 1,
+                                                                        alternative = paste0(alternative_details$alt_name_full),
+                                                                        iteration_number = 1,
+                                                                        prob_self_sustain = FALSE, # much faster without this, not needed here
+                                                                        lambda_over_x_years = 10)
+
+
+results_summary_num_indiv <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations  = results_summary_for_iter1_run1 ,
+                                                                  metric = "mean total number of individuals",
+                                                                  initial_year = 1, credible_interval = 0.95)
+
+
+(abundance_graph <- dapva::graphResultsSummary(results_summary_num_indiv))
+
+
+
+############## Convergence testing - number of runs per iteration ######
+
+# Still do to - update code so can be more flexible on the # of runs
+# e.g. min always of 100, after that check after x incremets etc. rather than all the way to 1000
+
+# Intalize the a list to store results for a handful of itrations
+convergence_test_runs_per_iter <- list()
+
+for(i in 1:4){
+  convergence_test_runs_per_iter[[i]] <- dapva::convergenceTestRunsPerIteration(
+    results_all_for_this_iteration = results_all_iterations_fall[which(results_all_iterations_fall$iteration == i),],
+    test_interval = 10,
+    iteration_number = i,
+    initial_year = 1,
+    final_year = 50,
+    num_rand_pulls_per_subset_size = 100)
+}
+
+convergence_test_runs_multiple_iter <- do.call("rbind", convergence_test_runs_per_iter)
+
+
+graphs <- dapva::graphCongvTestRunsPerIter(convergence_test_runs_multiple_iter,
+                                           x_location_vertical_line = 1000,
+                                           title = " ")
+graphs[[1]]
+graphs[[2]]
+
+############## Convergence testing - number of iterations ######
+
+
+# NEed to use a dataset with more iterations than needed so can show convergence
+# For example, if using 500 iterations need to use a dataset with e.g. 2000 iterations here
+
+# Resample to visually inspect convergence
+convergence_test <- dapva::convergenceTestIterations(results_all_this_alt = results_summary_all_iterations_overall,
+                                                     test_interval = 100,
+                                                     num_rand_pulls_per_subset_size = 100,
+                                                     initial_year = 1,
+                                                     final_year = 50)
+
+
+# Make graphs for visual inspection
+graphs <- dapva::graphCongvTestIter(convergence_test, x_location_vertical_line = 500,
+                                    title = " ")
+
+(p_prob_persist_conv_iter_mean <- graphs[[2]])
+(p_prob_persist_conv_iter_median <- graphs[[4]])
+
+(p_abundance_conv_iter_mean <- graphs[[1]])
+(p_abundance_conv_iter_median <- graphs[[3]])
+
+
+
+
+# Export the graphs
+
+# Do later
+
+
+# Extract the range of prob of persistence from 500 iterations
+int <- convergence_test$prob_persist_mean[which(convergence_test$subset_size == 500)]
+min(int) 
+max(int) 
+max(int) - min(int)
+
+
+############## Explore what the results would have looked like if we combined parametric and process uncertainty to one prob value ######
+
+
+# Rename the runs so that they have unique IDs with iteration and run since 
+# here pretending like they are all independent runs that we want one set of results for
+results_all_iterations_fall$run <- paste(results_all_iterations_fall$iteration, results_all_iterations_fall$run)
+
+# Run the prob of persistence function on the whole thing to show what it would look like if process and parametric were together
+n_iter_runcombos <- length(unique(paste(results_all_iterations_fall$iteration, results_all_iterations_fall$run)))
+results_summary_for_all_iter_and_runs <- dapva::makeResultsSummaryOneIteration(results_all_iterations_fall,
+                                                                                    by_pop = 'no',
+                                                                                    initial_year = 1,
+                                                                                    yrs = 50,
+                                                                                    n_iter = 1,
+                                                                                    n_runs_per_iter = n_iter_runcombos,
+                                                                                    alternative = paste0(alternative_details$alt_name_full),
+                                                                                    iteration_number = 1,
+                                                                                    prob_self_sustain = FALSE, # much faster without this, not needed here
+                                                                                    lambda_over_x_years = 10)
+
+
+# Graph the results
+# Point here is that if we combine parametric and process uncertainty then:
+# Results seem more optimistic (in this case); point is that it is different
+# Don't get any insights into where we should put more effort to learn more to make a more informed decision
+
+
+
+results_summary_prob_persist <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations  = results_summary_for_all_iter_and_runs,
+                                                                     metric = "probability of persistence",
+                                                                     initial_year = 1, credible_interval = 0.95)
+
+
+(persistence_graph <- dapva::graphResultsSummary(results_summary_prob_persist))
+
