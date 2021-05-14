@@ -219,10 +219,12 @@ for(j in 1:yrs){
 
 ############## basecase - Graphs of individual runs to show the process ######
 
-# Start by showing for each class and population; include eggs and tadpoles for illustrative purposes rather than the fall numbers used for the ttoals
+# Start by showing for each class and population; include eggs and tadpoles for illustrative purposes rather than the fall numbers used for the totals
 results_to_use <- results_basecase  # results_basecase_fall if want to get the total #
+# results_to_use <- results_basecase[1:100,]  # results_basecase_fall if want to get the total #
 
-test2 <- melt(results_to_use, id.vars=c("iteration", "run", "pop", "class", "sex"))
+library(reshape2)
+test2 <- reshape2::melt(results_to_use, id.vars=c("iteration", "run", "pop", "class", "sex"))
 colnames(test2)[which(colnames(test2) == "variable")]<- "year"
 colnames(test2)[which(colnames(test2) == "value")]<- "number_of_indiv"
 test2$year <- as.numeric(as.character(test2$year))
@@ -617,4 +619,99 @@ pl.beta(s_adult_w_threats_dist$alpha,
 # Explained at https://stats.stackexchange.com/questions/380833/std-dev-should-be-less-than-0-289-help-in-understanding
 # One solution might be to put a limit on it so that if the mean survival is a certain level of closesness to 0 or 1 then it just gets assigned the mean
 # I think this may be happening in my code anyways but not here where I am plotting it, need to look closer...
+
+
+
+# Update - perhaps for this best to just show means; need to explore the SD issue more separately
+
+survival_w_threats_comparison <- as.data.frame(matrix(nrow = 5, ncol = 7))
+colnames(survival_w_threats_comparison) <- c("life_stage", "no_threat", "chytrid", "roads", "bullfrogs", "chytrid_and_roads",  "all_three")
+
+survival_w_threats_comparison$life_stage[1] <- "eggs to tadpoles"
+survival_w_threats_comparison$no_threat[1] <- s_eggs_mean
+survival_w_threats_comparison$chytrid[1] <- (1-s_pct_reduced_eggs_chytrid/100)*s_eggs_mean 
+survival_w_threats_comparison$roads[1] <- (1-s_pct_reduced_eggs_roads/100)*s_eggs_mean 
+survival_w_threats_comparison$chytrid_and_roads[1] <- (1-s_pct_reduced_eggs_chytrid/100)*
+  (1-s_pct_reduced_eggs_roads/100)*s_eggs_mean 
+survival_w_threats_comparison$bullfrogs[1] <- (1-s_pct_reduced_eggs_bullfrogs/100)*s_eggs_mean 
+survival_w_threats_comparison$all_three[1] <- (1-s_pct_reduced_eggs_chytrid/100)*
+  (1-s_pct_reduced_eggs_roads/100)*
+  (1-s_pct_reduced_eggs_bullfrogs/100)*s_eggs_mean 
+
+survival_w_threats_comparison$life_stage[2] <- "tadpoles to yoy"
+survival_w_threats_comparison$no_threat[2] <- s_tadpoles_mean
+survival_w_threats_comparison$chytrid[2] <- (1-s_pct_reduced_tadpoles_chytrid/100)*s_tadpoles_mean 
+survival_w_threats_comparison$roads[2] <- (1-s_pct_reduced_tadpoles_roads/100)*s_tadpoles_mean 
+survival_w_threats_comparison$chytrid_and_roads[2] <- (1-s_pct_reduced_tadpoles_chytrid/100)*
+  (1-s_pct_reduced_tadpoles_roads/100)*s_tadpoles_mean 
+survival_w_threats_comparison$bullfrogs[2] <- (1-s_pct_reduced_tadpoles_bullfrogs/100)*s_tadpoles_mean 
+survival_w_threats_comparison$all_three[2] <- (1-s_pct_reduced_tadpoles_chytrid/100)*
+  (1-s_pct_reduced_tadpoles_roads/100)*
+  (1-s_pct_reduced_tadpoles_bullfrogs/100)*s_tadpoles_mean 
+
+
+survival_w_threats_comparison$life_stage[3] <- "yoy to juv"
+survival_w_threats_comparison$no_threat[3] <- s_yoy_mean
+survival_w_threats_comparison$chytrid[3] <- (1-s_pct_reduced_yoy_chytrid/100)*s_yoy_mean 
+survival_w_threats_comparison$roads[3] <- (1-s_pct_reduced_yoy_roads/100)*s_yoy_mean 
+survival_w_threats_comparison$chytrid_and_roads[3] <- (1-s_pct_reduced_yoy_chytrid/100)*
+  (1-s_pct_reduced_yoy_roads/100)*s_yoy_mean 
+survival_w_threats_comparison$bullfrogs[3] <- (1-s_pct_reduced_yoy_bullfrogs/100)*s_yoy_mean 
+survival_w_threats_comparison$all_three[3] <- (1-s_pct_reduced_yoy_chytrid/100)*
+  (1-s_pct_reduced_yoy_roads/100)*
+  (1-s_pct_reduced_yoy_bullfrogs/100)*s_yoy_mean 
+
+
+survival_w_threats_comparison$life_stage[4] <- "juv to adult"
+survival_w_threats_comparison$no_threat[4] <- s_juv_mean
+survival_w_threats_comparison$chytrid[4] <- (1-s_pct_reduced_juv_chytrid/100)*s_juv_mean 
+survival_w_threats_comparison$roads[4] <- (1-s_pct_reduced_juv_roads/100)*s_juv_mean 
+survival_w_threats_comparison$chytrid_and_roads[4] <- (1-s_pct_reduced_juv_chytrid/100)*
+  (1-s_pct_reduced_juv_roads/100)*s_juv_mean 
+survival_w_threats_comparison$bullfrogs[4] <- (1-s_pct_reduced_juv_bullfrogs/100)*s_juv_mean 
+survival_w_threats_comparison$all_three[4] <- (1-s_pct_reduced_juv_chytrid/100)*
+  (1-s_pct_reduced_juv_roads/100)*
+  (1-s_pct_reduced_juv_bullfrogs/100)*s_juv_mean 
+
+survival_w_threats_comparison$life_stage[5] <- "adult to adult"
+survival_w_threats_comparison$no_threat[5] <- s_adult_mean
+survival_w_threats_comparison$chytrid[5] <- (1-s_pct_reduced_adult_chytrid/100)*s_adult_mean 
+survival_w_threats_comparison$roads[5] <- (1-s_pct_reduced_adult_roads/100)*s_adult_mean 
+survival_w_threats_comparison$chytrid_and_roads[5] <- (1-s_pct_reduced_adult_chytrid/100)*
+  (1-s_pct_reduced_adult_roads/100)*s_adult_mean 
+survival_w_threats_comparison$bullfrogs[5] <- (1-s_pct_reduced_adult_bullfrogs/100)*s_adult_mean 
+survival_w_threats_comparison$all_three[5] <- (1-s_pct_reduced_adult_chytrid/100)*
+  (1-s_pct_reduced_adult_roads/100)*
+  (1-s_pct_reduced_adult_bullfrogs/100)*s_adult_mean 
+
+
+survival_w_threats_comparison$life_stage <- factor(survival_w_threats_comparison$life_stage, 
+                                                   levels = c("eggs to tadpoles",
+                                                              "tadpoles to yoy", 
+                                                              "yoy to juv", 
+                                                              "juv to adult", "adult to adult"))
+
+
+survival_w_threats_comparison_long <- reshape2::melt(survival_w_threats_comparison,  id.vars=c("life_stage"))
+colnames(survival_w_threats_comparison_long) <- c("life_stage", "threats" , "survival_rate" )
+
+
+ggplot2::ggplot(survival_w_threats_comparison_long, ggplot2::aes(x = threats, y = survival_rate)) +
+  ggplot2::geom_bar(stat="identity") +
+  ggplot2::facet_wrap(~life_stage) +
+  ggplot2::labs(x = "Threats") +
+  ggplot2::labs(y = "Survival Rate") +
+  ggplot2::ggtitle("Base case (P50) mean survival rates with compounding threats") +
+  ggplot2::theme_bw() +
+  ggplot2::theme(
+    panel.grid.major = ggplot2::element_blank(),
+    panel.grid.minor = ggplot2::element_blank(),
+    strip.background = ggplot2::element_blank(),
+    panel.border = ggplot2::element_rect(colour = "black"),
+    text = ggplot2::element_text(size = 12),
+    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+    legend.position = "none"
+  )
+
+
 
