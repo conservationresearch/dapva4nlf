@@ -69,8 +69,14 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                 parameterByIterTracking <- dapva4nlf::selectNLFIdahoParameterByIterTracking(inputs)
                                                 return(parameterByIterTracking)
                                                 
-                                              }
-
+                                               }
+  
+  # If running using just base case inputs (i.e. one iteration with best guess values),
+  # then uncomment the lines below.
+  # parameterByIterTracking_baseCase <- selectNLFIdahoParameterByIterTracking(inputs, base_case = TRUE)
+  # parameterByIterTracking <-  parameterByIterTracking_baseCase
+  # n_iter <- 1
+  
 #---- Run the PVA. ----
   # Need to have run the foreach loop for parameterByIterTracking first
   print("Running the PVA with each iteration in parallel.")
@@ -81,7 +87,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   results_summary_all_iterations_by_pop_int  <- list() # initialize
   results_all_iterations  <- list() # initialize
   
-  batch_size <- n_iter/20
+  batch_size <- max(n_iter/20, 1) # always at least one batch
   batches <- split(1:n_iter, ceiling(seq_along(1:n_iter)/batch_size ))
   
   for(batch in 1:length(batches)){
@@ -272,9 +278,16 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                       } # end iteration loop
     
     n_it_w_results <- dim(results_summary_all_iterations)[1] # not the same as batch size as we removed those where there was an error
-    results_summary_all_iterations_overall_int[[batch]] <- do.call("rbind", results_summary_all_iterations[1:n_it_w_results])
-    results_summary_all_iterations_by_pop_int[[batch]] <- do.call("rbind", results_summary_all_iterations[(n_it_w_results+1):(n_it_w_results*2)])
-    results_all_iterations[[batch]] <- do.call("rbind", results_summary_all_iterations[(n_it_w_results*2+1):(n_it_w_results*3)])
+    if(n_it_w_results > 1){
+      results_summary_all_iterations_overall_int[[batch]] <- do.call("rbind", results_summary_all_iterations[1:n_it_w_results])
+      results_summary_all_iterations_by_pop_int[[batch]] <- do.call("rbind", results_summary_all_iterations[(n_it_w_results+1):(n_it_w_results*2)])
+      results_all_iterations[[batch]] <- do.call("rbind", results_summary_all_iterations[(n_it_w_results*2+1):(n_it_w_results*3)])
+    }
+    if(n_it_w_results == 1 || n_iter == 1){ # e.g. when you are running a baseline case and so just have one iteration
+      results_summary_all_iterations_overall_int[[batch]] <- results_summary_all_iterations[[1]]
+      results_summary_all_iterations_by_pop_int[[batch]] <- results_summary_all_iterations[[2]]
+      results_all_iterations[[batch]] <- results_summary_all_iterations[[3]]
+    }
   }
   
   

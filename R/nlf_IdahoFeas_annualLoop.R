@@ -365,8 +365,8 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       # Tadpoles get translocated in!
       
       if(alternative_details$release_location == "cell7"){
-        rows_for_trans <- which(resultsTracking_popSize_females$class == "tadpoles") &&
-          which(resultsTracking_popSize_females$pop == "cell7")
+        rows_for_trans <- intersect(which(resultsTracking_popSize_females$class == "tadpoles"),
+          which(resultsTracking_popSize_females$pop == "cell7"))
       }
       if(alternative_details$release_location == "all_three"){
         rows_for_trans <- intersect(which(resultsTracking_popSize_females$class == "tadpoles"),
