@@ -43,15 +43,15 @@ getNLFIdahoFeasinputs <- function() {
   repro_prop_active_mean <- list(
     c(input = "p_females_lay_eggs_mean_A2", type = "reproduction", 
       lcl = 0.1, best_guess = 0.75, ucl = 0.9, confidence = 90,
-      lower_bound = 0, upper_bound = 1,
+      lower_bound = 0.01, upper_bound = 1,
       best_guess_type = "median", management_alternative = "status_quo", source = "Lea and Rebecca on April 26, 2021", comments = "Absolute min of 0 is that in captivity don't ever get A2s breeding (at least in Vancouver aquariam, I guess we'll see with Edmonton Valley zoo); Hine et al. 1981 found that 23% of A2 females did not lay eggs in Wisconsin, as you get further north things take longer to grow but Wisconson should be pretty similar to Idaho; at the low end if the previous year was tough and the A1s didn't grow fully to full A2, high end not much higher than 77"),
     c(input = "p_females_lay_eggs_mean_A3", type = "reproduction", 
       lcl = 0.5, best_guess = 0.9, ucl = 0.95, confidence = 90,
-      lower_bound = 0, upper_bound = 1,
+      lower_bound = 0.05, upper_bound = 1,
       best_guess_type = "median", management_alternative = "status_quo", source = "Lea and Rebecca on April 26, 2021", comments = "Most of the older females lay eggs" ),
     c(input = "p_females_lay_eggs_mean_A4plus", type = "reproduction", 
       lcl = 0.5, best_guess = 0.9, ucl = 0.95, confidence = 90,
-      lower_bound = 0, upper_bound = 1,
+      lower_bound = 0.05, upper_bound = 1,
       best_guess_type = "median", management_alternative = "status_quo", source = "Lea and Rebecca on April 26, 2021", comments = "Most of the older females lay eggs" )
   )
   
@@ -97,31 +97,31 @@ getNLFIdahoFeasinputs <- function() {
   survival_rate_mean_no_threats <- list(
     c(input = "s_mean_eggs_no_threats", type = "survival", 
       lcl = 0.12, best_guess = 0.75, ucl = 0.9, confidence = 95,
-      lower_bound = 0, upper_bound = 0.95,
+      lower_bound = 0.05, upper_bound = 0.95,
       best_guess_type = "median", management_alternative = "status_quo", 
       source = "Lea and Rebecca, April 23, 2021", comments = "survival from eggs to tadpoles"),
     
     c(input = "s_mean_tadpoles_no_threats", type = "survival", 
-      lcl = 0.01, best_guess = 0.04, ucl = 0.1, confidence = 80,
-      lower_bound = 0, upper_bound = 0.25,
+      lcl = 0.02, best_guess = 0.04, ucl = 0.1, confidence = 80,
+      lower_bound = 0.01, upper_bound = 0.25,
       best_guess_type = "median", management_alternative = "status_quo", 
       source = "Lea and Rebecca, April 23, 2021", comments = "survival from tadpoles to yoy"),
     
     c(input = "s_mean_yoy_no_threats", type = "survival", 
       lcl = 0.05, best_guess = 0.1, ucl = 0.31, confidence = 80,
-      lower_bound = 0, upper_bound = 0.5,
+      lower_bound = 0.01, upper_bound = 0.5,
       best_guess_type = "median", management_alternative = "status_quo", 
       source = "Lea and Rebecca, April 23, 2021", comments = "annual survival from yoy to juv (one year old adult), includes overwinter survival"),
     
     c(input = "s_mean_juv_no_threats", type = "survival", 
       lcl = 0.2, best_guess = 0.4, ucl = 0.6, confidence = 80,
-      lower_bound = 0, upper_bound = 0.9,
+      lower_bound = 0.075, upper_bound = 0.9,
       best_guess_type = "median", management_alternative = "status_quo", 
       source = "Lea and Rebecca, April 23, 2021", comments = "annual survival from juv (one year old adult) to adult (2 years), includes overwinter survival"),
     
     c(input = "s_mean_adult_no_threats", type = "survival", 
       lcl = 0.36, best_guess = 0.6, ucl = 0.7, confidence = 80,
-      lower_bound = 0, upper_bound = 0.9,
+      lower_bound = 0.1, upper_bound = 0.9,
       best_guess_type = "median", management_alternative = "status_quo", 
       source = "Lea and Rebecca, April 23, 2021", comments = "annual survival for adults (age 2 and older), includes overwinter survival")
     
