@@ -4,12 +4,17 @@
 \alias{selectNLFIdahoParameterByIterTracking}
 \title{Select NLF Idaho Feasability parameters for each iteration.}
 \usage{
-selectNLFIdahoParameterByIterTracking(inputs)
+selectNLFIdahoParameterByIterTracking(inputs, base_case = FALSE)
 }
 \arguments{
 \item{inputs}{model inputs formatted using getNLFIdahoFeasinputs()
 and choose the first output in the list (i.e. singular number outputs as this
  is where parametric uncertainty is specified).}
+
+\item{base_case}{TRUE or FALSE if you want all of the parameters just to reflect 
+the best guess (for for uniform distributions, half way between the low and 
+upper bounds). Defaults to FALSE to allow for probabalistic analysis. TRUE 
+can be useful for model troubleshooting or to illustrate deterministic results.}
 }
 \value{
 Returns one value for each parameter, representing the inputs for one
