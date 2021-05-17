@@ -220,7 +220,7 @@ do_Nothing$n_runs_per_iter <- 0
 do_Nothing$alternative <- "Do Nothing"
 results_summary_prob_persist <- rbind(results_summary_prob_persist, do_Nothing)
 
-# Best Guess vs Status Quo
+# Alternatives of interest
 goBig_alt_name  <- "Go Big or Go Home "
 mostReal_alt_name  <- "Middle of the Road"
 lowEffort_alt_name  <- "Minimum Funding Availabilty / Low Effort"
@@ -570,9 +570,256 @@ dev.off()
 
 
 
+############## Show what results would have looked like if combined parametric and process uncertainty ######
+path_to_results_folder <- "C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results"# on my work PC
+#path_to_results_folder <- "/Users/laurakeating/Documents/R/R_scripts/BTPD_PVA/Results/BTPD_baseline_results_march17"# on my mac
+setwd(path_to_results_folder) # on my mac
+files <-  list.files(path = ".","*.RData", full.names="TRUE")
+
+# FOr each alternative. 
+# Load the Rdata file
+# i = 1  
+
+for(i in c(1, 2, 4, 5, 6, 7)){ # file 3 get "Error: cannot allocate vector of size 18.1 Mb
+  
+  print(paste('combining process and parametric uncertainty for file #', i))
+  
+  load(files[i])
+  
+  # Remove eggs and tadpoles as they are intermediate stages in the year and we just want the pop size at the fall census
+  results_all_iterations_fall <- results_all_iterations # initalize
+  
+  for(j in 1:yrs){
+    nrow(results_all_iterations_fall)
+    results_all_iterations_fall[which(results_all_iterations_fall$class == "eggs"),paste(j)] <- 0
+    results_all_iterations_fall[which(results_all_iterations_fall$class == "tadpoles"),paste(j)] <- 0 
+  } # Takes a min or two
+  
+  # Rename the runs so that they have unique IDs with iteration and run since 
+  # here pretending like they are all independent runs that we want one set of results for
+  results_all_iterations_fall$run <- paste(results_all_iterations_fall$iteration, results_all_iterations_fall$run)
+  
+  # Run the prob of persistence function on the whole thing to show what it would look like if process and parametric were together
+  n_iter_runcombos <- length(unique(paste(results_all_iterations_fall$iteration, results_all_iterations_fall$run)))
+  results_summary_for_all_iter_and_runs <- dapva::makeResultsSummaryOneIteration(results_all_iterations_fall,
+                                                                                 by_pop = 'no',
+                                                                                 initial_year = 1,
+                                                                                 yrs = 50,
+                                                                                 n_iter = 1,
+                                                                                 n_runs_per_iter = n_iter_runcombos,
+                                                                                 alternative = paste0(alternative_details$alt_name_full),
+                                                                                 iteration_number = 1,
+                                                                                 prob_self_sustain = FALSE, # much faster without this, not needed here
+                                                                                 lambda_over_x_years = 10)
+  
+  #Write out the results so can load them all in later
+  write.csv(results_summary_for_all_iter_and_runs, file = paste0("results_summary_for_all_iter_and_runs_", name, version,".csv"), row.names = FALSE)
+  
+} # close for loop through each file
 
 
-############## Load basecase results for one alternative to use in the examples in the following sections ######
+# Graph the results
+# Point here is that if we combine parametric and process uncertainty then:
+# Results seem more optimistic (in this case); point is that it is different
+# Don't get any insights into where we should put more effort to learn more to make a more informed decision
+
+# Upload all of the results in the results folder and bind them together
+temp_iter <- list.files(pattern="*results_summary_for_all_iter_and_runs_")
+results_summary_for_all_iter_and_runs_list <- lapply(temp_iter, read.csv)
+results_summary_for_all_iter_and_runs_allAlt <- do.call(rbind, results_summary_for_all_iter_and_runs_list)
+colnames(results_summary_for_all_iter_and_runs_allAlt)[7:ncol(results_summary_for_all_iter_and_runs_allAlt)] <- 1:50
+
+
+results_summary_prob_persist_combineUnct <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations  = results_summary_for_all_iter_and_runs_allAlt,
+                                                                                 metric = "probability of persistence",
+                                                                                 initial_year = 1, credible_interval = 0.95)
+
+# (persistence_graph_combineUnct <- dapva::graphResultsSummary(results_summary_prob_persist_combineUnct))
+
+
+
+# Make a summary graph with just the level of effort alternatives to show the difference
+
+
+
+# Add the Do Nothing scenario, which is 0 since population is currently extirpated with no chance of natural recovery
+do_Nothing <- results_summary_prob_persist_combineUnct[1:yrs,] # initalize
+do_Nothing$mean <- 0
+do_Nothing$median <- 0
+do_Nothing$lcl <- 0
+do_Nothing$ucl <- 0
+do_Nothing$n_iter <- 0
+do_Nothing$n_runs_per_iter <- 0
+do_Nothing$alternative <- "Do Nothing"
+results_summary_prob_persist_combineUnct <- rbind(results_summary_prob_persist_combineUnct, do_Nothing)
+
+# Alternatives of interest
+goBig_alt_name  <- "Go Big or Go Home "
+mostReal_alt_name  <- "Middle of the Road"
+lowEffort_alt_name  <- "Minimum Funding Availabilty / Low Effort"
+doNothing_alt_name  <- "Do Nothing"
+
+int9 <- results_summary_prob_persist_combineUnct[c(which(results_summary_prob_persist_combineUnct$alternative == goBig_alt_name),
+                                                   which(results_summary_prob_persist_combineUnct$alternative == mostReal_alt_name),
+                                                   which(results_summary_prob_persist_combineUnct$alternative == lowEffort_alt_name),
+                                                   which(results_summary_prob_persist_combineUnct$alternative == doNothing_alt_name)),]
+int9$alternative[which(int9$alternative == goBig_alt_name)] <- "Go Big or Go Home" # get rid of the extra space
+int9$alternative[which(int9$alternative == lowEffort_alt_name)] <- "Minimum Funding / Low Effort" # put it on two lines
+
+
+int9$alternative <- factor(int9$alternative, levels=c("Do Nothing", "Minimum Funding / Low Effort",
+                                                      "Middle of the Road", "Go Big or Go Home")) # reorder factor levels
+
+(persist_effort_graph_combineUnct <- dapva::graphResultsSummary(results_summary = int9,
+                                                                overlap = FALSE,
+                                                                title = 'B)',
+                                                                x_axis_lab = "Year",
+                                                                y_axis_lab = "\n Probability of Persistence \n ")) # The extra lines push the title out to the same spot as in panel B)
+
+
+filename <- paste("ForReport/compare_persist_combineUnct", version,".tiff", sep="")
+tiff(filename, width=12, height=8, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600,
+     restoreConsole=TRUE)
+gridExtra:: grid.arrange(persist_effort_graph1,  
+                         persist_effort_graph_combineUnct,
+                         ncol = 2, nrow = 1)
+dev.off()
+
+
+############## Try the same graph as above but with just base case parameter draw ######
+path_to_results_folder <- "C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/basecase"# on my work PC
+#path_to_results_folder <- "/Users/laurakeating/Documents/R/R_scripts/BTPD_PVA/Results/BTPD_baseline_results_march17"# on my mac
+setwd(path_to_results_folder) # on my mac
+files <-  list.files(path = ".","*.RData", full.names="TRUE")
+
+# NOTE: IF GO THIS ROUTE, MAY WANT TO RUN MORE ITERATIONS THAN NEEDED FOR CONVERGENCE AT YEAR 50 BECAUSE IT IS 0
+
+# Load the Rdata file
+
+files_basecase <-  list.files(path = ".","*basecase.RData", full.names="TRUE")
+# i = 1  
+
+for(i in 1:length(files_basecase)){
+  
+  print(paste('basecase for alternative #', i))
+  
+  load(files_basecase[i])
+  
+  # Make the classes factors
+  
+  results_all_iterations$class <- factor(results_all_iterations$class, levels = c("eggs", "tadpoles", "yoy", "juv", "A2", "A3", "A4plus"))
+  results_basecase <- results_all_iterations # initalize
+  
+  # Remove eggs and tadpoles as they are intermediate stages in the year and we just want the pop size at the fall census
+  results_basecase_fall <- results_all_iterations # initalize
+  
+  for(j in 1:yrs){
+    nrow(results_basecase_fall)
+    results_basecase_fall[which(results_basecase_fall$class == "eggs"),paste(j)] <- 0
+    results_basecase_fall[which(results_basecase_fall$class == "tadpoles"),paste(j)] <- 0 
+  }
+  
+  
+  results_summary_basecase <- dapva::makeResultsSummaryOneIteration(results_basecase_fall,
+                                                 by_pop = 'no',
+                                                 initial_year = 1,
+                                                 yrs = 50,
+                                                 n_iter = 1,
+                                                 n_runs_per_iter = length(unique(results_basecase_fall$run)),
+                                                 alternative = paste0(alternative_details$alt_name_full),
+                                                 iteration_number = 1,
+                                                 prob_self_sustain = TRUE,
+                                                 lambda_over_x_years = 10)
+  #Write out the results so can load them all in later
+  write.csv(results_summary_basecase, file = paste0("results_summary_basecase_", name, version,".csv"), row.names = FALSE)
+
+} # close for loop through each file
+
+
+
+# Graph the results
+# Point here is that if we combine parametric and process uncertainty then:
+# Results seem more optimistic (in this case); point is that it is different
+# Don't get any insights into where we should put more effort to learn more to make a more informed decision
+
+# Upload all of the results in the results folder and bind them together
+temp_iter <- list.files(pattern="*results_summary_basecase_")
+results_summary_basecase_list <- lapply(temp_iter, read.csv)
+results_summary_basecase_allAlt <- do.call(rbind, results_summary_basecase_list)
+colnames(results_summary_basecase_allAlt)[7:ncol(results_summary_basecase_allAlt)] <- 1:50
+
+
+results_summary_prob_persist_basecase <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations  = results_summary_basecase_allAlt,
+                                                                                 metric = "probability of persistence",
+                                                                                 initial_year = 1, credible_interval = 0.95)
+
+# (persistence_graph_combineUnct <- dapva::graphResultsSummary(results_summary_prob_persist_combineUnct))
+
+
+
+# Make a summary graph with just the level of effort alternatives to show the difference
+
+
+
+# Add the Do Nothing scenario, which is 0 since population is currently extirpated with no chance of natural recovery
+do_Nothing <- results_summary_prob_persist_basecase[1:yrs,] # initalize
+do_Nothing$mean <- 0
+do_Nothing$median <- 0
+do_Nothing$lcl <- 0
+do_Nothing$ucl <- 0
+do_Nothing$n_iter <- 0
+do_Nothing$n_runs_per_iter <- 0
+do_Nothing$alternative <- "Do Nothing"
+results_summary_prob_persist_basecase <- rbind(results_summary_prob_persist_basecase, do_Nothing)
+
+# Alternatives of interest
+goBig_alt_name  <- "Go Big or Go Home "
+mostReal_alt_name  <- "Middle of the Road"
+lowEffort_alt_name  <- "Minimum Funding Availabilty / Low Effort"
+doNothing_alt_name  <- "Do Nothing"
+
+int10 <- results_summary_prob_persist_basecase [c(which(results_summary_prob_persist_basecase$alternative == goBig_alt_name),
+                                                   which(results_summary_prob_persist_basecase$alternative == mostReal_alt_name),
+                                                   which(results_summary_prob_persist_basecase$alternative == lowEffort_alt_name),
+                                                   which(results_summary_prob_persist_basecase$alternative == doNothing_alt_name)),]
+int10$alternative[which(int10$alternative == goBig_alt_name)] <- "Go Big or Go Home" # get rid of the extra space
+int10$alternative[which(int10$alternative == lowEffort_alt_name)] <- "Minimum Funding / Low Effort" # put it on two lines
+
+
+int10$alternative <- factor(int10$alternative, levels=c("Do Nothing", "Minimum Funding / Low Effort",
+                                                      "Middle of the Road", "Go Big or Go Home")) # reorder factor levels
+
+(persist_effort_graph_basecase <- dapva::graphResultsSummary(results_summary = int10,
+                                                                overlap = FALSE,
+                                                                title = 'A)',
+                                                                x_axis_lab = "Year",
+                                                                y_axis_lab = "\n Probability of Persistence \n ")) # The extra lines push the title out to the same spot as in panel B)
+
+
+path_to_results_folder <- "C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results"# on my work PC
+#path_to_results_folder <- "/Users/laurakeating/Documents/R/R_scripts/BTPD_PVA/Results/BTPD_baseline_results_march17"# on my mac
+setwd(path_to_results_folder) # on my mac
+files <-  list.files(path = ".","*.RData", full.names="TRUE")
+
+
+filename <- paste("ForReport/compare_persist_diffapproaches", version,".tiff", sep="")
+tiff(filename, width=12, height=8, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600,
+     restoreConsole=TRUE)
+gridExtra:: grid.arrange(persist_effort_graph_basecase, 
+                         persist_effort_graph_combineUnct,
+                         persist_effort_graph1,  
+                         ncol = 3, nrow = 1)
+dev.off()
+
+
+
+
+
+
+
+############## Load basecase results for one alternative to use in the examples in the appendices ######
 # Load the Rdata file
 
 files_basecase <-  list.files(path = ".","*basecase.RData", full.names="TRUE")
@@ -987,8 +1234,6 @@ ggplot2::ggplot(survival_w_threats_comparison_long, ggplot2::aes(x = threats, y 
 
 ############## Explore the problem with the beta distribution and too big SDs... #####################
 
-
-
 # Visualization code from ?dbeta help file
 # dbeta is the density function where the x axis is the survival rate
 # pbeta is the cumulative distribution function where x axis is the survival rate and y axis is the prob that survival is less than or qual
@@ -1013,13 +1258,14 @@ pl.beta <- function(title, a,b, asp = if(isLim) 1, ylim = if(isLim) c(0,1.1)) {
 }
 
 
-# BASE CASE
+# BASE CASE info
 inputs_all <- dapva4nlf::getNLFIdahoFeasinputs()
 inputs <- inputs_all[[1]]
 parameterByIterTracking_baseCase <- selectNLFIdahoParameterByIterTracking(inputs, base_case = TRUE)
 parameterByIterTracking <- parameterByIterTracking_baseCase
 
-# BASE CASE - eggs, no threats
+# Example one - base case parameter draw, no threat survival for eggs
+
 s_eggs_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_eggs_no_threats")])
 s_eggs_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_eggs_no_threats")])
 s_eggs_no_threats_dist <- dapva::estBetaParams(mean = s_eggs_mean, sd = s_eggs_sd)
@@ -1028,24 +1274,7 @@ pl.beta(s_eggs_no_threats_dist$alpha,
         s_eggs_no_threats_dist$beta, 
         title = "base case (P50) egg survival, no threats") 
 
-# BASE CASE - eggs with threats
-s_pct_reduced_eggs_bullfrogs <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_eggs_bullfrogs")])
-s_pct_reduced_eggs_chytrid <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_eggs_chytrid")])
-s_pct_reduced_eggs_roads <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_eggs_roads")])
-
-s_eggs_afterThreats_mean <- (1-as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_eggs_roads")])/100)*
-  (1-as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_eggs_chytrid")])/100)*
-  (1-s_pct_reduced_eggs_bullfrogs/100)*
-  s_eggs_mean # note quite how it is in the code at the moment since this reduction is applied after EV, but here to illustrate; perhaps should update so do it this way and apply EV after? don't think it will matter
-
-s_eggs_w_threats_dist <- dapva::estBetaParams(mean = s_eggs_afterThreats_mean, sd = s_eggs_sd)
-
-pl.beta(s_eggs_w_threats_dist$alpha, 
-        s_eggs_w_threats_dist$beta, 
-        title = "base case (P50) egg survival with bullfrogs, chytrid, and roads") 
-
-
-
+# Example two - base case parameter draw, no threat survival for tadpoles
 
 # BASE CASE - tadpoles, no threats
 s_tadpoles_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_tadpoles_no_threats")])
@@ -1056,107 +1285,51 @@ pl.beta(s_tadpoles_no_threats_dist$alpha,
         s_tadpoles_no_threats_dist$beta, 
         title = "base case (P50) tadpole survival, no threats") 
 
-# BASE CASE - tadpoles with threats
-s_pct_reduced_tadpoles_bullfrogs <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_tadpoles_bullfrogs")])
-s_pct_reduced_tadpoles_chytrid <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_tadpoles_chytrid")])
-s_pct_reduced_tadpoles_roads <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_tadpoles_roads")])
-
-s_tadpoles_afterThreats_mean <- (1-as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_tadpoles_roads")])/100)*
-  (1-as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_tadpoles_chytrid")])/100)*
-  (1-s_pct_reduced_tadpoles_bullfrogs/100)*
-  s_tadpoles_mean # note quite how it is in the code at the moment since this reduction is applied after EV, but here to illustrate; perhaps should update so do it this way and apply EV after? don't think it will matter
-
-s_tadpoles_w_threats_dist <- dapva::estBetaParams(mean = s_tadpoles_afterThreats_mean, sd = s_tadpoles_sd)
-
-pl.beta(s_tadpoles_w_threats_dist$alpha, 
-        s_tadpoles_w_threats_dist$beta, 
-        title = "base case (P50) tadpole survival with bullfrogs, chytrid, and roads") 
-
-
-
-# BASE CASE - yoy, no threats
-s_yoy_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_yoy_no_threats")])
-s_yoy_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_yoy_no_threats")])
-s_yoy_no_threats_dist <- dapva::estBetaParams(mean = s_yoy_mean, sd = s_yoy_sd)
-
-pl.beta(s_yoy_no_threats_dist$alpha, 
-        s_yoy_no_threats_dist$beta, 
-        title = "base case (P50) yoy survival, no threats") 
-
-# BASE CASE - yoy with threats
-s_pct_reduced_yoy_bullfrogs <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_yoy_bullfrogs")])
-s_pct_reduced_yoy_chytrid <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_yoy_chytrid")])
-s_pct_reduced_yoy_roads <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_yoy_roads")])
-
-s_yoy_afterThreats_mean <- (1-as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_yoy_roads")])/100)*
-  (1-as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_yoy_chytrid")])/100)*
-  (1-s_pct_reduced_yoy_bullfrogs/100)*
-  s_yoy_mean # note quite how it is in the code at the moment since this reduction is applied after EV, but here to illustrate; perhaps should update so do it this way and apply EV after? don't think it will matter
-
-s_yoy_w_threats_dist <- dapva::estBetaParams(mean = s_yoy_afterThreats_mean, sd = s_yoy_sd)
-
-pl.beta(s_yoy_w_threats_dist$alpha, 
-        s_yoy_w_threats_dist$beta, 
-        title = "base case (P50) yoy survival with bullfrogs, chytrid, and roads") 
-
-
-# BASE CASE - juv, no threats
-s_juv_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_juv_no_threats")])
-s_juv_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_juv_no_threats")])
-s_juv_no_threats_dist <- dapva::estBetaParams(mean = s_juv_mean, sd = s_juv_sd)
-
-pl.beta(s_juv_no_threats_dist$alpha, 
-        s_juv_no_threats_dist$beta, 
-        title = "base case (P50) juv survival, no threats") 
-
-# BASE CASE - juv with threats
-s_pct_reduced_juv_bullfrogs <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_juvenile_bullfrogs")])
-s_pct_reduced_juv_chytrid <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_juvenile_chytrid")])
-s_pct_reduced_juv_roads <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_juvenile_roads")])
-
-s_juv_afterThreats_mean <- (1-as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_juvenile_roads")])/100)*
-  (1-as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_juvenile_chytrid")])/100)*
-  (1-s_pct_reduced_juv_bullfrogs/100)*
-  s_juv_mean # note quite how it is in the code at the moment since this reduction is applied after EV, but here to illustrate; perhaps should update so do it this way and apply EV after? don't think it will matter
-
-s_juv_w_threats_dist <- dapva::estBetaParams(mean = s_juv_afterThreats_mean, sd = s_juv_sd)
-
-pl.beta(s_juv_w_threats_dist$alpha, 
-        s_juv_w_threats_dist$beta, 
-        title = "base case (P50) juv survival with bullfrogs, chytrid, and roads") 
-
-# BASE CASE - adult, no threats
-s_adult_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_adult_no_threats")])
-s_adult_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_adult_no_threats")])
-s_adult_no_threats_dist <- dapva::estBetaParams(mean = s_adult_mean, sd = s_adult_sd)
-
-pl.beta(s_adult_no_threats_dist$alpha, 
-        s_adult_no_threats_dist$beta, 
-        title = "base case (P50) adult survival, no threats") 
-
-# BASE CASE - adult with threats
-s_pct_reduced_adult_bullfrogs <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_adult_bullfrogs")])
-s_pct_reduced_adult_chytrid <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_adult_chytrid")])
-s_pct_reduced_adult_roads <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_adult_roads")])
-
-s_adult_afterThreats_mean <- (1-as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_adult_roads")])/100)*
-  (1-as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_adult_chytrid")])/100)*
-  (1-s_pct_reduced_adult_bullfrogs/100)*
-  s_adult_mean # note quite how it is in the code at the moment since this reduction is applied after EV, but here to illustrate; perhaps should update so do it this way and apply EV after? don't think it will matter
-
-s_adult_w_threats_dist <- dapva::estBetaParams(mean = s_adult_afterThreats_mean, sd = s_adult_sd)
-
-pl.beta(s_adult_w_threats_dist$alpha, 
-        s_adult_w_threats_dist$beta, 
-        title = "base case (P50) adult survival with bullfrogs, chytrid, and roads") 
-
-
-
 # NOTE: funny shape when mean values are too close to 0 or 1, as in tadpole survival
 # Explained at https://stats.stackexchange.com/questions/380833/std-dev-should-be-less-than-0-289-help-in-understanding
-# One solution might be to put a limit on it so that if the mean survival is a certain level of closesness to 0 or 1 then it just gets assigned the mean
+# One solution might be to put a limit on it so that if the mean survival is a certain level of closeness to 0 or 1 then it just gets assigned the mean
 # I think this may be happening in my code anyways but not here where I am plotting it, need to look closer...
 
+# Example to play with - base case parameter draw, no threat survival for tadpoles
+s_tadpoles_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_tadpoles_no_threats")])
+s_tadpoles_sd <- 0.24 #0.01
+s_tadpoles_no_threats_dist <- dapva::estBetaParams(mean = s_tadpoles_mean, sd = s_tadpoles_sd)
+
+pl.beta(s_tadpoles_no_threats_dist$alpha, 
+        s_tadpoles_no_threats_dist$beta, 
+        title = "base case (P50) tadpole survival, no threats") 
+
+# BUT this still works
+
+# However, if the mean is too close to 0 (or 1) then the alpha and beta are negative, which doesn't work
+
+
+s_tadpoles_mean <- 0.01
+s_tadpoles_sd <- 0.07 #0.14 
+# Travis and Karen's paper used 10% of the mean; to see what that looks like, use 
+# s_tadpoles_sd <- 0.1*s_tadpoles_mean
+
+# dapva::selectPercentileBetaDistribution(
+#     mean = s_tadpoles_mean,
+#     sd = s_tadpoles_sd,
+#     EV_percentile = 0.1
+#     )
+s_tadpoles_no_threats_dist <- dapva::estBetaParams(mean = s_tadpoles_mean, sd = s_tadpoles_sd)
+pl.beta(s_tadpoles_no_threats_dist$alpha, 
+        s_tadpoles_no_threats_dist$beta, 
+        title = "base case (P50) tadpole survival, no threats") 
+
+int <- dapva::estBetaParams(mean = s_tadpoles_mean, sd = s_tadpoles_sd)
+alpha <- int$alpha
+beta <- int$beta
+
+EV_percentile <- 0.5
+stats::qbeta(EV_percentile, alpha, beta)
+
+
+# According to the book (https://books.google.ca/books?id=ZRMJ-CebFm4C&pg=PA83&dq=&redir_esc=y#v=onepage&q&f=false),
+# technically non-negative alpha and beta are allowed if you are confident it is really close to 0 or 1. BUT
+# the qbeta function does not allow it.
 
 
 
