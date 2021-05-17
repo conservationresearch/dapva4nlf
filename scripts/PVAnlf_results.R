@@ -109,7 +109,7 @@ for (i in 1:length(files)){
 
 }
 
-#---- Graph the overall results for all the scenarios/alternatives. ----
+#---- Graph the overall results for all the scenarios/alternatives - explore the results. ----
 
 # Upload all of the results in the results folder and bind them together
 temp_iter <- list.files(pattern="*results_overall_")
@@ -192,6 +192,382 @@ results_summary_prob_selfsustaining_table <- results_summary_prob_selfsustaining
 # Export this probability of persistence results summary table
 filename <- paste("probSelfSustain_summary_table", version, "_iter_", n_iter, ".csv", sep="")
 write.csv(results_summary_prob_selfsustaining_table, file = filename)
+
+
+#---- Make graphs for the report - level of effort, persistence. ----
+
+# Get a fresh load of the results
+# Upload all of the results in the results folder and bind them together
+temp_iter <- list.files(pattern="*results_overall_")
+results_all_iter_list <- lapply(temp_iter, read.csv)
+results_all_iter <- do.call(rbind, results_all_iter_list)
+colnames(results_all_iter)[7:ncol(results_all_iter)] <- 1:50
+
+# Graph over time
+# Pull out the results summary
+results_summary_prob_persist <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations  = results_all_iter,
+                                                                     metric = "probability of persistence",
+                                                                     initial_year = 1, credible_interval = 0.95)
+
+# Add the Do Nothing scenario, which is 0 since population is currently extirpated with no chance of natural recovery
+do_Nothing <- results_summary_prob_persist[1:yrs,] # initalize
+do_Nothing$mean <- 0
+do_Nothing$median <- 0
+do_Nothing$lcl <- 0
+do_Nothing$ucl <- 0
+do_Nothing$n_iter <- 0
+do_Nothing$n_runs_per_iter <- 0
+do_Nothing$alternative <- "Do Nothing"
+results_summary_prob_persist <- rbind(results_summary_prob_persist, do_Nothing)
+
+# Best Guess vs Status Quo
+goBig_alt_name  <- "Go Big or Go Home "
+mostReal_alt_name  <- "Middle of the Road"
+lowEffort_alt_name  <- "Minimum Funding Availabilty / Low Effort"
+doNothing_alt_name  <- "Do Nothing"
+
+int <- results_summary_prob_persist[c(which(results_summary_prob_persist$alternative == goBig_alt_name),
+                                      which(results_summary_prob_persist$alternative == mostReal_alt_name),
+                                      which(results_summary_prob_persist$alternative == lowEffort_alt_name),
+                                      which(results_summary_prob_persist$alternative == doNothing_alt_name)),]
+int$alternative[which(int$alternative == goBig_alt_name)] <- "Go Big or Go Home" # get rid of the extra space
+int$alternative[which(int$alternative == lowEffort_alt_name)] <- "Minimum Funding / Low Effort" # put it on two lines
+
+
+int$alternative<- factor(int$alternative, levels=c("Do Nothing", "Minimum Funding / Low Effort",
+                                                   "Middle of the Road", "Go Big or Go Home")) # reorder factor levels
+
+(persist_effort_graph1 <- graphResultsSummary(results_summary = int,
+                                       overlap = FALSE,
+                                       title = 'A)',
+                                       x_axis_lab = "Year",
+                                       y_axis_lab = "\n Probability of Persistence \n ")) # The extra lines push the title out to the same spot as in panel B)
+
+
+# Flying Bars
+
+# Add the Do Nothing scenario, which is 0 since population is currently extirpated with no chance of natural recovery
+do_Nothing <- results_all_iter[1,] # initalize
+do_Nothing$metric <- "probability of persistence"
+do_Nothing$alternative <- "Do Nothing"
+do_Nothing$n_iter <- 0
+do_Nothing$n_runs_per_iter <- 0
+do_Nothing[1,7:(7+yrs-1)] <- rep(0, time = yrs)
+results_all_iter <- rbind(results_all_iter, do_Nothing, do_Nothing, do_Nothing)
+
+
+int2 <- results_all_iter[c(which(results_all_iter$alternative == goBig_alt_name),
+                           which(results_all_iter$alternative == mostReal_alt_name),
+                           which(results_all_iter$alternative == lowEffort_alt_name),
+                           which(results_all_iter$alternative == doNothing_alt_name)),]
+int2$alternative[which(int2$alternative == goBig_alt_name)] <- "Go Big or Go Home" # get rid of the extra space
+int2$alternative[which(int2$alternative == lowEffort_alt_name)] <- "Minimum Funding /\n Low Effort" # put it on two lines
+
+int2$alternative<- factor(int2$alternative, levels=c("Go Big or Go Home", "Middle of the Road",
+                                                    "Minimum Funding /\n Low Effort",
+                                                    "Do Nothing" )) # reorder factor levels
+
+(persistence_effort_flyingBars1 <- graphFlyingBars(results_summary_all_iterations = int2,
+                                            metric = "probability of persistence",
+                                            year = yrs,
+                                            credible_interval = 0.95,
+                                            x_axis_lab = "Probability of Persistence in Year 50",
+                                            y_axis_lab = "\n Management Alternative",
+                                            # title = 'B)'))
+                                            title = ''))
+
+# filename <- paste("ForReport/graph_panel_effort_persist", version,".tiff", sep="")
+# tiff(filename, width=12, height=8, units="in",
+#      pointsize=8, compression="lzw", bg="white", res=600,
+#      restoreConsole=TRUE)
+# grid.arrange(persist_effort_graph1, persistence_effort_flyingBars1,
+#              ncol = 1, nrow = 2)
+# dev.off()
+
+#---- Make graphs for the report - level of effort, self-sustaining. ----
+# Get a fresh load of the results
+# Upload all of the results in the results folder and bind them together
+temp_iter <- list.files(pattern="*results_overall_")
+results_all_iter_list <- lapply(temp_iter, read.csv)
+results_all_iter <- do.call(rbind, results_all_iter_list)
+colnames(results_all_iter)[7:ncol(results_all_iter)] <- 1:50
+
+# Graph over time
+# Pull out the results summary
+results_summary_prob_selfsustaining <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations  = results_all_iter,
+                                                                            metric = "probability of self-sustaining population",
+                                                                            initial_year = 1, credible_interval = 0.95)
+
+# Add the Do Nothing scenario, which is 0 since population is currently extirpated with no chance of natural recovery
+do_Nothing <- results_summary_prob_selfsustaining[1:yrs,] # initalize
+do_Nothing$mean <- 0
+do_Nothing$median <- 0
+do_Nothing$lcl <- 0
+do_Nothing$ucl <- 0
+do_Nothing$n_iter <- 0
+do_Nothing$n_runs_per_iter <- 0
+do_Nothing$alternative <- "Do Nothing"
+results_summary_prob_selfsustaining <- rbind(results_summary_prob_selfsustaining, do_Nothing)
+
+# Best Guess vs Status Quo
+goBig_alt_name  <- "Go Big or Go Home "
+mostReal_alt_name  <- "Middle of the Road"
+lowEffort_alt_name  <- "Minimum Funding Availabilty / Low Effort"
+doNothing_alt_name  <- "Do Nothing"
+
+int3 <- results_summary_prob_selfsustaining[c(which(results_summary_prob_selfsustaining$alternative == goBig_alt_name),
+                                      which(results_summary_prob_selfsustaining$alternative == mostReal_alt_name),
+                                      which(results_summary_prob_selfsustaining$alternative == lowEffort_alt_name),
+                                      which(results_summary_prob_selfsustaining$alternative == doNothing_alt_name)),]
+int3$alternative[which(int3$alternative == goBig_alt_name)] <- "Go Big or Go Home" # get rid of the extra space
+int3$alternative[which(int3$alternative == lowEffort_alt_name)] <- "Minimum Funding / Low Effort" # put it on two lines
+
+
+int3$alternative <- factor(int3$alternative, levels=c("Do Nothing", "Minimum Funding / Low Effort",
+                                                   "Middle of the Road", "Go Big or Go Home")) # reorder factor levels
+
+(selfsustain_effort_graph1 <- graphResultsSummary(results_summary = int3,
+                                              overlap = FALSE,
+                                              # title = 'A)',
+                                              title = 'B)',
+                                              x_axis_lab = "Year",
+                                              # y_axis_lab = "Probability of a Self-Sustaining Population \n \n ")) # The extra lines push the title out to the same spot as in panel B)
+                                              y_axis_lab = "\n Probability of a Self-Sustaining Population \n")) # The extra lines push the title out to the same spot as in panel B)
+
+
+# Flying Bars
+
+# Add the Do Nothing scenario, which is 0 since population is currently extirpated with no chance of natural recovery
+do_Nothing <- results_all_iter[1,] # initalize
+do_Nothing$metric <- "probability of self-sustaining population"
+do_Nothing$alternative <- "Do Nothing"
+do_Nothing$n_iter <- 0
+do_Nothing$n_runs_per_iter <- 0
+do_Nothing[1,7:(7+yrs-1)] <- rep(0, time = yrs)
+results_all_iter <- rbind(results_all_iter, do_Nothing, do_Nothing, do_Nothing)
+
+
+int4 <- results_all_iter[c(which(results_all_iter$alternative == goBig_alt_name),
+                           which(results_all_iter$alternative == mostReal_alt_name),
+                           which(results_all_iter$alternative == lowEffort_alt_name),
+                           which(results_all_iter$alternative == doNothing_alt_name)),]
+int4$alternative[which(int4$alternative == goBig_alt_name)] <- "Go Big or Go Home" # get rid of the extra space
+int4$alternative[which(int4$alternative == lowEffort_alt_name)] <- "Minimum Funding /\n Low Effort" # put it on two lines
+
+int4$alternative <- factor(int4$alternative, levels=c("Go Big or Go Home", "Middle of the Road",
+                                                     "Minimum Funding /\n Low Effort",
+                                                     "Do Nothing" )) # reorder factor levels
+
+(selfsustain_effort_flyingBars1 <- graphFlyingBars(results_summary_all_iterations = int4,
+                                                   metric = "probability of self-sustaining population",
+                                                   year = yrs,
+                                                   credible_interval = 0.95,
+                                                   x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",
+                                                   y_axis_lab = "\n Management Alternative",
+                                                   # title = 'B)'))
+                                                   title = ''))
+
+# filename <- paste("ForReport/graph_panel_effort_selfsustain", version,".tiff", sep="")
+# tiff(filename, width=12, height=8, units="in",
+#      pointsize=8, compression="lzw", bg="white", res=600,
+#      restoreConsole=TRUE)
+# grid.arrange(selfsustain_effort_graph1, selfsustain_effort_flyingBars1,
+#              ncol = 1, nrow = 2)
+# dev.off()
+
+
+#---- Make graphs for the report - level of effort, panel for export. ----
+
+filename <- paste("ForReport/graph_panel_effort", version,".tiff", sep="")
+tiff(filename, width=12, height=8, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600,
+     restoreConsole=TRUE)
+grid.arrange(persist_effort_graph1,  selfsustain_effort_graph1,
+             persistence_effort_flyingBars1, selfsustain_effort_flyingBars1,
+             ncol = 2, nrow = 2)
+dev.off()
+
+
+
+
+
+#---- Make graphs for the report - variations on Go Big, persistence. ----
+
+# Get a fresh load of the results
+# Upload all of the results in the results folder and bind them together
+temp_iter <- list.files(pattern="*results_overall_")
+results_all_iter_list <- lapply(temp_iter, read.csv)
+results_all_iter <- do.call(rbind, results_all_iter_list)
+colnames(results_all_iter)[7:ncol(results_all_iter)] <- 1:50
+
+# Graph over time
+# Pull out the results summary
+results_summary_prob_persist <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations  = results_all_iter,
+                                                                     metric = "probability of persistence",
+                                                                     initial_year = 1, credible_interval = 0.95)
+
+
+# PUll out the alternatives of interest
+goBig_alt_name  <- "Go Big or Go Home "
+oneWetland_alt_name  <- "Try Hard at One Wetland"
+fewTadpoles_alt_name  <- "Try Hard but Few Tadpoles"
+noBFM_alt_name  <- "Try Hard but No Bullfrog Management"
+short_alt_name  <- "Try Hard but Short"
+noHabRest_alt_name  <- "Try Hard but No Habitat Restoration" # still missing this one
+
+int5 <- results_summary_prob_persist[c(which(results_summary_prob_persist$alternative == goBig_alt_name),
+                                      which(results_summary_prob_persist$alternative == oneWetland_alt_name),
+                                      which(results_summary_prob_persist$alternative == fewTadpoles_alt_name),
+                                      which(results_summary_prob_persist$alternative == noBFM_alt_name),
+                                      which(results_summary_prob_persist$alternative == noHabRest_alt_name),
+                                      which(results_summary_prob_persist$alternative == short_alt_name)),]
+int5$alternative[which(int5$alternative == goBig_alt_name)] <- "Go Big or Go Home" # get rid of the extra space
+
+
+int5$alternative<- factor(int5$alternative, levels=c("Go Big or Go Home", "Try Hard but Few Tadpoles",
+                                                   "Try Hard but No Bullfrog Management", "Try Hard but No Habitat Restoration",
+                                                   "Try Hard but Short", "Try Hard at One Wetland")) # reorder factor levels
+
+(persist_goBigVar_graph1 <- graphResultsSummary(results_summary = int5,
+                                              overlap = FALSE,
+                                              title = 'A)',
+                                              x_axis_lab = "Year",
+                                              y_axis_lab = "\n Probability of Persistence \n ")) # The extra lines push the title out to the same spot as in panel B)
+
+
+# Flying Bars
+
+int6 <- results_all_iter[c(which(results_all_iter$alternative == goBig_alt_name),
+                           which(results_all_iter$alternative == oneWetland_alt_name),
+                           which(results_all_iter$alternative == fewTadpoles_alt_name),
+                           which(results_all_iter$alternative == noBFM_alt_name),
+                           which(results_all_iter$alternative == noHabRest_alt_name),
+                           which(results_all_iter$alternative == short_alt_name)),]
+int6$alternative[which(int6$alternative == goBig_alt_name)] <- "Go Big or Go Home" # get rid of the extra space
+int6$alternative[which(int6$alternative == noBFM_alt_name)] <- "Try Hard but \n No Bullfrog Management" # put it on two lines
+
+
+int6$alternative<- factor(int6$alternative, levels=c("Try Hard at One Wetland",
+                                                     "Try Hard but Short",
+                                                     "Try Hard but No Habitat Restoration",
+                                                     "Try Hard but \n No Bullfrog Management", 
+                                                     "Try Hard but Few Tadpoles",
+                                                     "Go Big or Go Home")) # reorder factor levels
+
+
+(persistence_goBigVar_flyingBars1 <- graphFlyingBars(results_summary_all_iterations = int6,
+                                                   metric = "probability of persistence",
+                                                   year = yrs,
+                                                   credible_interval = 0.95,
+                                                   x_axis_lab = "Probability of Persistence in Year 50",
+                                                   y_axis_lab = "\n Management Alternative",
+                                                   # title = 'B)'))
+                                                   title = ''))
+
+# filename <- paste("ForReport/graph_panel_effort_persist", version,".tiff", sep="")
+# tiff(filename, width=12, height=8, units="in",
+#      pointsize=8, compression="lzw", bg="white", res=600,
+#      restoreConsole=TRUE)
+# grid.arrange(persist_effort_graph1, persistence_effort_flyingBars1,
+#              ncol = 1, nrow = 2)
+# dev.off()
+
+
+
+
+#---- Make graphs for the report - variations on Go Big, self-sustaining. ----
+# Get a fresh load of the results
+# Upload all of the results in the results folder and bind them together
+temp_iter <- list.files(pattern="*results_overall_")
+results_all_iter_list <- lapply(temp_iter, read.csv)
+results_all_iter <- do.call(rbind, results_all_iter_list)
+colnames(results_all_iter)[7:ncol(results_all_iter)] <- 1:50
+
+# Graph over time
+# Pull out the results summary
+results_summary_prob_selfsustaining <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations  = results_all_iter,
+                                                                            metric = "probability of self-sustaining population",
+                                                                            initial_year = 1, credible_interval = 0.95)
+
+# PUll out the alternatives of interest
+goBig_alt_name  <- "Go Big or Go Home "
+oneWetland_alt_name  <- "Try Hard at One Wetland"
+fewTadpoles_alt_name  <- "Try Hard but Few Tadpoles"
+noBFM_alt_name  <- "Try Hard but No Bullfrog Management"
+short_alt_name  <- "Try Hard but Short"
+noHabRest_alt_name  <- "Try Hard but No Habitat Restoration" # still missing this one
+
+int7 <- results_summary_prob_selfsustaining[c(which(results_summary_prob_selfsustaining$alternative == goBig_alt_name),
+                                              which(results_summary_prob_selfsustaining$alternative == oneWetland_alt_name),
+                                              which(results_summary_prob_selfsustaining$alternative == fewTadpoles_alt_name),
+                                              which(results_summary_prob_selfsustaining$alternative == noBFM_alt_name),
+                                              which(results_summary_prob_selfsustaining$alternative == noHabRest_alt_name),
+                                              which(results_summary_prob_selfsustaining$alternative == short_alt_name)),]
+
+int7$alternative[which(int7$alternative == goBig_alt_name)] <- "Go Big or Go Home" # get rid of the extra space
+
+
+int7$alternative<- factor(int7$alternative, levels=c("Go Big or Go Home", "Try Hard but Few Tadpoles",
+                                                     "Try Hard but No Bullfrog Management", "Try Hard but No Habitat Restoration",
+                                                     "Try Hard but Short", "Try Hard at One Wetland")) # reorder factor levels
+
+(selfsustain_goBigVar_graph1 <- graphResultsSummary(results_summary = int7,
+                                                  overlap = FALSE,
+                                                  # title = 'A)',
+                                                  title = 'B)',
+                                                  x_axis_lab = "Year",
+                                                  # y_axis_lab = "Probability of a Self-Sustaining Population \n \n ")) # The extra lines push the title out to the same spot as in panel B)
+                                                  y_axis_lab = "\n Probability of a Self-Sustaining Population \n")) # The extra lines push the title out to the same spot as in panel B)
+
+
+# Flying Bars
+
+int8 <- results_all_iter[c(which(results_all_iter$alternative == goBig_alt_name),
+                           which(results_all_iter$alternative == oneWetland_alt_name),
+                           which(results_all_iter$alternative == fewTadpoles_alt_name),
+                           which(results_all_iter$alternative == noBFM_alt_name),
+                           which(results_all_iter$alternative == noHabRest_alt_name),
+                           which(results_all_iter$alternative == short_alt_name)),]
+int8$alternative[which(int8$alternative == goBig_alt_name)] <- "Go Big or Go Home" # get rid of the extra space
+int8$alternative[which(int8$alternative == noBFM_alt_name)] <- "Try Hard but \n No Bullfrog Management" # put it on two lines
+
+int8$alternative<- factor(int8$alternative, levels=c("Try Hard at One Wetland",
+                                                     "Try Hard but Short",
+                                                     "Try Hard but No Habitat Restoration",
+                                                     "Try Hard but \n No Bullfrog Management", 
+                                                     "Try Hard but Few Tadpoles",
+                                                     "Go Big or Go Home")) # reorder factor levels
+
+(selfsustain_goBigVar_flyingBars1 <- graphFlyingBars(results_summary_all_iterations = int8,
+                                                   metric = "probability of self-sustaining population",
+                                                   year = yrs,
+                                                   credible_interval = 0.95,
+                                                   x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",
+                                                   y_axis_lab = "\n Management Alternative",
+                                                   # title = 'B)'))
+                                                   title = ''))
+
+# filename <- paste("ForReport/graph_panel_effort_selfsustain", version,".tiff", sep="")
+# tiff(filename, width=12, height=8, units="in",
+#      pointsize=8, compression="lzw", bg="white", res=600,
+#      restoreConsole=TRUE)
+# grid.arrange(selfsustain_effort_graph1, selfsustain_effort_flyingBars1,
+#              ncol = 1, nrow = 2)
+# dev.off()
+
+
+#---- Make graphs for the report -goBigVar, panel for export. ----
+
+filename <- paste("ForReport/graph_panel_goBigVar", version,".tiff", sep="")
+tiff(filename, width=12, height=8, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600,
+     restoreConsole=TRUE)
+grid.arrange(persist_goBigVar_graph1,  selfsustain_goBigVar_graph1,
+             persistence_goBigVar_flyingBars1, selfsustain_goBigVar_flyingBars1,
+             ncol = 2, nrow = 2)
+dev.off()
+
+
 
 
 
@@ -452,6 +828,167 @@ results_summary_prob_persist <- dapva::makeResultsSummaryMultipleAlt(results_sum
 
 ############## Plot the survival distributions for multiple threats to illustrate for Lea and Rebecca. #####################
 
+# Update - perhaps for this best to just show means; need to explore the SD issue more separately
+
+# BASE CASE
+inputs_all <- dapva4nlf::getNLFIdahoFeasinputs()
+inputs <- inputs_all[[1]]
+parameterByIterTracking_baseCase <- selectNLFIdahoParameterByIterTracking(inputs, base_case = TRUE)
+parameterByIterTracking <- parameterByIterTracking_baseCase
+
+# BASE CASE - eggs, no threats
+s_eggs_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_eggs_no_threats")])
+s_eggs_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_eggs_no_threats")])
+
+
+# BASE CASE - eggs with threats
+s_pct_reduced_eggs_bullfrogs <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_eggs_bullfrogs")])
+s_pct_reduced_eggs_chytrid <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_eggs_chytrid")])
+s_pct_reduced_eggs_roads <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_eggs_roads")])
+
+
+# BASE CASE - tadpoles, no threats
+s_tadpoles_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_tadpoles_no_threats")])
+s_tadpoles_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_tadpoles_no_threats")])
+s_tadpoles_no_threats_dist <- dapva::estBetaParams(mean = s_tadpoles_mean, sd = s_tadpoles_sd)
+
+
+# BASE CASE - tadpoles with threats
+s_pct_reduced_tadpoles_bullfrogs <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_tadpoles_bullfrogs")])
+s_pct_reduced_tadpoles_chytrid <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_tadpoles_chytrid")])
+s_pct_reduced_tadpoles_roads <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_tadpoles_roads")])
+
+# BASE CASE - yoy, no threats
+s_yoy_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_yoy_no_threats")])
+s_yoy_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_yoy_no_threats")])
+s_yoy_no_threats_dist <- dapva::estBetaParams(mean = s_yoy_mean, sd = s_yoy_sd)
+
+# BASE CASE - yoy with threats
+s_pct_reduced_yoy_bullfrogs <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_yoy_bullfrogs")])
+s_pct_reduced_yoy_chytrid <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_yoy_chytrid")])
+s_pct_reduced_yoy_roads <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_yoy_roads")])
+
+
+
+# BASE CASE - juv, no threats
+s_juv_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_juv_no_threats")])
+s_juv_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_juv_no_threats")])
+
+
+# BASE CASE - juv with threats
+s_pct_reduced_juv_bullfrogs <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_juvenile_bullfrogs")])
+s_pct_reduced_juv_chytrid <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_juvenile_chytrid")])
+s_pct_reduced_juv_roads <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_juvenile_roads")])
+
+
+# BASE CASE - adult, no threats
+s_adult_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_adult_no_threats")])
+s_adult_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_adult_no_threats")])
+s_adult_no_threats_dist <- dapva::estBetaParams(mean = s_adult_mean, sd = s_adult_sd)
+
+
+# BASE CASE - adult with threats
+s_pct_reduced_adult_bullfrogs <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_adult_bullfrogs")])
+s_pct_reduced_adult_chytrid <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_adult_chytrid")])
+s_pct_reduced_adult_roads <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_adult_roads")])
+
+
+
+
+survival_w_threats_comparison <- as.data.frame(matrix(nrow = 5, ncol = 7))
+colnames(survival_w_threats_comparison) <- c("life_stage", "no_threat", "chytrid", "roads", "bullfrogs", "chytrid_and_roads",  "all_three")
+
+survival_w_threats_comparison$life_stage[1] <- "eggs to tadpoles"
+survival_w_threats_comparison$no_threat[1] <- s_eggs_mean
+survival_w_threats_comparison$chytrid[1] <- (1-s_pct_reduced_eggs_chytrid/100)*s_eggs_mean 
+survival_w_threats_comparison$roads[1] <- (1-s_pct_reduced_eggs_roads/100)*s_eggs_mean 
+survival_w_threats_comparison$chytrid_and_roads[1] <- (1-s_pct_reduced_eggs_chytrid/100)*
+  (1-s_pct_reduced_eggs_roads/100)*s_eggs_mean 
+survival_w_threats_comparison$bullfrogs[1] <- (1-s_pct_reduced_eggs_bullfrogs/100)*s_eggs_mean 
+survival_w_threats_comparison$all_three[1] <- (1-s_pct_reduced_eggs_chytrid/100)*
+  (1-s_pct_reduced_eggs_roads/100)*
+  (1-s_pct_reduced_eggs_bullfrogs/100)*s_eggs_mean 
+
+survival_w_threats_comparison$life_stage[2] <- "tadpoles to yoy"
+survival_w_threats_comparison$no_threat[2] <- s_tadpoles_mean
+survival_w_threats_comparison$chytrid[2] <- (1-s_pct_reduced_tadpoles_chytrid/100)*s_tadpoles_mean 
+survival_w_threats_comparison$roads[2] <- (1-s_pct_reduced_tadpoles_roads/100)*s_tadpoles_mean 
+survival_w_threats_comparison$chytrid_and_roads[2] <- (1-s_pct_reduced_tadpoles_chytrid/100)*
+  (1-s_pct_reduced_tadpoles_roads/100)*s_tadpoles_mean 
+survival_w_threats_comparison$bullfrogs[2] <- (1-s_pct_reduced_tadpoles_bullfrogs/100)*s_tadpoles_mean 
+survival_w_threats_comparison$all_three[2] <- (1-s_pct_reduced_tadpoles_chytrid/100)*
+  (1-s_pct_reduced_tadpoles_roads/100)*
+  (1-s_pct_reduced_tadpoles_bullfrogs/100)*s_tadpoles_mean 
+
+
+survival_w_threats_comparison$life_stage[3] <- "yoy to juv"
+survival_w_threats_comparison$no_threat[3] <- s_yoy_mean
+survival_w_threats_comparison$chytrid[3] <- (1-s_pct_reduced_yoy_chytrid/100)*s_yoy_mean 
+survival_w_threats_comparison$roads[3] <- (1-s_pct_reduced_yoy_roads/100)*s_yoy_mean 
+survival_w_threats_comparison$chytrid_and_roads[3] <- (1-s_pct_reduced_yoy_chytrid/100)*
+  (1-s_pct_reduced_yoy_roads/100)*s_yoy_mean 
+survival_w_threats_comparison$bullfrogs[3] <- (1-s_pct_reduced_yoy_bullfrogs/100)*s_yoy_mean 
+survival_w_threats_comparison$all_three[3] <- (1-s_pct_reduced_yoy_chytrid/100)*
+  (1-s_pct_reduced_yoy_roads/100)*
+  (1-s_pct_reduced_yoy_bullfrogs/100)*s_yoy_mean 
+
+
+survival_w_threats_comparison$life_stage[4] <- "juv to adult"
+survival_w_threats_comparison$no_threat[4] <- s_juv_mean
+survival_w_threats_comparison$chytrid[4] <- (1-s_pct_reduced_juv_chytrid/100)*s_juv_mean 
+survival_w_threats_comparison$roads[4] <- (1-s_pct_reduced_juv_roads/100)*s_juv_mean 
+survival_w_threats_comparison$chytrid_and_roads[4] <- (1-s_pct_reduced_juv_chytrid/100)*
+  (1-s_pct_reduced_juv_roads/100)*s_juv_mean 
+survival_w_threats_comparison$bullfrogs[4] <- (1-s_pct_reduced_juv_bullfrogs/100)*s_juv_mean 
+survival_w_threats_comparison$all_three[4] <- (1-s_pct_reduced_juv_chytrid/100)*
+  (1-s_pct_reduced_juv_roads/100)*
+  (1-s_pct_reduced_juv_bullfrogs/100)*s_juv_mean 
+
+survival_w_threats_comparison$life_stage[5] <- "adult to adult"
+survival_w_threats_comparison$no_threat[5] <- s_adult_mean
+survival_w_threats_comparison$chytrid[5] <- (1-s_pct_reduced_adult_chytrid/100)*s_adult_mean 
+survival_w_threats_comparison$roads[5] <- (1-s_pct_reduced_adult_roads/100)*s_adult_mean 
+survival_w_threats_comparison$chytrid_and_roads[5] <- (1-s_pct_reduced_adult_chytrid/100)*
+  (1-s_pct_reduced_adult_roads/100)*s_adult_mean 
+survival_w_threats_comparison$bullfrogs[5] <- (1-s_pct_reduced_adult_bullfrogs/100)*s_adult_mean 
+survival_w_threats_comparison$all_three[5] <- (1-s_pct_reduced_adult_chytrid/100)*
+  (1-s_pct_reduced_adult_roads/100)*
+  (1-s_pct_reduced_adult_bullfrogs/100)*s_adult_mean 
+
+
+survival_w_threats_comparison$life_stage <- factor(survival_w_threats_comparison$life_stage, 
+                                                   levels = c("eggs to tadpoles",
+                                                              "tadpoles to yoy", 
+                                                              "yoy to juv", 
+                                                              "juv to adult", "adult to adult"))
+
+
+survival_w_threats_comparison_long <- reshape2::melt(survival_w_threats_comparison,  id.vars=c("life_stage"))
+colnames(survival_w_threats_comparison_long) <- c("life_stage", "threats" , "survival_rate" )
+
+
+ggplot2::ggplot(survival_w_threats_comparison_long, ggplot2::aes(x = threats, y = survival_rate)) +
+  ggplot2::geom_bar(stat="identity") +
+  ggplot2::facet_wrap(~life_stage) +
+  ggplot2::labs(x = "Threats") +
+  ggplot2::labs(y = "Survival Rate") +
+  ggplot2::ggtitle("Base case (P50) mean survival rates with compounding threats") +
+  ggplot2::theme_bw() +
+  ggplot2::theme(
+    panel.grid.major = ggplot2::element_blank(),
+    panel.grid.minor = ggplot2::element_blank(),
+    strip.background = ggplot2::element_blank(),
+    panel.border = ggplot2::element_rect(colour = "black"),
+    text = ggplot2::element_text(size = 12),
+    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+    legend.position = "none"
+  )
+
+
+############## Explore the problem with the beta distribution and too big SDs... #####################
+
+
+
 # Visualization code from ?dbeta help file
 # dbeta is the density function where the x axis is the survival rate
 # pbeta is the cumulative distribution function where x axis is the survival rate and y axis is the prob that survival is less than or qual
@@ -620,98 +1157,6 @@ pl.beta(s_adult_w_threats_dist$alpha,
 # One solution might be to put a limit on it so that if the mean survival is a certain level of closesness to 0 or 1 then it just gets assigned the mean
 # I think this may be happening in my code anyways but not here where I am plotting it, need to look closer...
 
-
-
-# Update - perhaps for this best to just show means; need to explore the SD issue more separately
-
-survival_w_threats_comparison <- as.data.frame(matrix(nrow = 5, ncol = 7))
-colnames(survival_w_threats_comparison) <- c("life_stage", "no_threat", "chytrid", "roads", "bullfrogs", "chytrid_and_roads",  "all_three")
-
-survival_w_threats_comparison$life_stage[1] <- "eggs to tadpoles"
-survival_w_threats_comparison$no_threat[1] <- s_eggs_mean
-survival_w_threats_comparison$chytrid[1] <- (1-s_pct_reduced_eggs_chytrid/100)*s_eggs_mean 
-survival_w_threats_comparison$roads[1] <- (1-s_pct_reduced_eggs_roads/100)*s_eggs_mean 
-survival_w_threats_comparison$chytrid_and_roads[1] <- (1-s_pct_reduced_eggs_chytrid/100)*
-  (1-s_pct_reduced_eggs_roads/100)*s_eggs_mean 
-survival_w_threats_comparison$bullfrogs[1] <- (1-s_pct_reduced_eggs_bullfrogs/100)*s_eggs_mean 
-survival_w_threats_comparison$all_three[1] <- (1-s_pct_reduced_eggs_chytrid/100)*
-  (1-s_pct_reduced_eggs_roads/100)*
-  (1-s_pct_reduced_eggs_bullfrogs/100)*s_eggs_mean 
-
-survival_w_threats_comparison$life_stage[2] <- "tadpoles to yoy"
-survival_w_threats_comparison$no_threat[2] <- s_tadpoles_mean
-survival_w_threats_comparison$chytrid[2] <- (1-s_pct_reduced_tadpoles_chytrid/100)*s_tadpoles_mean 
-survival_w_threats_comparison$roads[2] <- (1-s_pct_reduced_tadpoles_roads/100)*s_tadpoles_mean 
-survival_w_threats_comparison$chytrid_and_roads[2] <- (1-s_pct_reduced_tadpoles_chytrid/100)*
-  (1-s_pct_reduced_tadpoles_roads/100)*s_tadpoles_mean 
-survival_w_threats_comparison$bullfrogs[2] <- (1-s_pct_reduced_tadpoles_bullfrogs/100)*s_tadpoles_mean 
-survival_w_threats_comparison$all_three[2] <- (1-s_pct_reduced_tadpoles_chytrid/100)*
-  (1-s_pct_reduced_tadpoles_roads/100)*
-  (1-s_pct_reduced_tadpoles_bullfrogs/100)*s_tadpoles_mean 
-
-
-survival_w_threats_comparison$life_stage[3] <- "yoy to juv"
-survival_w_threats_comparison$no_threat[3] <- s_yoy_mean
-survival_w_threats_comparison$chytrid[3] <- (1-s_pct_reduced_yoy_chytrid/100)*s_yoy_mean 
-survival_w_threats_comparison$roads[3] <- (1-s_pct_reduced_yoy_roads/100)*s_yoy_mean 
-survival_w_threats_comparison$chytrid_and_roads[3] <- (1-s_pct_reduced_yoy_chytrid/100)*
-  (1-s_pct_reduced_yoy_roads/100)*s_yoy_mean 
-survival_w_threats_comparison$bullfrogs[3] <- (1-s_pct_reduced_yoy_bullfrogs/100)*s_yoy_mean 
-survival_w_threats_comparison$all_three[3] <- (1-s_pct_reduced_yoy_chytrid/100)*
-  (1-s_pct_reduced_yoy_roads/100)*
-  (1-s_pct_reduced_yoy_bullfrogs/100)*s_yoy_mean 
-
-
-survival_w_threats_comparison$life_stage[4] <- "juv to adult"
-survival_w_threats_comparison$no_threat[4] <- s_juv_mean
-survival_w_threats_comparison$chytrid[4] <- (1-s_pct_reduced_juv_chytrid/100)*s_juv_mean 
-survival_w_threats_comparison$roads[4] <- (1-s_pct_reduced_juv_roads/100)*s_juv_mean 
-survival_w_threats_comparison$chytrid_and_roads[4] <- (1-s_pct_reduced_juv_chytrid/100)*
-  (1-s_pct_reduced_juv_roads/100)*s_juv_mean 
-survival_w_threats_comparison$bullfrogs[4] <- (1-s_pct_reduced_juv_bullfrogs/100)*s_juv_mean 
-survival_w_threats_comparison$all_three[4] <- (1-s_pct_reduced_juv_chytrid/100)*
-  (1-s_pct_reduced_juv_roads/100)*
-  (1-s_pct_reduced_juv_bullfrogs/100)*s_juv_mean 
-
-survival_w_threats_comparison$life_stage[5] <- "adult to adult"
-survival_w_threats_comparison$no_threat[5] <- s_adult_mean
-survival_w_threats_comparison$chytrid[5] <- (1-s_pct_reduced_adult_chytrid/100)*s_adult_mean 
-survival_w_threats_comparison$roads[5] <- (1-s_pct_reduced_adult_roads/100)*s_adult_mean 
-survival_w_threats_comparison$chytrid_and_roads[5] <- (1-s_pct_reduced_adult_chytrid/100)*
-  (1-s_pct_reduced_adult_roads/100)*s_adult_mean 
-survival_w_threats_comparison$bullfrogs[5] <- (1-s_pct_reduced_adult_bullfrogs/100)*s_adult_mean 
-survival_w_threats_comparison$all_three[5] <- (1-s_pct_reduced_adult_chytrid/100)*
-  (1-s_pct_reduced_adult_roads/100)*
-  (1-s_pct_reduced_adult_bullfrogs/100)*s_adult_mean 
-
-
-survival_w_threats_comparison$life_stage <- factor(survival_w_threats_comparison$life_stage, 
-                                                   levels = c("eggs to tadpoles",
-                                                              "tadpoles to yoy", 
-                                                              "yoy to juv", 
-                                                              "juv to adult", "adult to adult"))
-
-
-survival_w_threats_comparison_long <- reshape2::melt(survival_w_threats_comparison,  id.vars=c("life_stage"))
-colnames(survival_w_threats_comparison_long) <- c("life_stage", "threats" , "survival_rate" )
-
-
-ggplot2::ggplot(survival_w_threats_comparison_long, ggplot2::aes(x = threats, y = survival_rate)) +
-  ggplot2::geom_bar(stat="identity") +
-  ggplot2::facet_wrap(~life_stage) +
-  ggplot2::labs(x = "Threats") +
-  ggplot2::labs(y = "Survival Rate") +
-  ggplot2::ggtitle("Base case (P50) mean survival rates with compounding threats") +
-  ggplot2::theme_bw() +
-  ggplot2::theme(
-    panel.grid.major = ggplot2::element_blank(),
-    panel.grid.minor = ggplot2::element_blank(),
-    strip.background = ggplot2::element_blank(),
-    panel.border = ggplot2::element_rect(colour = "black"),
-    text = ggplot2::element_text(size = 12),
-    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
-    legend.position = "none"
-  )
 
 
 
