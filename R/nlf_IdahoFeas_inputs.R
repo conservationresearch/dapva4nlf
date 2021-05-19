@@ -364,12 +364,12 @@ getNLFIdahoFeasinputs <- function() {
       lcl = 0.4, best_guess = 0.7, ucl = 0.9, confidence = 70,
       lower_bound = 0.2, upper_bound = 1,
       best_guess_type = "median", management_alternative = "status_quo", 
-      source = "Lea and Rebecca on May 5, 2021", comments = "Cells 3 and 4 are lumped here so it is the difference between them and Cell 7 in the south, not sure about how agriculture will affect Cell 7, other than that they will all be pretty similar. The south wetland is 200m away from an agriculture field. Depends on what pesticide they are using and how they are applying them. HIghly dependent on the pesticide application method. If use aerial spreaders that can really drift, then that could decimate the quality in that south wetland."),
-    c(input = "wetland_eggTadSurv_TempCor_wEph", type = "wetland_vitalrate_EVcorrelations", 
-      lcl = 0.2, best_guess = 0.6, ucl = 0.8, confidence = 90,
-      lower_bound = 0.1, upper_bound = 0.9,
-      best_guess_type = "median", management_alternative = "status_quo", 
-      source = "Lea and Rebecca on May 5, 2021", comments = "Here it is really the difference with the epehemral wetlands driving it.")
+      source = "Lea and Rebecca on May 5, 2021", comments = "Cells 3 and 4 are lumped here so it is the difference between them and Cell 7 in the south, not sure about how agriculture will affect Cell 7, other than that they will all be pretty similar. The south wetland is 200m away from an agriculture field. Depends on what pesticide they are using and how they are applying them. HIghly dependent on the pesticide application method. If use aerial spreaders that can really drift, then that could decimate the quality in that south wetland.")
+    # c(input = "wetland_eggTadSurv_TempCor_wEph", type = "wetland_vitalrate_EVcorrelations", 
+    #   lcl = 0.2, best_guess = 0.6, ucl = 0.8, confidence = 90,
+    #   lower_bound = 0.1, upper_bound = 0.9,
+    #   best_guess_type = "median", management_alternative = "status_quo", 
+    #   source = "Lea and Rebecca on May 5, 2021", comments = "Here it is really the difference with the epehemral wetlands driving it.")
   )
   
   #---- Dispersal inputs.  -------------
