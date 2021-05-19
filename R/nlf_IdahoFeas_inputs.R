@@ -703,12 +703,12 @@ selectNLFIdahoParameterByIterTracking <- function(inputs, base_case = FALSE) {
   ######### Select the parameters for this iteration - correlation between wetlands for vital rates. #########
   if(base_case == FALSE){
    parameterByIterTracking[i, "wetland_eggTadSurv_TempCor_noEph"] <- dapva::selectParamMetalogDistribution(input_name = "wetland_eggTadSurv_TempCor_noEph", inputsDF = inputs)
-   parameterByIterTracking[i, "wetland_eggTadSurv_TempCor_wEph"] <- dapva::selectParamMetalogDistribution(input_name = "wetland_eggTadSurv_TempCor_wEph", inputsDF = inputs)
+   # parameterByIterTracking[i, "wetland_eggTadSurv_TempCor_wEph"] <- dapva::selectParamMetalogDistribution(input_name = "wetland_eggTadSurv_TempCor_wEph", inputsDF = inputs)
   }
   
   if(base_case == TRUE){
     parameterByIterTracking[i, "wetland_eggTadSurv_TempCor_noEph"] <-  as.numeric(as.character(inputs$best_guess[which(inputs$input == "wetland_eggTadSurv_TempCor_noEph")]))
-    parameterByIterTracking[i, "wetland_eggTadSurv_TempCor_wEph"] <-   as.numeric(as.character(inputs$best_guess[which(inputs$input == "wetland_eggTadSurv_TempCor_wEph")]))
+    # parameterByIterTracking[i, "wetland_eggTadSurv_TempCor_wEph"] <-   as.numeric(as.character(inputs$best_guess[which(inputs$input == "wetland_eggTadSurv_TempCor_wEph")]))
   }
   
   ######### Select the parameters for this iteration - quasi extinction threshold. #########
