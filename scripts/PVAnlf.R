@@ -40,10 +40,10 @@ clusterSetRNGStream(cl, iseed = 29) # without parallel computing can just do set
 #---- Specify the alternatives to run.  -------------
 alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are preloaded in for easy calling
 
-rows_to_run <- c(9) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
+rows_to_run <- c(2) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
 
 #---- Specify number of iterations and number of runs per iterations.  -------------
-n_iter  <- 500
+n_iter  <- 5 # 500
 max_n_runs_per_iter <- 1000
 
 #---- Start the scenario loop.  -------------
@@ -134,48 +134,31 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                        # Wetland quality (which is partially correlated) will affect the egg/tadpole stage but not the terrestrial life stages or reproduction since that depends on 
                                                                        # female body condition coming out of winter. 
                                                                        # Re partially correlated EV for the egg/tadpole stage, no reason to think cells 3 and 4 will be any different so use the same there.
-                                                                       # Cell 7 may be different because closer to agriculture. Ephemeral wetlands is a different type of system so definitly have the potential to be different.
-                                                                
-                                                                       # Current approach re ephemeral wetlands is to have a different range on correlation inputs for the alternatives where the ephemeral wetlands have been restored
-                                                                       
-                                                                       # To see that the data is in fact correlated, try increasing the n_years to 10000 and run cor(x) or library(lattice) splom(x)
-                                                                       # It is not a perfect algorithm but appropriate for the level of randomness we need I think
-                                                                       
-                                                                       # Note: increased nyears to 1000 and then just select first 50 since the permute algorithm sometimes gets stuck if there are not enough draws
-                                                                       
+                                                                       # Cell 7 may be different because closer to agriculture. 
+                                                                       # Ephemeral wetlands is a different type of system so definitely have the potential to be different, treat as uncorrelated.
+             
                                                                        print("Test2")
                                                                        
-                                                                       if(alternative_details$restore_ephemeralWetlands == "no"){
-                                                                         print("Test2a")
-                                                                         percentilesEV_survival_eggs_tad <- dapva::selectEVPercentilesNormal(input_names_w_EV = c("cells3and4", "cell7"),
-                                                                                                                                             correlation = parameterByIterTracking$wetland_eggTadSurv_TempCor_noEph[i],
-                                                                                                                                             n_years = yrs)
-                                                                         # Separate out the EVs so that each wetland has its own col that can be called later
-                                                                         percentilesEV_survival_eggs_tad$cell3 <- percentilesEV_survival_eggs_tad$cells3and4
-                                                                         percentilesEV_survival_eggs_tad$cell4 <- percentilesEV_survival_eggs_tad$cells3and4
-                                                                         percentilesEV_survival_eggs_tad <- percentilesEV_survival_eggs_tad[,c("cell3", "cell4", "cell7")]
-                                                                         
-                                                                       }
+                                                                       # Select correlated EVs for wetlands cells 3/4 and 7
+                                                                       print("Test2a")
+                                                                       percentilesEV_survival_eggs_tad <- dapva::selectEVPercentilesNormal(input_names_w_EV = c("cells3and4", "cell7"),
+                                                                                                                                           correlation = parameterByIterTracking$wetland_eggTadSurv_TempCor_noEph[i],
+                                                                                                                                           n_years = yrs)
+                                                                       # Separate out the EVs so that each wetland has its own col that can be called later
+                                                                       percentilesEV_survival_eggs_tad$cell3 <- percentilesEV_survival_eggs_tad$cells3and4
+                                                                       percentilesEV_survival_eggs_tad$cell4 <- percentilesEV_survival_eggs_tad$cells3and4
+                                                                       percentilesEV_survival_eggs_tad <- percentilesEV_survival_eggs_tad[,c("cell3", "cell4", "cell7")]
+                                                                       
+                                                                       
+                                                                       # Select EVs for ephemeral wetlands, will only be applied for alternatives w
+
                                                                        if(alternative_details$restore_ephemeralWetlands == "yes"){
                                                                          print("Test2c")
-                                                                         percentilesEV_survival_eggs_tad <- dapva::selectEVPercentilesNormal(input_names_w_EV = c("cells3and4", "cell7", "ephemeral_wetlands"),
-                                                                                                                                             correlation = parameterByIterTracking$wetland_eggTadSurv_TempCor_wEph[i],
+                                                                         percentilesEV_survival_eggs_tad_ephemeral <- dapva::selectEVPercentilesNormal(input_names_w_EV = c("ephemeral_wetlands"),
+                                                                                                                                             correlation = 1,
                                                                                                                                              n_years = yrs)
-                                                                         
-                                                                         #test <- selectEVPercentilesNormal(input_names_w_EV = c("cells3and4", "cell7", "ephemeral_wetlands"),
-                                                                        #                                                       correlation = parameterByIterTracking$wetland_eggTadSurv_TempCor_wEph[i],
-                                                                         #                                                      n_years = 50)
-                                                                         
-                                                                         
-                                                                         
-                                                                         
-                                                                         
-                                                                         
-                                                                         print("Test2d")
-                                                                         # Separate out the EVs so that each wetland has its own col that can be called later
-                                                                         percentilesEV_survival_eggs_tad$cell3 <- percentilesEV_survival_eggs_tad$cells3and4
-                                                                         percentilesEV_survival_eggs_tad$cell4 <- percentilesEV_survival_eggs_tad$cells3and4
-                                                                         percentilesEV_survival_eggs_tad <- percentilesEV_survival_eggs_tad[,c("cell3", "cell4", "cell7", "ephemeral_wetlands")]
+                                       
+                                                                         percentilesEV_survival_eggs_tad <- cbind( percentilesEV_survival_eggs_tad, percentilesEV_survival_eggs_tad_ephemeral)
                                                                          
                                                                          }
                                                              
