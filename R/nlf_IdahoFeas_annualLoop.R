@@ -47,8 +47,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
                                  percentilesEV_reproduction,
                                  alternative_details) {
   
-  # STILL MISSING - DISPERSAL
-  # REMEMBER TO ACCOUNT FOR ALTERNATIVE WITH AND WITHOUT EPHEMERAL WETLANDS
+    # CHECK - DO WE ACCOUNT FOR ALTERNATIVE WITH AND WITHOUT EPHEMERAL WETLANDS
   # WHEN IMPLEMENTING DISPERSAL
   
   
@@ -94,6 +93,16 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
         EV_percentile = percentilesEV_survival_eggs_tad[j, paste(wetlands_without_outside[x])]
       )
     }))    
+    
+    # Lea's insight is that in every translocation experience so far, there are always some tadpoles that become metamorophs
+    # So doesn't make sense for there to ever be none that survive
+    # We are getting that quite a bit because we have the uniform distribution on survival
+    # TEST: Try this rule: survival can not be less than 1%
+    
+    s_tadpoles <- pmax(0.01, s_tadpoles)  # See if that helps make it more realistic
+    
+   
+    
     
     s_yoy_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_yoy_no_threats")])
     s_yoy_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_yoy_no_threats")])
