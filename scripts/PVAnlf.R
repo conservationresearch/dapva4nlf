@@ -44,7 +44,7 @@ rows_to_run <- c(2) # note that can't call 1 but just 0s anyways; all the rest s
 
 #---- Specify number of iterations and number of runs per iterations.  -------------
 n_iter  <- 5 # 500
-max_n_runs_per_iter <- 1000
+max_n_runs_per_iter <- 100 #1000
 
 #---- Start the scenario loop.  -------------
 for(m in 1:length(rows_to_run)){ # loop through the different scenarios requested in the scenarios_to_run file
@@ -225,6 +225,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                      
                                                                       results_all_for_this_iteration <- plyr::rbind.fill(results_annual)
                                                                       
+                                                               
                                                                       # Remove eggs and tadpoles as they are intermediate stages in the year and we just want the pop size at the fall census
                                                                       results_all_for_this_iteration_fall <- results_all_for_this_iteration # initalize
                                                                       results_all_for_this_iteration_fall[which(results_all_for_this_iteration_fall$class == "eggs"),paste(1:yrs)] <- 0

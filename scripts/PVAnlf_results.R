@@ -1304,8 +1304,8 @@ pl.beta(s_tadpoles_no_threats_dist$alpha,
 # However, if the mean is too close to 0 (or 1) then the alpha and beta are negative, which doesn't work
 
 
-s_tadpoles_mean <- 0.01
-s_tadpoles_sd <- 0.07 #0.14 
+s_tadpoles_mean <- 0.07
+s_tadpoles_sd <- 0.2 #0.14 
 # Travis and Karen's paper used 10% of the mean; to see what that looks like, use 
 # s_tadpoles_sd <- 0.1*s_tadpoles_mean
 
@@ -1323,7 +1323,7 @@ int <- dapva::estBetaParams(mean = s_tadpoles_mean, sd = s_tadpoles_sd)
 alpha <- int$alpha
 beta <- int$beta
 
-EV_percentile <- 0.5
+EV_percentile <- 0.9
 stats::qbeta(EV_percentile, alpha, beta)
 
 
@@ -1332,4 +1332,117 @@ stats::qbeta(EV_percentile, alpha, beta)
 # the qbeta function does not allow it.
 
 
+
+
+
+
+
+
+
+
+############## Investigating why some perist and others don't #####################
+# Ran one iteration  - aftert 100 runs, this parameter draw has a prob of persis of 26% or something like that
+
+path_to_results_folder <- "C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/Investigating"# on my work PC
+setwd(path_to_results_folder) # on my mac
+
+
+file <-  list.files(path = ".","*investigating_why_some_persist_May292021.RData", full.names="TRUE")
+load(file)
+
+
+# start with results_all_for_this_iteration
+
+# Remove eggs and tadpoles as they are intermediate stages in the year and we just want the pop size at the fall census
+results_all_for_this_iteration_fall <- results_all_for_this_iteration # initalize
+results_all_for_this_iteration_fall[which(results_all_for_this_iteration_fall$class == "eggs"),paste(1:yrs)] <- 0
+results_all_for_this_iteration_fall[which(results_all_for_this_iteration_fall$class == "tadpoles"),paste(1:yrs)] <- 0
+
+
+
+# Identify which runs persist and which don;t
+  
+  # from code fin dapva::makeResultsSummaryOneIteration
+  results_total_by_run <- results_all_for_this_iteration_fall %>%
+    dplyr::group_by(run) %>%
+    dplyr::summarise(dplyr::across(paste(initial_year:(initial_year + yrs - 1)), sum))
+  results_total_by_run$metric <- "number_of_indiv"
+  
+  
+  results_summary_for_this_iteration <- results_total_by_run[, c("run",  "metric", paste(initial_year:(initial_year + yrs - 1)))] # Reorganize the results for easier viewing
+  
+  library(reshape2)
+  test <- melt(results_summary_for_this_iteration, id.vars=c("run", "metric"))
+  colnames(test)[which(colnames(test) == "variable")]<- "year"
+  colnames(test)[which(colnames(test) == "value")]<- "number_of_indiv"
+  test$year <- as.numeric(as.character(test$year))
+  # test$run <- as.factor(test$run)
+  
+  runs <- length(unique(test$run))
+  test$facet <- rep(1:(runs/10), each = runs/10)
+  
+  ggplot2::ggplot(test[which(test$run <=10),], ggplot2::aes(x = year, y = number_of_indiv, group = run, color = run)) +
+    ggplot2::geom_point() +
+    ggplot2::geom_line() + 
+    ggplot2::theme_bw() +
+    ggplot2::theme(
+      panel.grid.major = ggplot2::element_blank(),
+      panel.grid.minor = ggplot2::element_blank(),
+      strip.background = ggplot2::element_blank(),
+      panel.border = ggplot2::element_rect(colour = "black"),
+      text = ggplot2::element_text(size = 12),
+      axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+      legend.position = "none"
+    )
+  
+  runs_that_persist <- test$run[which(test$year == 50 & test$number_of_indiv > 0)]
+
+# flag the runts that persist in the overall tracking
+  results_all_for_this_iteration_fall$persist <- "no" # initialize
+  results_all_for_this_iteration_fall$persist[is.na(match(results_all_for_this_iteration_fall$run, runs_that_persist)) == FALSE] <- "yes"
+  
+  
+  results_total_by_run <- results_all_for_this_iteration_fall %>%
+    dplyr::group_by(run) %>%
+    dplyr::summarise(dplyr::across(paste(initial_year:(initial_year + yrs - 1)), sum))
+  results_total_by_run$metric <- "number_of_indiv"
+  
+  test <- melt(results_all_for_this_iteration_fall, id.vars=c("iteration", "run", "pop", "class", "sex", "persist"))
+  colnames(test)[which(colnames(test) == "variable")]<- "year"
+  colnames(test)[which(colnames(test) == "value")]<- "number_of_indiv"
+  test$year <- as.numeric(as.character(test$year))
+
+  ggplot2::ggplot(test[which(test$class == "yoy"),], ggplot2::aes(x = year, y = number_of_indiv, group = run, color = run)) +
+    ggplot2::geom_point() +
+    ggplot2::geom_line() + 
+    ggplot2::facet_grid(class~persist) + 
+    ggplot2::theme_bw() +
+    ggplot2::theme(
+      panel.grid.major = ggplot2::element_blank(),
+      panel.grid.minor = ggplot2::element_blank(),
+      strip.background = ggplot2::element_blank(),
+      panel.border = ggplot2::element_rect(colour = "black"),
+      text = ggplot2::element_text(size = 12),
+      axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+      legend.position = "none"
+    )
+  
+  
+  
+  test2 <- results_all_for_this_iteration_fall[which(results_all_for_this_iteration_fall$persist == "yes" &
+                                                       results_all_for_this_iteration_fall$class == "yoy" ),]
+  
+  
+  test2[, "max"] <- apply(test2[, 7:55], 1, max)
+  test2$max
+  
+  test3 <- results_all_for_this_iteration_fall[which(results_all_for_this_iteration_fall$persist == "no" &
+                                                       results_all_for_this_iteration_fall$class == "yoy" ),]
+  
+  
+  test3[, "max"] <- apply(test3[, 7:55], 1, max)
+  test3$max
+
+  
+  # The key seems to be having at least one? good year for yoy survival, this sets the age structure up for success
 
