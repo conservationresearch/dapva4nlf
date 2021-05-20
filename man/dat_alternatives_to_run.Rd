@@ -3,9 +3,9 @@
 \docType{data}
 \name{dat_alternatives_to_run}
 \alias{dat_alternatives_to_run}
-\title{Management alternatives that re to be evaluated as part of this feasability assesment.}
+\title{Management alternatives that re to be evaluated as part of this feasibility assessment.}
 \format{
-An object of class \code{data.frame} with 9 rows and 10 columns.
+An object of class \code{data.frame} with 12 rows and 11 columns.
 }
 \source{
 Group framing facilitation, April 1 2021
@@ -16,6 +16,6 @@ dat_alternatives_to_run
 \description{
 A table containing the alternatives that can be run with this model. 
 These alternatives were generated during facilitated group framing sessions, 
-with the last one where we finalzied these alternatives occuring on April 2, 2021.
+with the last one where we finalized these alternatives occurring on April 2, 2021.
 }
 \keyword{datasets}

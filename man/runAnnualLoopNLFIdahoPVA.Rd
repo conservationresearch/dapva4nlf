@@ -22,7 +22,8 @@ runAnnualLoopNLFIdahoPVA(
   percentilesEV_survival_eggs_tad,
   percentilesEV_survival_yoy_adult,
   percentilesEV_reproduction,
-  alternative_details
+  alternative_details,
+  exisiting_pop = FALSE
 )
 }
 \arguments{
@@ -35,7 +36,8 @@ format of selectBTPDparameterByIterTracking().}
 
 \item{q}{The run number. For results tracking purposes.}
 
-\item{wetland_distances_km}{Matrix of distances between wetlands in kilometers.}
+\item{wetland_distances_km}{Matrix of distances between wetlands in
+kilometers.}
 
 \item{initial_year}{First year of the model.}
 
@@ -43,19 +45,27 @@ format of selectBTPDparameterByIterTracking().}
 
 \item{stage_classes}{ADD DESCRIPTION LATER}
 
-\item{percentilesEV_survival_eggs_tad}{Columns are the different wetlands, rows 
-are a vector of length years with percentiles to use for environmental variation (EV) 
-in each iteration (e.g. output from selectEVPercentilesNormal()).}
+\item{percentilesEV_survival_eggs_tad}{Columns are the different wetlands,
+rows are a vector of length years with percentiles to use for environmental
+variation (EV) in each iteration (e.g. output from
+selectEVPercentilesNormal()).}
 
-\item{percentilesEV_survival_yoy_adult}{Columns are the different wetlands, rows 
-are a vector of length years with percentiles to use for environmental variation (EV) 
-in each iteration (e.g. output from selectEVPercentilesNormal())..}
+\item{percentilesEV_survival_yoy_adult}{Columns are the different wetlands,
+rows are a vector of length years with percentiles to use for environmental
+variation (EV) in each iteration (e.g. output from
+selectEVPercentilesNormal())..}
 
-\item{percentilesEV_reproduction}{Columns are the different wetlands, rows 
-are a vector of length years with percentiles to use for environmental variation (EV) 
-in each iteration (e.g. output from selectEVPercentilesNormal()).}
+\item{percentilesEV_reproduction}{Columns are the different wetlands, rows
+are a vector of length years with percentiles to use for environmental
+variation (EV) in each iteration (e.g. output from
+selectEVPercentilesNormal()).}
 
 \item{alternative_details}{ADD DESCRIPTION LATER}
+
+\item{exisiting_pop}{TRUE or FALSE if want to run it as if there is an
+existing population there. Defaults to FALSE. Turn to TRUE only when
+exploring the implications of having an established population from the
+start.}
 }
 \description{
 This functions contains the annual loop of the Idaho Feasability 

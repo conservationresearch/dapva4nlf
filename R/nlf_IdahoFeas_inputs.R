@@ -326,13 +326,23 @@ getNLFIdahoFeasinputs <- function() {
   )
   
   #---- Proportion of carrying capacity to start an existing population at.  -------------
+  # OLD APPROACH
+  # prop_K_starting_pop <- list(
+  #   c(input = "prop_K_starting_pop_exisiting_pop", type = "population size for existing population", 
+  #     lcl = 0.02, best_guess = 0.05, ucl = 0.1, confidence = 80,
+  #     lower_bound = 0.01, upper_bound = 0.5,
+  #     best_guess_type = "median", management_alternative = "status_quo", 
+  #     source = "LK Placeholder", comments = "Exploring results if started with an existing population")
+  # )
+  # 
+  #---- Terrestrial population size to start an existing population at.  -------------
   
-  prop_K_starting_pop <- list(
-    c(input = "prop_K_starting_pop_exisiting_pop", type = "population size for existing population", 
-      lcl = 0.02, best_guess = 0.05, ucl = 0.1, confidence = 80,
-      lower_bound = 0.01, upper_bound = 0.5,
+  starting_pop_terr_fem <- list(
+    c(input = "starting_pop_terr_fem", type = " starting terrestrial population size if testing existing population", 
+      lcl = 1000, best_guess = 100000, ucl = 200000, confidence = 80,
+      lower_bound = 100, upper_bound = 2000000,
       best_guess_type = "median", management_alternative = "status_quo", 
-      source = "LK Placeholder", comments = "Exploring results if started with an existing population")
+      source = "LK Placeholder", comments = "Exploring results if started with an existing population; low is sort of from Travis and Karens paper, where they found 800 metamorphs one year and if we apply the 0.94 metamorphs it is rougly 850 individuals, use 1000 as nice round number, high i 10% of best guess K, best guess is 5% of best guess K, abs max is best guess K")
   )
   
   
@@ -440,10 +450,10 @@ getNLFIdahoFeasinputs <- function() {
     prob_drawdown_beforeMidJuly,
     ephemeral_freq_dry,
     carrying_capacity,
-    prop_K_starting_pop,
     quasi_extinction_threshold,
     wetland_vitalrate_correlations,
-    dispersal_inputs
+    dispersal_inputs,
+    starting_pop_terr_fem
   ))
   
 
@@ -712,13 +722,13 @@ selectNLFIdahoParameterByIterTracking <- function(inputs, base_case = FALSE) {
     parameterByIterTracking[i, "carrying_capacity_BSCWMA"] <-  as.numeric(as.character(inputs$best_guess[which(inputs$input == "carrying_capacity_BSCWMA")]))
   }
   
-  ######### Select the parameters for this iteration - carrying capacity (cap). #########
+  ######### Select the parameters for this iteration - population size of a hypothetical existing population. #########
   if(base_case == FALSE){
-    parameterByIterTracking[i, "prop_K_starting_pop_exisiting_pop"] <- dapva::selectParamMetalogDistribution(input_name = "prop_K_starting_pop_exisiting_pop", inputsDF = inputs)
+    parameterByIterTracking[i, "starting_pop_terr_fem"] <- dapva::selectParamMetalogDistribution(input_name = "starting_pop_terr_fem", inputsDF = inputs)
   }
   
   if(base_case == TRUE){
-    parameterByIterTracking[i, "prop_K_starting_pop_exisiting_pop"] <-  as.numeric(as.character(inputs$best_guess[which(inputs$input == "prop_K_starting_pop_exisiting_pop")]))
+    parameterByIterTracking[i, "starting_pop_terr_fem"] <-  as.numeric(as.character(inputs$best_guess[which(inputs$input == "starting_pop_terr_fem")]))
   }
   
   

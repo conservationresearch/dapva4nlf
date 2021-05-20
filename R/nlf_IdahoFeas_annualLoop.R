@@ -463,8 +463,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       if(exisiting_pop == TRUE){
         # Add in existing population sizes
         # Assume starting out at carrying capacity some proportion of the carrying capacity
-        prop_K_starting_pop <- as.numeric(parameterByIterTracking[i, paste0("prop_K_starting_pop_exisiting_pop")])# e.g. 0.01 # between 0 and 1
-        total_n_terr_fem <- as.numeric(parameterByIterTracking[i, paste0("carrying_capacity_BSCWMA")])* prop_K_starting_pop 
+        total_n_terr_fem <- as.numeric(parameterByIterTracking[i, paste0("starting_pop_terr_fem")])
 
         # Age distribution from Rebecca's email: 
         #Based on Leclair and Castanet and Merrell 1977 I think that in late summer the ratio of 
