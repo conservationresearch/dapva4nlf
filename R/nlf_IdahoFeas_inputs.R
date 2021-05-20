@@ -325,6 +325,17 @@ getNLFIdahoFeasinputs <- function() {
       source = "Lea and Rebecca on April 26, 2021", comments = "These numbers were guided by the available literature above; in general we don't think the populations will ever get this big!! Absolute min, decinitly can support some!")
   )
   
+  #---- Proportion of carrying capacity to start an existing population at.  -------------
+  
+  prop_K_starting_pop <- list(
+    c(input = "prop_K_starting_pop_exisiting_pop", type = "population size for existing population", 
+      lcl = 0.02, best_guess = 0.05, ucl = 0.1, confidence = 80,
+      lower_bound = 0.01, upper_bound = 0.5,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "LK Placeholder", comments = "Exploring results if started with an existing population")
+  )
+  
+  
   #---- Quasi-extinction threshold.  -------------
   
   quasi_extinction_threshold <- list(
@@ -429,6 +440,7 @@ getNLFIdahoFeasinputs <- function() {
     prob_drawdown_beforeMidJuly,
     ephemeral_freq_dry,
     carrying_capacity,
+    prop_K_starting_pop,
     quasi_extinction_threshold,
     wetland_vitalrate_correlations,
     dispersal_inputs
@@ -699,6 +711,19 @@ selectNLFIdahoParameterByIterTracking <- function(inputs, base_case = FALSE) {
   if(base_case == TRUE){
     parameterByIterTracking[i, "carrying_capacity_BSCWMA"] <-  as.numeric(as.character(inputs$best_guess[which(inputs$input == "carrying_capacity_BSCWMA")]))
   }
+  
+  ######### Select the parameters for this iteration - carrying capacity (cap). #########
+  if(base_case == FALSE){
+    parameterByIterTracking[i, "prop_K_starting_pop_exisiting_pop"] <- dapva::selectParamMetalogDistribution(input_name = "prop_K_starting_pop_exisiting_pop", inputsDF = inputs)
+  }
+  
+  if(base_case == TRUE){
+    parameterByIterTracking[i, "prop_K_starting_pop_exisiting_pop"] <-  as.numeric(as.character(inputs$best_guess[which(inputs$input == "prop_K_starting_pop_exisiting_pop")]))
+  }
+  
+  
+  
+  
   
   ######### Select the parameters for this iteration - correlation between wetlands for vital rates. #########
   if(base_case == FALSE){

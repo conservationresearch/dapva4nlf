@@ -15,7 +15,7 @@ system.time({ # turn on the timer
 
 #---- Clear the workspace. ----
 rm(list = ls())
-version <- "_v1test6" # insert short description to append to results to help identify
+version <- "_v1test7" # insert short description to append to results to help identify
 
 #---- Load libraries, and set the random seed.  -------------
 ## Import libraries
@@ -40,11 +40,11 @@ clusterSetRNGStream(cl, iseed = 29) # without parallel computing can just do set
 #---- Specify the alternatives to run.  -------------
 alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are preloaded in for easy calling
 
-rows_to_run <- c(2) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
+rows_to_run <- c(12) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
 
 #---- Specify number of iterations and number of runs per iterations.  -------------
-n_iter  <- 500
-max_n_runs_per_iter <- 1000
+n_iter  <- 5
+max_n_runs_per_iter <- 100
 
 #---- Start the scenario loop.  -------------
 for(m in 1:length(rows_to_run)){ # loop through the different scenarios requested in the scenarios_to_run file
@@ -179,6 +179,17 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                                                                              
                                                                        print("Test5")
                                                                        
+                                                                       # Check if there is an existing pop in this alternative or not
+                                                                       if(alternative_details$assume_existing_pop == "yes"){
+                                                                         exisiting_pop <- TRUE
+                                                                       }
+                                                                       if(alternative_details$assume_existing_pop == "no"){
+                                                                         exisiting_pop <- FALSE
+                                                                       }
+                                                                       
+                                                                       
+                                                                       
+                                                                       
                                                                        # Run the annual loop
                                                                        results_annual[[q]] <- dapva4nlf::runAnnualLoopNLFIdahoPVA(parameterByIterTracking, yrs, i, q,
                                                                                                                                   wetland_distances_km,
@@ -186,7 +197,8 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                                                                                   percentilesEV_survival_eggs_tad,
                                                                                                                                   percentilesEV_survival_yoy_adult,
                                                                                                                                   percentilesEV_reproduction,
-                                                                                                                                  alternative_details)
+                                                                                                                                  alternative_details,
+                                                                                                                                  exisiting_pop)
 
                                                                         if(q == max_n_runs_per_iter*0.1){ # if we have run 10% of the max number of runs per iterations
 

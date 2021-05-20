@@ -17,25 +17,33 @@
 #' the output are due to environmental and demographic stochasticity.
 
 #' @param parameterByIterTracking Parameters to use in each iteration in the
-#' format of selectBTPDparameterByIterTracking().
+#'   format of selectBTPDparameterByIterTracking().
 #' @param yrs The number of years to run the model for (e.g. 50).
 #' @param i The iteration number. For results tracking purposes.
 #' @param q The run number. For results tracking purposes.
-#' @param wetland_distances_km Matrix of distances between wetlands in kilometers.
+#' @param wetland_distances_km Matrix of distances between wetlands in
+#'   kilometers.
 #' @param initial_year First year of the model.
 #' @param wetlands Wetland cell names/abbreviations.
 #' @param stage_classes ADD DESCRIPTION LATER
 #' @param alternative_details ADD DESCRIPTION LATER
-#' @param percentilesEV_survival_eggs_tad Columns are the different wetlands, rows 
-#' are a vector of length years with percentiles to use for environmental variation (EV) 
-#' in each iteration (e.g. output from selectEVPercentilesNormal()).
-#' @param percentilesEV_survival_yoy_adult Columns are the different wetlands, rows 
-#' are a vector of length years with percentiles to use for environmental variation (EV) 
-#' in each iteration (e.g. output from selectEVPercentilesNormal())..
-#' @param percentilesEV_reproduction Columns are the different wetlands, rows 
-#' are a vector of length years with percentiles to use for environmental variation (EV) 
-#' in each iteration (e.g. output from selectEVPercentilesNormal()).
-#' 
+#' @param percentilesEV_survival_eggs_tad Columns are the different wetlands,
+#'   rows are a vector of length years with percentiles to use for environmental
+#'   variation (EV) in each iteration (e.g. output from
+#'   selectEVPercentilesNormal()).
+#' @param percentilesEV_survival_yoy_adult Columns are the different wetlands,
+#'   rows are a vector of length years with percentiles to use for environmental
+#'   variation (EV) in each iteration (e.g. output from
+#'   selectEVPercentilesNormal())..
+#' @param percentilesEV_reproduction Columns are the different wetlands, rows
+#'   are a vector of length years with percentiles to use for environmental
+#'   variation (EV) in each iteration (e.g. output from
+#'   selectEVPercentilesNormal()).
+#' @param exisiting_pop TRUE or FALSE if want to run it as if there is an
+#'   existing population there. Defaults to FALSE. Turn to TRUE only when
+#'   exploring the implications of having an established population from the
+#'   start.
+#'
 #' @importFrom dplyr %>%
 #'
 #' @export
@@ -45,7 +53,8 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
                                  percentilesEV_survival_eggs_tad,
                                  percentilesEV_survival_yoy_adult,
                                  percentilesEV_reproduction,
-                                 alternative_details) {
+                                 alternative_details, 
+                                 exisiting_pop = FALSE) {
   
     # CHECK - DO WE ACCOUNT FOR ALTERNATIVE WITH AND WITHOUT EPHEMERAL WETLANDS
   # WHEN IMPLEMENTING DISPERSAL
@@ -408,9 +417,19 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
                    )
         )
       }
+      
+      if(alternative_details$release_location == "none"){
+        rows_for_trans <- NA
+      }
+      
 
       n_female_tadpoles_released <- round(as.numeric(alternative_details$n_tadpoles_per_year)/2) # assume 50/50 sex ratio, round so release whole individuals :)
-      resultsTracking_popSize_females[rows_for_trans, "1"] <- round(n_female_tadpoles_released /length(rows_for_trans)) # round so that releasing whole individuals :)
+      
+      if(is.na(rows_for_trans)[1] == FALSE){
+        resultsTracking_popSize_females[rows_for_trans, "1"] <- round(n_female_tadpoles_released /length(rows_for_trans)) # round so that releasing whole individuals :)
+      }
+        
+      
       
       # Then apply survival rates to see how many of the tadpoles survive to be yoy
       
@@ -440,8 +459,44 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
         n_arrived <- sum(dispersal_results[,paste(wetland)]) # colsum for this wetland
         resultsTracking_popSize_females[yoy_rows[z], paste(j)] <- resultsTracking_popSize_females[yoy_rows[z], paste(j)] - n_left + n_arrived
       }
-    }  
-    
+      
+      if(exisiting_pop == TRUE){
+        # Add in existing population sizes
+        # Assume starting out at carrying capacity some proportion of the carrying capacity
+        prop_K_starting_pop <- as.numeric(parameterByIterTracking[i, paste0("prop_K_starting_pop_exisiting_pop")])# e.g. 0.01 # between 0 and 1
+        total_n_terr_fem <- as.numeric(parameterByIterTracking[i, paste0("carrying_capacity_BSCWMA")])* prop_K_starting_pop 
+
+        # Age distribution from Rebecca's email: 
+        #Based on Leclair and Castanet and Merrell 1977 I think that in late summer the ratio of 
+        # YOY:A1:A2:A3:A4 (based on 17:1) would be 17:0.56:0.40:0.02: 0.02
+        # Or 94% YOY, 3% A1, 2% A2, 0.1% A3, 0.1% A4
+        
+        n_yoy <- round(0.94*total_n_terr_fem) # round so whole individuals :)
+        n_juv <- round(0.03*total_n_terr_fem) 
+        n_A2 <- round(0.02*total_n_terr_fem) 
+        n_A3 <- round(0.001*total_n_terr_fem) 
+        n_A4plus <- round((1 - (0.94 + 0.03 + 0.02 + 0.001))*total_n_terr_fem)  #0.009, close enough to Rebecca's 0.1%
+        
+        n_wetlands <- length(wetlands_without_outside)
+        
+        rows_yoy <- which(resultsTracking_popSize_females$class == "yoy")
+        resultsTracking_popSize_females[rows_yoy, "1"] <- resultsTracking_popSize_females[rows_yoy, "1"] + round(n_yoy/n_wetlands)
+        
+        rows_juv <- which(resultsTracking_popSize_females$class == "juv")
+        resultsTracking_popSize_females[rows_juv, "1"] <- resultsTracking_popSize_females[rows_juv, "1"] + round(n_juv/n_wetlands)
+        
+        rows_A2 <- which(resultsTracking_popSize_females$class == "A2")
+        resultsTracking_popSize_females[rows_A2, "1"] <- resultsTracking_popSize_females[rows_A2, "1"] + round(n_A2/n_wetlands)
+        
+        rows_A3 <- which(resultsTracking_popSize_females$class == "A3")
+        resultsTracking_popSize_females[rows_A3, "1"] <- resultsTracking_popSize_females[rows_A3, "1"] + round(n_A3/n_wetlands)
+        
+        rows_A4plus <- which(resultsTracking_popSize_females$class == "A4plus")
+        resultsTracking_popSize_females[rows_A4plus, "1"] <- resultsTracking_popSize_females[rows_A4plus, "1"] + round(n_A4plus/n_wetlands)
+        
+      }
+      
+    } # end of if j = 1
 
     ######### For the second year and beyond #########
     if (j != 1)  { 
