@@ -339,10 +339,10 @@ getNLFIdahoFeasinputs <- function() {
   
   starting_pop_terr_fem <- list(
     c(input = "starting_pop_terr_fem", type = " starting terrestrial population size if testing existing population", 
-      lcl = 1000, best_guess = 100000, ucl = 200000, confidence = 80,
+      lcl = 1000, best_guess = 3600, ucl = 200000, confidence = 80,
       lower_bound = 100, upper_bound = 2000000,
       best_guess_type = "median", management_alternative = "status_quo", 
-      source = "LK Placeholder", comments = "Exploring results if started with an existing population; low is sort of from Travis and Karens paper, where they found 800 metamorphs one year and if we apply the 0.94 metamorphs it is rougly 850 individuals, use 1000 as nice round number, high i 10% of best guess K, best guess is 5% of best guess K, abs max is best guess K")
+      source = "LK Placeholder", comments = "Exploring results if started with an existing population; low is sort of from Travis and Karens paper, where they found 800 metamorphs one year and if we apply the 0.94 metamorphs it is rougly 850 individuals, use 1000 as nice round number, high i 10% of best guess K, best guess is 5% of best guess K, abs max is best guess K; best guess - from TIschendorf PVA hd something about 30 adult females per pond, if asume that is A2+ and 2.5% of the pop is that agre group, need 1200 total terrestrial and we have three ponds - 3600")
   )
   
   

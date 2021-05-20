@@ -470,11 +470,11 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
         # YOY:A1:A2:A3:A4 (based on 17:1) would be 17:0.56:0.40:0.02: 0.02
         # Or 94% YOY, 3% A1, 2% A2, 0.1% A3, 0.1% A4
         
-        n_yoy <- round(0.94*total_n_terr_fem) # round so whole individuals :)
-        n_juv <- round(0.03*total_n_terr_fem) 
-        n_A2 <- round(0.02*total_n_terr_fem) 
-        n_A3 <- round(0.001*total_n_terr_fem) 
-        n_A4plus <- round((1 - (0.94 + 0.03 + 0.02 + 0.001))*total_n_terr_fem)  #0.009, close enough to Rebecca's 0.1%
+        n_yoy <- round((17/18)*total_n_terr_fem) # round so whole individuals :)
+        n_juv <- round((0.56/18)*total_n_terr_fem) 
+        n_A2 <- round((0.40/18)*total_n_terr_fem) 
+        n_A3 <- round((0.02/18)*total_n_terr_fem) 
+        n_A4plus <- round((0.02/18)*total_n_terr_fem)  #0.009, close enough to Rebecca's 0.1%
         
         n_wetlands <- length(wetlands_without_outside)
         
