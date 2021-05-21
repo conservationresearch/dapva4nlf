@@ -43,7 +43,7 @@ alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are p
 rows_to_run <- c(10) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
 
 #---- Specify number of iterations and number of runs per iterations.  -------------
-n_iter  <-  5# 500
+n_iter  <-  25# 500
 max_n_runs_per_iter <- 100 #1000
 
 #---- Start the scenario loop.  -------------
@@ -106,11 +106,18 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                      results_annual <- list() # initalize
                                                                      finish <- FALSE # initalize
                                                                      
+                                                                     # Inputs for 
+                                                                     convergence_band_halfwidth <- 0.025 # between 0 and 1 since will base it on the probability objective metrics
+                                                                     convergence_band_length <- 50 # number of run
+                                                                     burnin <- 100 # min number of runs
+                                                                     convergence_tracking_persis <- c(vector(), rep(NA, max_n_runs_per_iter)) # initalize
+                                                                     convergence_tracking_selfsustain <- c(vector(), rep(NA, max_n_runs_per_iter)) # initalize
+                                                                     converged_for_persist <- "no"
+                                                                     converged_for_selfsustain <- "no"
                                                                      
-                                                                   
                                                                      for(q in 1:max_n_runs_per_iter){# not in parallel here; in parallel at the iteration level
                                                                        
-                                                                       print("Test - checking if got back up here to start next iteration")
+                                                                       # print("Test - checking if got back up here to start next iteration")
                                                                        
                                                                        # Specify a few more inputs for this iteration
                                                                        initial_year <- parameterByIterTracking$initial_year[i]
@@ -137,10 +144,10 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                        # Cell 7 may be different because closer to agriculture. 
                                                                        # Ephemeral wetlands is a different type of system so definitely have the potential to be different, treat as uncorrelated.
              
-                                                                       print("Test2")
+                                                                       # print("Test2")
                                                                        
                                                                        # Select correlated EVs for wetlands cells 3/4 and 7
-                                                                       print("Test2a")
+                                                                       # print("Test2a")
                                                                        percentilesEV_survival_eggs_tad <- dapva::selectEVPercentilesNormal(input_names_w_EV = c("cells3and4", "cell7"),
                                                                                                                                            correlation = parameterByIterTracking$wetland_eggTadSurv_TempCor_noEph[i],
                                                                                                                                            n_years = yrs)
@@ -153,7 +160,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                        # Select EVs for ephemeral wetlands, will only be applied for alternatives w
 
                                                                        if(alternative_details$restore_ephemeralWetlands == "yes"){
-                                                                         print("Test2c")
+                                                                         # print("Test2c")
                                                                          percentilesEV_survival_eggs_tad_ephemeral <- dapva::selectEVPercentilesNormal(input_names_w_EV = c("ephemeral_wetlands"),
                                                                                                                                              correlation = 1,
                                                                                                                                              n_years = yrs)
@@ -162,12 +169,12 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                          
                                                                          }
                                                              
-                                                                       print("Test3")
+                                                                       # print("Test3")
                                                                        
                                                                        percentilesEV_survival_yoy_adult <- dapva::selectEVPercentilesNormal(input_names_w_EV = c("all_wetlands"),
                                                                                                                                     correlation = 1, n_years = parameterByIterTracking$yrs[i])
                                                                        
-                                                                       print("Test4")
+                                                                       # print("Test4")
                                                                        
                                                                        percentilesEV_reproduction <- dapva::selectEVPercentilesNormal(input_names_w_EV = c("all_wetlands"),
                                                                                                                               correlation = 1,
@@ -177,7 +184,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                        
                                                                        
                                                                                                                              
-                                                                       print("Test5")
+                                                                       # print("Test5")
                                                                        
                                                                        # Check if there is an existing pop in this alternative or not
                                                                        if(alternative_details$assume_existing_pop == "yes"){
@@ -201,29 +208,88 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                                                                                   exisiting_pop,
                                                                                                                                   dispersal_allowed_outside = parameterByIterTracking$dispersal_allowed_outside[i])
 
-                                                                        if(q == max_n_runs_per_iter*0.1){ # if we have run 10% of the max number of runs per iterations
-
-                                                                          # Check to see if within 5% of either 0 or 1 since we noticed from covergence
-                                                                          # plots that if it is at either of these two extremes, more iterations are typically not necessary
-
-                                                                          results_all_so_far <- plyr::rbind.fill(results_annual)
-
-                                                                          check_if_enough_runs <- makeResultsSummaryOneIteration(results_all_so_far,
-                                                                                                                                by_pop = 'no',
-                                                                                                                                 initial_year = parameterByIterTracking$initial_year[i],
-                                                                                                                                 yrs = parameterByIterTracking$yrs[i],
-                                                                                                                                 n_iter,
-                                                                                                                                 n_runs_per_iter = q,
-                                                                                                                                 alternative = paste0(alternative_details$alt_name_full),
-                                                                                                                                 iteration_number = i)
-
-                                                                          prob_of_persis_so_far <- check_if_enough_runs[which(check_if_enough_runs$metric == "probability of persistence"),
-                                                                                                                        paste(parameterByIterTracking$initial_year[i] + parameterByIterTracking$yrs[i]-1)]
-
-                                                                          # if with 5% of 0 or 1, then no need to do more runs
-                                                                         if(prob_of_persis_so_far <= 0.05){finish <- TRUE}
-                                                                          if(prob_of_persis_so_far >= 0.95){finish <- TRUE}
-                                                                        }
+                                                                       # Then check to see what the probability metric is
+                                                                       
+                                                                       results_all_so_far <- plyr::rbind.fill(results_annual)
+                                                                       
+                                                                       check_if_enough_runs <- makeResultsSummaryOneIteration(results_all_so_far,
+                                                                                                                              by_pop = 'no',
+                                                                                                                              initial_year = parameterByIterTracking$initial_year[i],
+                                                                                                                              yrs = parameterByIterTracking$yrs[i],
+                                                                                                                              n_iter,
+                                                                                                                              n_runs_per_iter = q,
+                                                                                                                              alternative = paste0(alternative_details$alt_name_full),
+                                                                                                                              prob_self_sustain = TRUE,
+                                                                                                                              iteration_number = i)
+                                                                       
+                                                                       prob_of_persis_so_far <- check_if_enough_runs[which(check_if_enough_runs$metric == "probability of persistence"),
+                                                                                                                     paste(parameterByIterTracking$initial_year[i] + parameterByIterTracking$yrs[i]-1)]
+                                                                       
+                                                                       
+                                                                       prob_of_selfsustain_so_far <- check_if_enough_runs[which(check_if_enough_runs$metric == "probability of self-sustaining population"),
+                                                                                                                          paste(parameterByIterTracking$initial_year[i] + parameterByIterTracking$yrs[i]-1)]
+                                                                       
+                                                                       
+                                                                       convergence_tracking_persis[q] <- as.numeric(prob_of_persis_so_far)
+                                                                       convergence_tracking_selfsustain[q] <- as.numeric(prob_of_selfsustain_so_far)
+                                                                       
+                                                                       # if(q >= burnin){ # for every iteration after the burn in + convergence band length 
+                                                                         
+                                                                         
+                                                                         if(q >= (burnin + convergence_band_length)){
+                                                                           
+                                                                           CB_persis_upper_limit <- convergence_tracking_persis[q - convergence_band_length] + convergence_band_halfwidth
+                                                                           CB_persis_lower_limit <- convergence_tracking_persis[q - convergence_band_length] - convergence_band_halfwidth
+                                                                           
+                                                                           CB_selfsustain_upper_limit <- convergence_tracking_selfsustain[q - convergence_band_length] + convergence_band_halfwidth
+                                                                           CB_selfsustain_lower_limit <- convergence_tracking_selfsustain[q - convergence_band_length] - convergence_band_halfwidth
+                                                                           
+                                                                           # if within the convergence criteria for both metrics of interest, can stop
+                                                                           if(convergence_tracking_persis[q] <= CB_persis_upper_limit & 
+                                                                              convergence_tracking_persis[q] >= CB_persis_lower_limit){
+                                                                             converged_for_persist <- "yes"
+                                                                           }
+                                                                           
+                                                                           if(convergence_tracking_selfsustain[q] <= CB_selfsustain_upper_limit & 
+                                                                              convergence_tracking_selfsustain[q] >= CB_selfsustain_lower_limit){
+                                                                             converged_for_selfsustain  <- "yes"
+                                                                           }
+  
+                                                                           if(converged_for_persist == "yes" & 
+                                                                              converged_for_selfsustain == "yes") {
+                                                                             finish <- TRUE
+                                                                           }      
+                                                                         }
+                                                                       # }
+                                                                       
+                                                                       
+                                                                       
+                                                                       
+                                                                       
+                                                                       
+                                                                       # if(q == max_n_runs_per_iter*0.1){ # if we have run 10% of the max number of runs per iterations
+                                                                       # 
+                                                                       #    # Check to see if within 5% of either 0 or 1 since we noticed from covergence
+                                                                       #    # plots that if it is at either of these two extremes, more iterations are typically not necessary
+                                                                       # 
+                                                                       #    results_all_so_far <- plyr::rbind.fill(results_annual)
+                                                                       # 
+                                                                       #    check_if_enough_runs <- makeResultsSummaryOneIteration(results_all_so_far,
+                                                                       #                                                          by_pop = 'no',
+                                                                       #                                                           initial_year = parameterByIterTracking$initial_year[i],
+                                                                       #                                                           yrs = parameterByIterTracking$yrs[i],
+                                                                       #                                                           n_iter,
+                                                                       #                                                           n_runs_per_iter = q,
+                                                                       #                                                           alternative = paste0(alternative_details$alt_name_full),
+                                                                       #                                                           iteration_number = i)
+                                                                       # 
+                                                                       #    prob_of_persis_so_far <- check_if_enough_runs[which(check_if_enough_runs$metric == "probability of persistence"),
+                                                                       #                                                  paste(parameterByIterTracking$initial_year[i] + parameterByIterTracking$yrs[i]-1)]
+                                                                       # 
+                                                                       #    # if with 5% of 0 or 1, then no need to do more runs
+                                                                       #   if(prob_of_persis_so_far <= 0.05){finish <- TRUE}
+                                                                       #    if(prob_of_persis_so_far >= 0.95){finish <- TRUE}
+                                                                       #  }
 
                                                                         if(finish == TRUE){
                                                                           print(paste('Iteration', i, "stopped at", q, "runs"))
