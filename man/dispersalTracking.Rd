@@ -12,7 +12,8 @@ dispersalTracking(
   j,
   wetlands,
   wetland_distances_km,
-  parameterByIterTracking
+  parameterByIterTracking,
+  allow_outside
 )
 }
 \arguments{
@@ -27,6 +28,8 @@ dispersalTracking(
 \item{parameterByIterTracking}{A dataframe of the form parameterByIterTracking()
 that contains the following dispersal related inputs: dispersal_CSF_vs_MoreGoShort,
 dispersal_CSFmodel_lessEqual1km, etc.}
+
+\item{allow_outside}{"yes" or "no", allow frogs to disperse outside of the WMA or not.}
 }
 \description{
 The rows are the 'from' wetland and the columns are the 'to' wetland/location.

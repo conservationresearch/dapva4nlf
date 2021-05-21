@@ -27,6 +27,7 @@
 #' @param parameterByIterTracking A dataframe of the form parameterByIterTracking()
 #'  that contains the following dispersal related inputs: dispersal_CSF_vs_MoreGoShort,
 #'  dispersal_CSFmodel_lessEqual1km, etc.
+#' @param allow_outside "yes" or "no", allow frogs to disperse outside of the WMA or not.
 #'
 #' @examples
 #' # Still to do
@@ -36,7 +37,8 @@
 dispersalTracking <- function(resultsTracking_popSize_females, yoy_rows, i, j,
                                wetlands,
                               wetland_distances_km,
-                              parameterByIterTracking){
+                              parameterByIterTracking,
+                              allow_outside){
   
   
   p_yoy_disperse <- as.numeric(parameterByIterTracking[i, paste0("p_yoy_disperse")])
@@ -94,8 +96,22 @@ dispersalTracking <- function(resultsTracking_popSize_females, yoy_rows, i, j,
       wetlands_greater2km <- colnames(wetland_distances_km)[which(wetland_distances > 2)]
       
       # Since all wetlands are less than 1km from the outside, add the outside bucket as an option to all distance buckets
-      wetlands_greater1lessEqual2km <- c(wetlands_greater1lessEqual2km, "outside")
-      wetlands_greater2km <- c(wetlands_greater2km, "outside")
+      wetlands_greater1lessEqual2km <- unique(c(wetlands_greater1lessEqual2km, "outside"))
+      wetlands_greater2km <- unique(c(wetlands_greater2km, "outside"))
+      
+      # If frogs are not allowed outside, then remove the outside option 
+      if(allow_outside == "no"){
+        wetlands_lessEqual_1km <- wetlands_lessEqual_1km[which(wetlands_lessEqual_1km != 'outside')]
+        wetlands_greater1lessEqual2km <- wetlands_greater1lessEqual2km[which(wetlands_greater1lessEqual2km != 'outside')]
+        wetlands_greater2km <- wetlands_greater2km[which(wetlands_greater2km != 'outside')]
+        
+        # If any of the distance categories are now empty, then have them return to their original wetland
+        if(length(wetlands_lessEqual_1km) == 0){wetlands_lessEqual_1km <- paste(wetland)}
+        if(length(wetlands_greater1lessEqual2km) == 0){wetlands_greater1lessEqual2km <- paste(wetland)}
+        if(length(wetlands_greater2km) == 0){wetlands_greater2km <- paste(wetland)}
+        
+      }
+      
       
       # Which wetland do each go to
       destinations <- c(sample(wetlands_lessEqual_1km, n_lessEqual_1km, replace = TRUE),

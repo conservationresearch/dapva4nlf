@@ -43,8 +43,8 @@ alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are p
 rows_to_run <- c(10) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
 
 #---- Specify number of iterations and number of runs per iterations.  -------------
-n_iter  <- 500
-max_n_runs_per_iter <- 1000
+n_iter  <-  5# 500
+max_n_runs_per_iter <- 100 #1000
 
 #---- Start the scenario loop.  -------------
 for(m in 1:length(rows_to_run)){ # loop through the different scenarios requested in the scenarios_to_run file
@@ -198,7 +198,8 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                                                                                   percentilesEV_survival_yoy_adult,
                                                                                                                                   percentilesEV_reproduction,
                                                                                                                                   alternative_details,
-                                                                                                                                  exisiting_pop)
+                                                                                                                                  exisiting_pop,
+                                                                                                                                  dispersal_allowed_outside = parameterByIterTracking$dispersal_allowed_outside[i])
 
                                                                         if(q == max_n_runs_per_iter*0.1){ # if we have run 10% of the max number of runs per iterations
 

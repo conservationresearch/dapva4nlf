@@ -43,6 +43,7 @@
 #'   existing population there. Defaults to FALSE. Turn to TRUE only when
 #'   exploring the implications of having an established population from the
 #'   start.
+#' @param dispersal_allowed_outside TRUE OR FALSE, defaults to TRUE
 #'
 #' @importFrom dplyr %>%
 #'
@@ -54,7 +55,8 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
                                  percentilesEV_survival_yoy_adult,
                                  percentilesEV_reproduction,
                                  alternative_details, 
-                                 exisiting_pop = FALSE) {
+                                 exisiting_pop = FALSE, 
+                                 dispersal_allowed_outside = TRUE) {
   
     # CHECK - DO WE ACCOUNT FOR ALTERNATIVE WITH AND WITHOUT EPHEMERAL WETLANDS
   # WHEN IMPLEMENTING DISPERSAL
@@ -450,7 +452,8 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       dispersal_results <- dapva4nlf::dispersalTracking(resultsTracking_popSize_females, yoy_rows, i, j,
                                              wetlands,
                                              wetland_distances_km,
-                                             parameterByIterTracking)
+                                             parameterByIterTracking,
+                                             allow_outside = dispersal_allowed_outside)
 
       # for each wetland, remove the # that left and then add them to the wetland they went to
       for(z in 1:length(yoy_rows)){
@@ -575,7 +578,8 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       dispersal_results <- dapva4nlf::dispersalTracking(resultsTracking_popSize_females, yoy_rows, i, j,
                                              wetlands,
                                              wetland_distances_km,
-                                             parameterByIterTracking)
+                                             parameterByIterTracking,
+                                             allow_outside = dispersal_allowed_outside)
       
       # for each wetland, remove the # that left and then add them to the wetland they went to
       for(z in 1:length(yoy_rows)){

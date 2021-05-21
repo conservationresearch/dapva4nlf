@@ -430,7 +430,13 @@ getNLFIdahoFeasinputs <- function() {
     c(input = "dispersal_MoreGoShortmodel_greater2km", type = "dispersal", 
       best_guess = 0.08, 
       best_guess_type = "probability", management_alternative = "status_quo", 
-      source = "Lea and Rebecca on May 5, 2021", comments = "We think it is more likely that they will go shorter distances than longer ones.")
+      source = "Lea and Rebecca on May 5, 2021", comments = "We think it is more likely that they will go shorter distances than longer ones."),
+    
+    c(input = "dispersal_allowed_outside", type = "dispersal", 
+      best_guess = 0.5, 
+      best_guess_type = "probability", management_alternative = "status_quo", 
+      source = "LK Placeholder", comments = "LK Testing")
+    
     
   )
   
@@ -764,6 +770,15 @@ selectNLFIdahoParameterByIterTracking <- function(inputs, base_case = FALSE) {
                                                                  prob = c(as.numeric(inputs$best_guess[which(inputs$input == "dispersal_CSF_vs_MoreGoShort")]),
                                                                           (1-as.numeric(inputs$best_guess[which(inputs$input == "dispersal_CSF_vs_MoreGoShort")]))
                                                                  ), replace = T)
+    
+    parameterByIterTracking[i, "dispersal_allowed_outside"] <- sample(c("yes", "no"),
+                                                                         size = 1,
+                                                                         prob = c(as.numeric(inputs$best_guess[which(inputs$input == "dispersal_allowed_outside")]),
+                                                                                  (1-as.numeric(inputs$best_guess[which(inputs$input == "dispersal_allowed_outside")]))
+                                                                         ), replace = T)
+    
+    
+    
   }
   
   if(base_case == TRUE){
@@ -773,6 +788,12 @@ selectNLFIdahoParameterByIterTracking <- function(inputs, base_case = FALSE) {
     {parameterByIterTracking[i, "dispersal_CSF_vs_MoreGoShort"] <- "MoreGoShort"}
     if(as.numeric(inputs$best_guess[which(inputs$input == "dispersal_CSF_vs_MoreGoShort")]) >= 0.5)
     {parameterByIterTracking[i, "dispersal_CSF_vs_MoreGoShort"] <- "CSF"}
+    
+    if(as.numeric(inputs$best_guess[which(inputs$input == "dispersal_allowed_outside")]) < 0.5)
+    {parameterByIterTracking[i, "dispersal_allowed_outside"] <- "no"}
+    if(as.numeric(inputs$best_guess[which(inputs$input == "dispersal_allowed_outside")]) >= 0.5)
+    {parameterByIterTracking[i, "dispersal_allowed_outside"] <- "yes"}
+    
   }
   
   # No uncertainty in these but record for easy access through parameterByIterTracking
