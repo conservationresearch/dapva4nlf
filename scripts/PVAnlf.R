@@ -43,8 +43,8 @@ alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are p
 rows_to_run <- c(10) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
 
 #---- Specify number of iterations and number of runs per iterations.  -------------
-n_iter  <-  25# 500
-max_n_runs_per_iter <- 100 #1000
+n_iter  <-  1000# 500
+max_n_runs_per_iter <- 1000
 
 #---- Start the scenario loop.  -------------
 for(m in 1:length(rows_to_run)){ # loop through the different scenarios requested in the scenarios_to_run file
@@ -87,8 +87,19 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   results_summary_all_iterations_by_pop_int  <- list() # initialize
   results_all_iterations  <- list() # initialize
   
-  batch_size <- max(n_iter/5, 1) # always at least one batch
+  batch_size <- 2 # always at least one batch
   batches <- split(1:n_iter, ceiling(seq_along(1:n_iter)/batch_size ))
+  
+  
+  # Inputs for convergence criteria at the iteration level
+  convergence_band_halfwidth_iter <- 0.025 # between 0 and 1 since will base it on the probability objective metrics
+  convergence_band_length_n_batches <- 1 # number of batches
+  min_n_batches <- 2 # 
+  convergence_tracking_persis_iter <- c(vector(), rep(NA, length(batches))) # initalize
+  convergence_tracking_selfsustain_iter <- c(vector(), rep(NA, length(batches))) # initalize
+  converged_for_persist_iter <- "no"
+  converged_for_selfsustain_iter <- "no"
+  
   
   for(batch in 1:length(batches)){
     print(paste("Running batch ", batch, "; i.e. iterations", first(batches[[batch]]), "to ", last(batches[[batch]]), " of ", n_iter))
@@ -106,10 +117,10 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                      results_annual <- list() # initalize
                                                                      finish <- FALSE # initalize
                                                                      
-                                                                     # Inputs for 
+                                                                     # Inputs for convergence criteria at the run level
                                                                      convergence_band_halfwidth <- 0.025 # between 0 and 1 since will base it on the probability objective metrics
                                                                      convergence_band_length <- 50 # number of run
-                                                                     burnin <- 100 # min number of runs
+                                                                     burnin <- 100 # min number of runs (should rename, not true burn in because we do not discard these)
                                                                      convergence_tracking_persis <- c(vector(), rep(NA, max_n_runs_per_iter)) # initalize
                                                                      convergence_tracking_selfsustain <- c(vector(), rep(NA, max_n_runs_per_iter)) # initalize
                                                                      converged_for_persist <- "no"
@@ -124,7 +135,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                        yrs <- parameterByIterTracking$yrs[i]
                                                                        stage_classes <- c("eggs", "tadpoles", "yoy", "juv", "A2", "A3", "A4plus")
                                                                        
-                                                                       print("Test1")
+                                                                       # print("Test1")
                                                                        if(alternative_details$restore_ephemeralWetlands == "yes"){
                                                                          wetlands <- c("cell3", "cell4", "cell7", "ephemeral_wetlands", "outside")
                                                                        }
@@ -351,6 +362,47 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
       results_summary_all_iterations_by_pop_int[[batch]] <- results_summary_all_iterations[[2]]
       results_all_iterations[[batch]] <- results_summary_all_iterations[[3]]
     }
+    
+    # At the end of each batch, check to see if we have converged and can stop the number of iteration
+    results_summary_all_iterations_overall <- do.call("rbind", results_summary_all_iterations_overall_int)
+    
+    int_persis <- makeResultsSummary(results_summary_all_iterations = results_summary_all_iterations_overall,
+      metric = "probability of persistence", initial_year = 1, credible_interval = 0.95)
+    
+    int_selfsustain <- makeResultsSummary(results_summary_all_iterations = results_summary_all_iterations_overall,
+                                     metric = "probability of self-sustaining population", initial_year = 1, credible_interval = 0.95)
+    
+    convergence_tracking_persis_iter[batch] <- int_persis$mean[which(int_persis$year == yrs)]
+    convergence_tracking_selfsustain_iter[batch] <- int_selfsustain$mean[which(int_selfsustain$year == yrs)]
+    
+    if(batch >= min_n_batches){
+
+      CB_persis_upper_limit_iter <- convergence_tracking_persis_iter[batch - convergence_band_length_n_batches] + convergence_band_halfwidth_iter
+      CB_persis_lower_limit_iter <- convergence_tracking_persis_iter[batch - convergence_band_length_n_batches] - convergence_band_halfwidth_iter
+
+      CB_selfsustain_upper_limit_iter <- convergence_tracking_selfsustain_iter[batch - convergence_band_length_n_batches] + convergence_band_halfwidth_iter
+      CB_selfsustain_lower_limit_iter <- convergence_tracking_selfsustain_iter[batch - convergence_band_length_n_batches] - convergence_band_halfwidth_iter
+      
+      
+      # if within the convergence criteria for both metrics of interest, can stop
+      if(convergence_tracking_persis_iter[batch] <= CB_persis_upper_limit_iter & 
+         convergence_tracking_persis_iter[batch] >= CB_persis_lower_limit_iter){
+        converged_for_persist_iter <- "yes"
+      }
+      
+      if(convergence_tracking_selfsustain_iter[batch] <= CB_selfsustain_upper_limit_iter & 
+         convergence_tracking_selfsustain_iter[batch] >= CB_selfsustain_lower_limit_iter){
+        converged_for_selfsustain_iter  <- "yes"
+      }
+      
+      if(converged_for_persist_iter == "yes" & 
+         converged_for_selfsustain_iter == "yes") {
+        print("Reached enough iterations, breaking out of iteration batch for loop")
+        break # break out of the for loop
+      }     
+
+    }
+    
   }
   
   
