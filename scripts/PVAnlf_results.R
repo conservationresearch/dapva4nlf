@@ -1,4 +1,4 @@
-# This script uses the Rdata files saved as the output from running the NLF Idaho Feasability PVA
+# This script uses the Rdata files saved as the output from running the NLF Idaho Feasibility PVA
 # wrapper script to extract and graph the results for the
 # 2021 SDM report.
 

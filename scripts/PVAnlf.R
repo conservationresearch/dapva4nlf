@@ -44,9 +44,9 @@ rows_to_run <- c(10) # note that can't call 1 but just 0s anyways; all the rest 
 
 #---- Specify number of iterations and number of runs per iterations.  -------------
 n_iter  <-  2000# 500
-flexible_convergence_iteration_on <- "yes" # 'yes' or 'no', generally choose yes unless you are running a tornado and want to specify a # of iter
+flexible_convergence_iteration_on <- "no" # 'yes' or 'no', generally choose yes unless you are running a tornado and want to specify a # of iter
 
-max_n_runs_per_iter <- 1000
+max_n_runs_per_iter <- 1000 # flexible convergence is always on at the run level
 
 
 #---- Start the scenario loop.  -------------
@@ -465,7 +465,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   tornado_parameter_labels <- as.data.frame(matrix(nrow = ncol(parameterByIterTracking_this_alt_clean), ncol = 2))
   colnames(tornado_parameter_labels) <- c("name", "label")
   tornado_parameter_labels$name <- colnames(parameterByIterTracking_this_alt_clean)
-  tornado_parameter_labels$label<- paste("W", tornado_parameter_labels$name) # for now, same as name. Can tweak later if desired.
+  tornado_parameter_labels$label <- paste(tornado_parameter_labels$name) # for now, same as name. Can tweak later if desired.
   
   # Do the sensitivity analysis
   paramSens <- dapva::makeParameterSens(parameterByIterTracking = parameterByIterTracking_this_alt_clean,
