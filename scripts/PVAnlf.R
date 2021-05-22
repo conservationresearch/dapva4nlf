@@ -15,7 +15,7 @@ system.time({ # turn on the timer
 
 #---- Clear the workspace. ----
 rm(list = ls())
-version <- "_v1test7" # insert short description to append to results to help identify
+version <- "_v1test8" # insert short description to append to results to help identify
 
 #---- Load libraries, and set the random seed.  -------------
 ## Import libraries
@@ -43,8 +43,11 @@ alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are p
 rows_to_run <- c(10) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
 
 #---- Specify number of iterations and number of runs per iterations.  -------------
-n_iter  <-  1000# 500
+n_iter  <-  2000# 500
+flexible_convergence_iteration_on <- "yes" # 'yes' or 'no', generally choose yes unless you are running a tornado and want to specify a # of iter
+
 max_n_runs_per_iter <- 1000
+
 
 #---- Start the scenario loop.  -------------
 for(m in 1:length(rows_to_run)){ # loop through the different scenarios requested in the scenarios_to_run file
@@ -87,7 +90,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   results_summary_all_iterations_by_pop_int  <- list() # initialize
   results_all_iterations  <- list() # initialize
   
-  batch_size <- 2 # always at least one batch
+  batch_size <- 100 # always at least one batch
   batches <- split(1:n_iter, ceiling(seq_along(1:n_iter)/batch_size ))
   
   
@@ -99,8 +102,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   convergence_tracking_selfsustain_iter <- c(vector(), rep(NA, length(batches))) # initalize
   converged_for_persist_iter <- "no"
   converged_for_selfsustain_iter <- "no"
-  
-  
+
   for(batch in 1:length(batches)){
     print(paste("Running batch ", batch, "; i.e. iterations", first(batches[[batch]]), "to ", last(batches[[batch]]), " of ", n_iter))
     
@@ -363,45 +365,49 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
       results_all_iterations[[batch]] <- results_summary_all_iterations[[3]]
     }
     
-    # At the end of each batch, check to see if we have converged and can stop the number of iteration
-    results_summary_all_iterations_overall <- do.call("rbind", results_summary_all_iterations_overall_int)
-    
-    int_persis <- makeResultsSummary(results_summary_all_iterations = results_summary_all_iterations_overall,
-      metric = "probability of persistence", initial_year = 1, credible_interval = 0.95)
-    
-    int_selfsustain <- makeResultsSummary(results_summary_all_iterations = results_summary_all_iterations_overall,
-                                     metric = "probability of self-sustaining population", initial_year = 1, credible_interval = 0.95)
-    
-    convergence_tracking_persis_iter[batch] <- int_persis$mean[which(int_persis$year == yrs)]
-    convergence_tracking_selfsustain_iter[batch] <- int_selfsustain$mean[which(int_selfsustain$year == yrs)]
-    
-    if(batch >= min_n_batches){
-
-      CB_persis_upper_limit_iter <- convergence_tracking_persis_iter[batch - convergence_band_length_n_batches] + convergence_band_halfwidth_iter
-      CB_persis_lower_limit_iter <- convergence_tracking_persis_iter[batch - convergence_band_length_n_batches] - convergence_band_halfwidth_iter
-
-      CB_selfsustain_upper_limit_iter <- convergence_tracking_selfsustain_iter[batch - convergence_band_length_n_batches] + convergence_band_halfwidth_iter
-      CB_selfsustain_lower_limit_iter <- convergence_tracking_selfsustain_iter[batch - convergence_band_length_n_batches] - convergence_band_halfwidth_iter
+    if(flexible_convergence_iteration_on == 'yes'){
+      # At the end of each batch, check to see if we have converged and can stop the number of iteration
+      results_summary_all_iterations_overall <- do.call("rbind", results_summary_all_iterations_overall_int)
       
+      int_persis <- makeResultsSummary(results_summary_all_iterations = results_summary_all_iterations_overall,
+                                       metric = "probability of persistence", initial_year = 1, credible_interval = 0.95)
       
-      # if within the convergence criteria for both metrics of interest, can stop
-      if(convergence_tracking_persis_iter[batch] <= CB_persis_upper_limit_iter & 
-         convergence_tracking_persis_iter[batch] >= CB_persis_lower_limit_iter){
-        converged_for_persist_iter <- "yes"
+      int_selfsustain <- makeResultsSummary(results_summary_all_iterations = results_summary_all_iterations_overall,
+                                            metric = "probability of self-sustaining population", initial_year = 1, credible_interval = 0.95)
+      
+      convergence_tracking_persis_iter[batch] <- int_persis$mean[which(int_persis$year == 50)]
+      convergence_tracking_selfsustain_iter[batch] <- int_selfsustain$mean[which(int_selfsustain$year == 50)]
+      
+      if(batch >= min_n_batches){
+        
+        CB_persis_upper_limit_iter <- convergence_tracking_persis_iter[batch - convergence_band_length_n_batches] + convergence_band_halfwidth_iter
+        CB_persis_lower_limit_iter <- convergence_tracking_persis_iter[batch - convergence_band_length_n_batches] - convergence_band_halfwidth_iter
+        
+        CB_selfsustain_upper_limit_iter <- convergence_tracking_selfsustain_iter[batch - convergence_band_length_n_batches] + convergence_band_halfwidth_iter
+        CB_selfsustain_lower_limit_iter <- convergence_tracking_selfsustain_iter[batch - convergence_band_length_n_batches] - convergence_band_halfwidth_iter
+        
+        
+        # if within the convergence criteria for both metrics of interest, can stop
+        if(convergence_tracking_persis_iter[batch] <= CB_persis_upper_limit_iter & 
+           convergence_tracking_persis_iter[batch] >= CB_persis_lower_limit_iter){
+          converged_for_persist_iter <- "yes"
+        }
+        
+        if(convergence_tracking_selfsustain_iter[batch] <= CB_selfsustain_upper_limit_iter & 
+           convergence_tracking_selfsustain_iter[batch] >= CB_selfsustain_lower_limit_iter){
+          converged_for_selfsustain_iter  <- "yes"
+        }
+        
+        if(converged_for_persist_iter == "yes" & 
+           converged_for_selfsustain_iter == "yes") {
+          print("Reached enough iterations, breaking out of iteration batch for loop")
+          break # break out of the for loop
+        }     
+        
       }
-      
-      if(convergence_tracking_selfsustain_iter[batch] <= CB_selfsustain_upper_limit_iter & 
-         convergence_tracking_selfsustain_iter[batch] >= CB_selfsustain_lower_limit_iter){
-        converged_for_selfsustain_iter  <- "yes"
-      }
-      
-      if(converged_for_persist_iter == "yes" & 
-         converged_for_selfsustain_iter == "yes") {
-        print("Reached enough iterations, breaking out of iteration batch for loop")
-        break # break out of the for loop
-      }     
-
     }
+    
+
     
   }
   
@@ -417,6 +423,11 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   
 #---- Do the sensitivity analysis on the overall results. ----
 
+  # TO DO: Add something in here so that it checks what the actual number of 
+  #iterations used was and then update the parameter by tracking accordingly
+  # Need to do this now that have added in this flexible way of determining the # of iterations
+  
+  
   # Not set up to do it by populations/colony
   print("Running the sensitivity analysis.")
   
@@ -442,18 +453,27 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   
   # Add order to the ones that are factors
   parameterByIterTracking_this_alt_clean$drawdown_beforeMidJuly <- ordered(parameterByIterTracking_this_alt_clean$drawdown_beforeMidJuly, 
-                                                                           levels = c("yes", "no"))
+                                                                           levels = c("no","yes"))
   parameterByIterTracking_this_alt_clean$dispersal_CSF_vs_MoreGoShort <- ordered(parameterByIterTracking_this_alt_clean$dispersal_CSF_vs_MoreGoShort, 
                                                                                  levels = c("CSF", "MoreGoShort"))
   parameterByIterTracking_this_alt_clean$bullfrogMgmt_effective <- ordered(parameterByIterTracking_this_alt_clean$bullfrogMgmt_effective, 
                                                                            levels = c("no", "yes"))
-
+  
+  parameterByIterTracking_this_alt_clean$dispersal_allowed_outside <- ordered(parameterByIterTracking_this_alt_clean$dispersal_allowed_outside, 
+                                                                           levels = c("no", "yes"))
+  
+  tornado_parameter_labels <- as.data.frame(matrix(nrow = ncol(parameterByIterTracking_this_alt_clean), ncol = 2))
+  colnames(tornado_parameter_labels) <- c("name", "label")
+  tornado_parameter_labels$name <- colnames(parameterByIterTracking_this_alt_clean)
+  tornado_parameter_labels$label<- paste("W", tornado_parameter_labels$name) # for now, same as name. Can tweak later if desired.
+  
   # Do the sensitivity analysis
-  paramSens <- makeParameterSens(parameterByIterTracking = parameterByIterTracking_this_alt_clean,
+  paramSens <- dapva::makeParameterSens(parameterByIterTracking = parameterByIterTracking_this_alt_clean,
                                  results_all_this_alt = results_all_this_alt,
                                  metric = "probability of persistence",
                                  start_year = 1,
-                                 nyrs = 50)
+                                 nyrs = 50,
+                                 parameter_labels = tornado_parameter_labels)
   
   
 #---- Store the name of the scenario. ----
