@@ -43,7 +43,7 @@ alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are p
 rows_to_run <- c(10) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
 
 #---- Specify number of iterations and number of runs per iterations.  -------------
-n_iter  <-  2000# 500
+n_iter  <- 25 # 2000# 500
 flexible_convergence_iteration_on <- "no" # 'yes' or 'no', generally choose yes unless you are running a tornado and want to specify a # of iter
 
 max_n_runs_per_iter <- 1000 # flexible convergence is always on at the run level
@@ -258,13 +258,13 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                            CB_selfsustain_lower_limit <- convergence_tracking_selfsustain[q - convergence_band_length] - convergence_band_halfwidth
                                                                            
                                                                            # if within the convergence criteria for both metrics of interest, can stop
-                                                                           if(convergence_tracking_persis[q] <= CB_persis_upper_limit & 
-                                                                              convergence_tracking_persis[q] >= CB_persis_lower_limit){
+                                                                           if(sum(convergence_tracking_persis[(burnin+1):q] <= CB_persis_upper_limit) >= convergence_band_length & 
+                                                                             sum(convergence_tracking_persis[(burnin+1):q] >= CB_persis_lower_limit) >= convergence_band_length){
                                                                              converged_for_persist <- "yes"
                                                                            }
                                                                            
-                                                                           if(convergence_tracking_selfsustain[q] <= CB_selfsustain_upper_limit & 
-                                                                              convergence_tracking_selfsustain[q] >= CB_selfsustain_lower_limit){
+                                                                           if(sum(convergence_tracking_selfsustain[(burnin+1):q] <= CB_selfsustain_upper_limit) >= convergence_band_length & 
+                                                                              sum(convergence_tracking_selfsustain[(burnin+1):q] >= CB_selfsustain_lower_limit) >= convergence_band_length){
                                                                              converged_for_selfsustain  <- "yes"
                                                                            }
   
