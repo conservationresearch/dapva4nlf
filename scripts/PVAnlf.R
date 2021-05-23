@@ -90,16 +90,18 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   results_summary_all_iterations_by_pop_int  <- list() # initialize
   results_all_iterations  <- list() # initialize
   
-  batch_size <- 100 # always at least one batch
+  batch_size <- 5 # 100 # always at least one batch
   batches <- split(1:n_iter, ceiling(seq_along(1:n_iter)/batch_size ))
   
   
   # Inputs for convergence criteria at the iteration level
   convergence_band_halfwidth_iter <- 0.025 # between 0 and 1 since will base it on the probability objective metrics
   convergence_band_length_n_batches <- 1 # number of batches
+  convergence_band_length_n_iter <- 50 # number of batches
+  
   min_n_batches <- 2 # 
-  convergence_tracking_persis_iter <- c(vector(), rep(NA, length(batches))) # initalize
-  convergence_tracking_selfsustain_iter <- c(vector(), rep(NA, length(batches))) # initalize
+  convergence_tracking_persis_iter <- c(vector(), rep(NA, convergence_band_length_n_iter)) # initalize
+  convergence_tracking_selfsustain_iter <- c(vector(), rep(NA, convergence_band_length_n_iter)) # initalize
   converged_for_persist_iter <- "no"
   converged_for_selfsustain_iter <- "no"
 
@@ -372,11 +374,24 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
       int_persis <- makeResultsSummary(results_summary_all_iterations = results_summary_all_iterations_overall,
                                        metric = "probability of persistence", initial_year = 1, credible_interval = 0.95)
       
-      int_selfsustain <- makeResultsSummary(results_summary_all_iterations = results_summary_all_iterations_overall,
-                                            metric = "probability of self-sustaining population", initial_year = 1, credible_interval = 0.95)
+      # Calulate how many iterations have returned results so far (not the same as i necessaryily since the parallal computing throws out results if it gives an error)
+      # Also renumber the iteraitons outside of the dataframe so can use it below
+      n_iter_so_far <- length(unique(results_summary_all_iterations_overall$iteration))
+      n_iter_so_far - convergence_band_length_n_iter
+      iteration_renumbered  <- rep(1:n_iter_so_far, each = 3)
+
+      int_persis <-  do.call("rbind",lapply((n_iter_so_far - convergence_band_length_n_iter+1):n_iter_so_far, # for the last x iterations, where x is the convergence band length
+                     function(x) makeResultsSummary(results_summary_all_iterations = results_summary_all_iterations_overall[which(iteration_renumbered <= x),],
+                                              metric = "probability of persistence", initial_year = 1, credible_interval = 0.95))
+      )
+
+      int_selfsustain <-  do.call("rbind",lapply((n_iter_so_far - convergence_band_length_n_iter+1):n_iter_so_far, # for the last x iterations, where x is the convergence band length
+                                            function(x) makeResultsSummary(results_summary_all_iterations = results_summary_all_iterations_overall[which(iteration_renumbered <= x),],
+                                                                           metric = "probability of self-sustaining population", initial_year = 1, credible_interval = 0.95))
+      )
       
-      convergence_tracking_persis_iter[batch] <- int_persis$mean[which(int_persis$year == 50)]
-      convergence_tracking_selfsustain_iter[batch] <- int_selfsustain$mean[which(int_selfsustain$year == 50)]
+      convergence_tracking_persis_iter <- int_persis$mean[which(int_persis$year == 50)]
+      convergence_tracking_selfsustain_iter <- int_selfsustain$mean[which(int_selfsustain$year == 50)]
       
       if(batch >= min_n_batches){
         
@@ -386,16 +401,14 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
         CB_selfsustain_upper_limit_iter <- convergence_tracking_selfsustain_iter[batch - convergence_band_length_n_batches] + convergence_band_halfwidth_iter
         CB_selfsustain_lower_limit_iter <- convergence_tracking_selfsustain_iter[batch - convergence_band_length_n_batches] - convergence_band_halfwidth_iter
         
-        
         # if within the convergence criteria for both metrics of interest, can stop
-        if(convergence_tracking_persis_iter[batch] <= CB_persis_upper_limit_iter & 
-           convergence_tracking_persis_iter[batch] >= CB_persis_lower_limit_iter){
+        if(sum(convergence_tracking_persis_iter <= CB_persis_upper_limit_iter) >= convergence_band_length_n_iter & 
+           sum(convergence_tracking_persis_iter >= CB_persis_lower_limit_iter) >= convergence_band_length_n_iter){
           converged_for_persist_iter <- "yes"
         }
-        
-        if(convergence_tracking_selfsustain_iter[batch] <= CB_selfsustain_upper_limit_iter & 
-           convergence_tracking_selfsustain_iter[batch] >= CB_selfsustain_lower_limit_iter){
-          converged_for_selfsustain_iter  <- "yes"
+        if(sum(convergence_tracking_selfsustain_iter <= CB_selfsustain_upper_limit_iter) >= convergence_band_length_n_iter & 
+           sum(convergence_tracking_selfsustain_iter >= CB_selfsustain_lower_limit_iter) >= convergence_band_length_n_iter){
+          converged_for_selfsustain_iter <- "yes"
         }
         
         if(converged_for_persist_iter == "yes" & 
