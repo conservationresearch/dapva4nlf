@@ -1446,3 +1446,26 @@ results_all_for_this_iteration_fall[which(results_all_for_this_iteration_fall$cl
   
   # The key seems to be having at least one? good year for yoy survival, this sets the age structure up for success
 
+  
+  
+  
+  ############# Load in run with existing pop, look at age structure for those that do persist. #######
+  
+  results_all_iterations$iterRun <- paste(results_all_iterations$iteration, results_all_iterations$run)
+  
+  int <- unique(results_all_iterations$iterRun[which(results_all_iterations[,"50"] >0)[1:10000]])
+  int
+  
+  test <- results_all_iterations[which(results_all_iterations$iterRun == "9 28"),c(1:10,50:56 )]
+  
+  (test_yoy_n_yr50 <- sum(test[which(test$class == "yoy"), "50"]))
+  (test_juv_n_yr50 <- sum(test[which(test$class == "juv"), "50"]))
+  (test_A2_n_yr50 <- sum(test[which(test$class == "A2"), "50"]))
+  (test_A3_n_yr50 <- sum(test[which(test$class == "A3"), "50"]))
+  (test_A4plus_n_yr50 <- sum(test[which(test$class == "A4plus"), "50"]))
+  
+  test_yoy_n_yr50/(test_yoy_n_yr50 + test_juv_n_yr50 + test_A2_n_yr50 + test_A3_n_yr50  + test_A4plus_n_yr50) # prop yoy
+  
+  
+  # Pretty variable, the numbers are generally much higher than in Tischindorf - do we need to revisit our K? Discuss
+  

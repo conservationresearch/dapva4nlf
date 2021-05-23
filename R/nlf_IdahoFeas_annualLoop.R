@@ -91,11 +91,12 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       dapva::selectPercentileBetaDistribution(
         mean = s_eggs_mean,
         sd = s_eggs_sd,
-        EV_percentile = percentilesEV_survival_eggs_tad[j, paste(wetlands_without_outside[x])],
-        neg_shape_param_update_sd = TRUE,
-        neg_shape_param_update_sd_pct_mean = 10 # need this because the uniform SD means that sometimes the SD is too big for the mean, the 10% is from Karen and Travis' NLF pop modelling paper
-        
+        EV_percentile = percentilesEV_survival_eggs_tad[j, paste(wetlands_without_outside[x])]
       )
+      #   neg_shape_param_update_sd = TRUE,
+      #   neg_shape_param_update_sd_pct_mean = 10 # need this because the uniform SD means that sometimes the SD is too big for the mean, the 10% is from Karen and Travis' NLF pop modelling paper
+      #   
+      # )
     }))
 
     s_tadpoles_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_tadpoles_no_threats")])
@@ -104,10 +105,10 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       dapva::selectPercentileBetaDistribution(
         mean = s_tadpoles_mean,
         sd = s_tadpoles_sd,
-        EV_percentile = percentilesEV_survival_eggs_tad[j, paste(wetlands_without_outside[x])],
-        neg_shape_param_update_sd = TRUE,
-        neg_shape_param_update_sd_pct_mean = 10 # need this because the uniform SD means that sometimes the SD is too big for the mean, the 10% is from Karen and Travis' NLF pop modelling paper
-        
+        EV_percentile = percentilesEV_survival_eggs_tad[j, paste(wetlands_without_outside[x])]
+        # neg_shape_param_update_sd = TRUE,
+        # neg_shape_param_update_sd_pct_mean = 10 # need this because the uniform SD means that sometimes the SD is too big for the mean, the 10% is from Karen and Travis' NLF pop modelling paper
+        # 
       )
     }))    
     
@@ -127,10 +128,10 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       dapva::selectPercentileBetaDistribution(
         mean = s_yoy_mean,
         sd = s_yoy_sd,
-        EV_percentile = percentilesEV_survival_yoy_adult$all_wetlands[j],
-        neg_shape_param_update_sd = TRUE,
-        neg_shape_param_update_sd_pct_mean = 10 # need this because the uniform SD means that sometimes the SD is too big for the mean, the 10% is from Karen and Travis' NLF pop modelling paper
-        
+        EV_percentile = percentilesEV_survival_yoy_adult$all_wetlands[j]
+        # neg_shape_param_update_sd = TRUE,
+        # neg_shape_param_update_sd_pct_mean = 10 # need this because the uniform SD means that sometimes the SD is too big for the mean, the 10% is from Karen and Travis' NLF pop modelling paper
+        # 
       )
     }))
     
@@ -140,10 +141,10 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       dapva::selectPercentileBetaDistribution(
         mean = s_juv_mean,
         sd = s_juv_sd,
-        EV_percentile = percentilesEV_survival_yoy_adult$all_wetlands[j],
-        neg_shape_param_update_sd = TRUE,
-        neg_shape_param_update_sd_pct_mean = 10 # need this because the uniform SD means that sometimes the SD is too big for the mean, the 10% is from Karen and Travis' NLF pop modelling paper
-        
+        EV_percentile = percentilesEV_survival_yoy_adult$all_wetlands[j]
+        # neg_shape_param_update_sd = TRUE,
+        # neg_shape_param_update_sd_pct_mean = 10 # need this because the uniform SD means that sometimes the SD is too big for the mean, the 10% is from Karen and Travis' NLF pop modelling paper
+        # 
       )
     }))
     
@@ -153,10 +154,10 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       dapva::selectPercentileBetaDistribution(
         mean = s_adult_mean,
         sd = s_adult_sd,
-        EV_percentile = percentilesEV_survival_yoy_adult$all_wetlands[j],
-        neg_shape_param_update_sd = TRUE,
-        neg_shape_param_update_sd_pct_mean = 10 # need this because the uniform SD means that sometimes the SD is too big for the mean, the 10% is from Karen and Travis' NLF pop modelling paper
-        
+        EV_percentile = percentilesEV_survival_yoy_adult$all_wetlands[j]
+        # neg_shape_param_update_sd = TRUE,
+        # neg_shape_param_update_sd_pct_mean = 10 # need this because the uniform SD means that sometimes the SD is too big for the mean, the 10% is from Karen and Travis' NLF pop modelling paper
+        # 
       )
     }))    
     

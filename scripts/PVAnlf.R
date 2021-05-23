@@ -80,6 +80,80 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   # parameterByIterTracking <-  parameterByIterTracking_baseCase
   # n_iter <- 1
   
+  
+  # Replace any iterations where bullfrog management is effective to NA for all the bullfrog threat related survival inputs.
+  rows_bullfrogMgt_effective <- which(parameterByIterTracking$bullfrogMgmt_effective == "yes")
+  parameterByIterTracking$s_pct_reduced_eggs_bullfrogs[rows_bullfrogMgt_effective] <- NA
+  parameterByIterTracking$s_pct_reduced_tadpoles_bullfrogs[rows_bullfrogMgt_effective] <- NA
+  parameterByIterTracking$s_pct_reduced_yoy_bullfrogs[rows_bullfrogMgt_effective] <- NA
+  parameterByIterTracking$s_pct_reduced_juvenile_bullfrogs[rows_bullfrogMgt_effective] <- NA
+  parameterByIterTracking$s_pct_reduced_adult_bullfrogs[rows_bullfrogMgt_effective] <- NA
+  
+  
+  # Identify any survival inputs that don't have valid beta distribution shape paramaters 
+  # and relplace the standard deviation with 10% of the mean (something small) to make it work.
+  # NOTE: IF THIS WORKS, CAN TAKE OUT OF dapva::selectPercentileBetaDistribution in the annual loop.
+  
+
+  parameterByIterTracking_replace_invalid_beta_shapeParam <- function(parameterByIterTracking, mean, sd){
+    
+    test <- do.call("rbind",lapply(1:nrow(parameterByIterTracking), 
+                                   function(x)dapva::estBetaParams(mean = parameterByIterTracking[x, paste(mean)], 
+                                                                   sd = parameterByIterTracking[x, paste(sd)])
+    )
+    )
+    
+    rows_with_invalid_alpha <- which(test[,1] <=0)
+    rows_with_invalid_beta <- which(test[,2] <=0)
+    rows_with_invalid_shapeParam <- unique(c(rows_with_invalid_alpha, rows_with_invalid_beta))
+    if(length(rows_with_invalid_shapeParam)>0){
+      print(paste("Replacing for ", length(rows_with_invalid_shapeParam), "iterations: sd with 10 pct of the mean"))
+      parameterByIterTracking_updated <- parameterByIterTracking # initalize
+      parameterByIterTracking_updated[rows_with_invalid_shapeParam, paste(sd)] <- parameterByIterTracking[rows_with_invalid_shapeParam, paste(mean)]*0.1 
+      
+    }
+
+    return(parameterByIterTracking_updated)
+  }
+  
+  # Check and update reproduction if needed
+  
+  parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking, 
+                                                                                     mean = "p_females_lay_eggs_mean_A2", 
+                                                                                     sd = "p_females_lay_eggs_sd_A2")
+  
+  parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking, 
+                                                                                     mean = "p_females_lay_eggs_mean_A3", 
+                                                                                     sd = "p_females_lay_eggs_sd_A3")
+  
+  parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking, 
+                                                                                     mean = "p_females_lay_eggs_mean_A4plus", 
+                                                                                     sd = "p_females_lay_eggs_sd_A4plus")
+  # Check and update survival if needed
+  
+  parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking, 
+                                                                                    mean = "s_mean_eggs_no_threats", 
+                                                                                    sd = "s_sd_eggs_no_threats")
+
+  parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking, 
+                                                                                     mean = "s_mean_tadpoles_no_threats", 
+                                                                                     sd = "s_sd_tadpoles_no_threats")
+  
+  parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking, 
+                                                                                     mean = "s_mean_yoy_no_threats", 
+                                                                                     sd = "s_sd_yoy_no_threats")
+  
+  parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking, 
+                                                                                     mean = "s_mean_juv_no_threats", 
+                                                                                     sd = "s_sd_juv_no_threats")
+  
+  parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking, 
+                                                                                     mean = "s_mean_adult_no_threats", 
+                                                                                     sd = "s_sd_adult_no_threats")
+  
+  
+  
+  
 #---- Run the PVA. ----
   # Need to have run the foreach loop for parameterByIterTracking first
   print("Running the PVA with each iteration in parallel.")
@@ -479,6 +553,16 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   colnames(tornado_parameter_labels) <- c("name", "label")
   tornado_parameter_labels$name <- colnames(parameterByIterTracking_this_alt_clean)
   tornado_parameter_labels$label <- paste(tornado_parameter_labels$name) # for now, same as name. Can tweak later if desired.
+  
+  # Update a few tornado labels
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_eggs_bullfrogs")] <- "egg survival reduction: bullfrogMgt not effective"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_tadpoles_bullfrogs")] <- "tadpoles survival reduction: bullfrogMgt not effective"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_yoy_bullfrogs")] <- "yoy survival reduction: bullfrogMgt not effective"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_juvenile_bullfrogs")] <- "juvenile survival reduction: bullfrogMgt not effective"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_adult_bullfrogs")] <- "adult survival reduction: bullfrogMgt not effective"
+  
+  
+  
   
   # Do the sensitivity analysis
   paramSens <- dapva::makeParameterSens(parameterByIterTracking = parameterByIterTracking_this_alt_clean,
