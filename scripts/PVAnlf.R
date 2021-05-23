@@ -43,8 +43,8 @@ alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are p
 rows_to_run <- c(10) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
 
 #---- Specify number of iterations and number of runs per iterations.  -------------
-n_iter  <- 25 # 2000# 500
-flexible_convergence_iteration_on <- "no" # 'yes' or 'no', generally choose yes unless you are running a tornado and want to specify a # of iter
+n_iter  <- 2000# 500
+flexible_convergence_iteration_on <- "yes" # 'yes' or 'no', generally choose yes unless you are running a tornado and want to specify a # of iter
 
 max_n_runs_per_iter <- 1000 # flexible convergence is always on at the run level
 
@@ -164,7 +164,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   results_summary_all_iterations_by_pop_int  <- list() # initialize
   results_all_iterations  <- list() # initialize
   
-  batch_size <- 5 # 100 # always at least one batch
+  batch_size <-  100 # always at least one batch
   batches <- split(1:n_iter, ceiling(seq_along(1:n_iter)/batch_size ))
   
   
