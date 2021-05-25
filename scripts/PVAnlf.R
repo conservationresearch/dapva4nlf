@@ -554,14 +554,71 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   tornado_parameter_labels$name <- colnames(parameterByIterTracking_this_alt_clean)
   tornado_parameter_labels$label <- paste(tornado_parameter_labels$name) # for now, same as name. Can tweak later if desired.
   
-  # Update a few tornado labels
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_eggs_bullfrogs")] <- "egg survival reduction: bullfrogMgt not effective"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_tadpoles_bullfrogs")] <- "tadpoles survival reduction: bullfrogMgt not effective"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_yoy_bullfrogs")] <- "yoy survival reduction: bullfrogMgt not effective"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_juvenile_bullfrogs")] <- "juvenile survival reduction: bullfrogMgt not effective"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_adult_bullfrogs")] <- "adult survival reduction: bullfrogMgt not effective"
+  # Update a few tornado labels - could tidy this up by putting it in a function and moving it to a different file, do later if time
+  
+  # Reprodcution - proportion of females who lay eggs
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "p_females_lay_eggs_mean_A2")] <- "proportion of A2 lay eggs - mean"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "p_females_lay_eggs_mean_A3")] <- "proportion of A3 lay eggs - mean"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "p_females_lay_eggs_mean_A4plus")] <- "proportion of A4plus lay eggs - mean"
+  
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "p_females_lay_eggs_sd_A2")] <- "proportion of A2 lay eggs - sd"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "p_females_lay_eggs_sd_A3")] <- "proportion of A3 lay eggs - sd"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "p_females_lay_eggs_sd_A4plus")] <- "proportion of A4plus lay eggs - sd"
+  
+  # Reproduction - number of eggs per reproductively active female
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "num_eggs_per_active_female_mean_A2")] <- "number of eggs per A2 if lay eggs  - mean"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "num_eggs_per_active_female_mean_A3")] <- "number of eggs per A3 if lay eggs  - mean"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "num_eggs_per_active_female_mean_A4plus")] <- "number of eggs per A4plus if lay eggs  - mean"
+  
+  # Survival
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_mean_eggs_no_threats")] <- "egg survival - mean"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_mean_tadpoles_no_threats")] <- "tadpole survival - mean"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_mean_yoy_no_threats")] <- "yoy survival - mean"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_mean_juv_no_threats")] <- "juv survival - mean"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_mean_adult_no_threats")] <- "adult survival - mean"
+  
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_sd_eggs_no_threats")] <- "egg survival - sd"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_sd_tadpoles_no_threats")] <- "tadpole survival - sd"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_sd_yoy_no_threats")] <- "yoy survival - sd"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_sd_juv_no_threats")] <- "juv survival - sd"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_sd_adult_no_threats")] <- "adult survival - sd"
   
   
+  # Survival - pct reduced, bullfrogs
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_eggs_bullfrogs")] <- "egg survival reduction if bullfrogMgt not effective"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_tadpoles_bullfrogs")] <- "tadpoles survival reduction if bullfrogMgt not effective"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_yoy_bullfrogs")] <- "yoy survival reduction if bullfrogMgt not effective"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_juvenile_bullfrogs")] <- "juvenile survival reduction if bullfrogMgt not effective"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_adult_bullfrogs")] <- "adult survival reduction if bullfrogMgt not effective"
+  
+  # Survival - pct reduced, roads
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_eggs_roads")] <- "egg survival reduction from roads"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_tadpoles_roads")] <- "tadpoles survival reduction from roads"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_yoy_roads")] <- "yoy survival reduction from roads"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_juvenile_roads")] <- "juvenile survival reduction from roads"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_adult_roads")] <- "adult survival reduction from roads"
+  
+  # Survival - pct reduced, chytrid
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_eggs_chytrid")] <- "egg survival reduction from chytrid"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_tadpoles_chytrid")] <- "tadpoles survival reduction from chytrid"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_yoy_chytrid")] <- "yoy survival reduction from chytrid"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_juvenile_chytrid")] <- "juvenile survival reduction from chytrid"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_adult_chytrid")] <- "adult survival reduction from chytrid"
+  
+  # Survival - pct reduced, drawdown
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_tadpoles_drawdownPartial")] <- "tadpoles survival reduction from partial drawdown"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_tadpoles_drawdownComplete")] <- "tadpoles survival reduction from complete drawdown"
+  
+  # Other
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "drawdown_completeVSpartial_freq")] <- "frequency of complete vs. partial drawdowns"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "bullfrogMgmt_effective")] <- "bullfrog mgmt. effective (yes = high, no = low)"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "drawdown_beforeMidJuly")] <- "drawdowns before mid-July (yes = high, no = low)"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "ephemeral_freq_dry")] <- "frequency of ephemeral wetland dry years"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "carrying_capacity_BSCWMA")] <- "carrying capacity"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "quasi_extinction_threshold")] <- "quasi-extinction threshold"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "wetland_eggTadSurv_TempCor_noEph")] <- "wetland correlation for egg and tadpole survival"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "p_yoy_disperse")] <- "proportion of yoy that disperse"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "dispersal_CSF_vs_MoreGoShort")] <- "dispersal model (CSF = low, MoreGoShort = high)"
   
   
   # Do the sensitivity analysis
