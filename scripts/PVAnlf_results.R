@@ -32,21 +32,38 @@ for (i in 1:length(files)){
   write.csv(results_summary_all_iterations_overall, file = paste0("results_overall_", name, version,".csv"), row.names = FALSE)
 
   # Sensitivity analysis results
-  write.csv(paramSens[1], # write the summary, which is the first output (the second is yrs, used in the tornado)
-           file = paste0("paramSens_", name, version,".csv"), row.names = FALSE)
+  write.csv(paramSens_persist[1], # write the summary, which is the first output (the second is yrs, used in the tornado)
+           file = paste0("paramSens_persist", name, version,".csv"), row.names = FALSE)
+  
+  write.csv(paramSens_selfsustain[1], # write the summary, which is the first output (the second is yrs, used in the tornado)
+            file = paste0("paramSens_selfsustain", name, version,".csv"), row.names = FALSE)
 
   # Draw the associated tornado
-  tornado <- dapva::drawTornado(paramSens = paramSens,
+  tornado_persist <- dapva::drawTornado(paramSens = paramSens_persist,
                          metric = "probability of persistence",
                          year = 50,
                          title = paste(name), breaks = 0.1)
+  
+  tornado_selfsustain <- dapva::drawTornado(paramSens = paramSens_selfsustain,
+                                        metric = "probability of self-sustaining population",
+                                        year = 50,
+                                        title = paste(name), breaks = 0.1)
+  
 
   # Export the tornado diagram
-  tiff(filename = paste0("tornado_", name,version,".tiff"),
+  tiff(filename = paste0("tornado_persist_", name,version,".tiff"),
        width=12, height=6, units="in",
        pointsize=8, compression="lzw", bg="white", res=600)
-  print(tornado)
+  print(tornado_persist)
   dev.off()
+  
+  tiff(filename = paste0("tornado_selfsustain_", name,version,".tiff"),
+       width=12, height=6, units="in",
+       pointsize=8, compression="lzw", bg="white", res=600)
+  print(tornado_selfsustain)
+  dev.off()
+  
+  
 
   # Summarize the population specific results for this scenario/alternative.
   results_summary_num_indiv_by_pop <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations = results_summary_all_iterations_by_pop,
@@ -1332,7 +1349,16 @@ stats::qbeta(EV_percentile, alpha, beta)
 # the qbeta function does not allow it.
 
 
+# BEta distribution for visualizations
+mean <- 0.5
+sd <- 0.14 #mean*0.2
+dist <- dapva::estBetaParams(mean = mean, sd = sd)
 
+pl.beta(dist$alpha, 
+        dist$beta, 
+        title = "beta distribution2") 
+
+stats::qbeta(0.999, dist$alpha, dist$beta)
 
 
 

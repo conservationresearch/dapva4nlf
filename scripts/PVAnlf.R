@@ -565,13 +565,19 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   
   
   # Do the sensitivity analysis
-  paramSens <- dapva::makeParameterSens(parameterByIterTracking = parameterByIterTracking_this_alt_clean,
+  paramSens_persist <- dapva::makeParameterSens(parameterByIterTracking = parameterByIterTracking_this_alt_clean,
                                  results_all_this_alt = results_all_this_alt,
                                  metric = "probability of persistence",
                                  start_year = 1,
                                  nyrs = 50,
                                  parameter_labels = tornado_parameter_labels)
   
+  paramSens_selfsustain <- dapva::makeParameterSens(parameterByIterTracking = parameterByIterTracking_this_alt_clean,
+                                                results_all_this_alt = results_all_this_alt,
+                                                metric = "probability of self-sustaining population",
+                                                start_year = 1,
+                                                nyrs = 50,
+                                                parameter_labels = tornado_parameter_labels)
   
 #---- Store the name of the scenario. ----
   # Store the name as an object we know which scenario these results belong to
