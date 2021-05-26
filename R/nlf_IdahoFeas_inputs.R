@@ -205,24 +205,24 @@ getNLFIdahoFeasinputs <- function() {
       source = "Lea and Rebecca, April 26, 2021", comments = "Can affect the mouthparts of tadpoles but shouldn't affect the mortality; literature suggests mortality was post-metamorphisis (Marantelli et al. 2004)"),
     
     c(input = "s_pct_reduced_yoy_chytrid", type = "survival", 
-      lcl = 1, best_guess = 10, ucl = 20, confidence = 60,
-      lower_bound = 0, upper_bound = 100,
+      lcl = 1, best_guess = 5, ucl = 20, confidence = 99,
+      lower_bound = 0, upper_bound = 50,
       best_guess_type = "median", management_alternative = "status_quo", 
       source = "Lea and Rebecca, April 26, 2021", comments = "In Brisco, the worst they saw was 30% of metamorphis had evidence of it (but did not necessarily die from it; literature suggests that mortalities of chytrid may be restricted to metamorphis (and juv, but overweintering?) (see one note page on Chytrid for references); For absolute max - In a lab settiung shown that it can wipe them out entirely, some other examples in Arizona (word of mouth) where it was causing their sites to fail"),
     
-    c(input = "s_pct_reduced_juvenile_chytrid", type = "survival", 
-      lcl = 1, best_guess = 8, ucl = 20, confidence = 60,
-      lower_bound = 0, upper_bound = 100,
-      best_guess_type = "median", management_alternative = "status_quo", 
-      source = "Lea and Rebecca, April 26, 2021", comments = "Literature suggests that chytrid mortality in adults is generally low (see SDM one note page on chytrid)"),
-    
-    c(input = "s_pct_reduced_adult_chytrid", type = "survival", 
-      lcl = 1, best_guess = 8, ucl = 20, confidence = 60,
-      lower_bound = 0, upper_bound = 100,
+    c(input = "s_pct_reduced_juvenile_adult_chytrid", type = "survival", # updated to reflect that chytrid will affect juveniles and adults in the same way, so should be the same paramater draw
+      lcl = 1, best_guess = 3, ucl = 20, confidence = 99,
+      lower_bound = 0, upper_bound = 50,
       best_guess_type = "median", management_alternative = "status_quo", 
       source = "Lea and Rebecca, April 26, 2021", comments = "Literature suggests that chytrid mortality in adults is generally low (see SDM one note page on chytrid)")
-    )
-  
+    # 
+    # c(input = "s_pct_reduced_adult_chytrid", type = "survival", 
+    #   lcl = 1, best_guess = 3, ucl = 20, confidence = 99,
+    #   lower_bound = 0, upper_bound = 50,
+    #   best_guess_type = "median", management_alternative = "status_quo", 
+    #   source = "Lea and Rebecca, April 26, 2021", comments = "Literature suggests that chytrid mortality in adults is generally low (see SDM one note page on chytrid)")
+     )
+    # 
   #---- Survival: % reduction due to roads.  -------------
   
   # Only affects terrestrial life stages, so yoy up
@@ -635,16 +635,16 @@ selectNLFIdahoParameterByIterTracking <- function(inputs, base_case = FALSE) {
     parameterByIterTracking[i, "s_pct_reduced_eggs_chytrid"] <- dapva::selectParamUniformDistribution(input_name = "s_pct_reduced_eggs_chytrid", inputsDF = inputs)
     parameterByIterTracking[i, "s_pct_reduced_tadpoles_chytrid"] <- dapva::selectParamUniformDistribution(input_name = "s_pct_reduced_tadpoles_chytrid", inputsDF = inputs)
     parameterByIterTracking[i, "s_pct_reduced_yoy_chytrid"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_yoy_chytrid", inputsDF = inputs)
-    parameterByIterTracking[i, "s_pct_reduced_juvenile_chytrid"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_juvenile_chytrid", inputsDF = inputs)
-    parameterByIterTracking[i, "s_pct_reduced_adult_chytrid"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_adult_chytrid", inputsDF = inputs)
+    parameterByIterTracking[i, "s_pct_reduced_juvenile_adult_chytrid"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_juvenile_adult_chytrid", inputsDF = inputs)
+    # parameterByIterTracking[i, "s_pct_reduced_adult_chytrid"] <- dapva::selectParamMetalogDistribution(input_name = "s_pct_reduced_adult_chytrid", inputsDF = inputs)
   }
   
   if(base_case == TRUE){
     parameterByIterTracking[i, "s_pct_reduced_eggs_chytrid"] <- (as.numeric(as.character(inputs$lcl[which(inputs$input == "s_pct_reduced_eggs_chytrid")])) + as.numeric(as.character(inputs$ucl[which(inputs$input == "s_pct_reduced_eggs_chytrid")])))/2
     parameterByIterTracking[i, "s_pct_reduced_tadpoles_chytrid"] <- (as.numeric(as.character(inputs$lcl[which(inputs$input == "s_pct_reduced_tadpoles_chytrid")])) + as.numeric(as.character(inputs$ucl[which(inputs$input == "s_pct_reduced_tadpoles_chytrid")])))/2
     parameterByIterTracking[i, "s_pct_reduced_yoy_chytrid"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_pct_reduced_yoy_chytrid")]))
-    parameterByIterTracking[i, "s_pct_reduced_juvenile_chytrid"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_pct_reduced_juvenile_chytrid")]))
-    parameterByIterTracking[i, "s_pct_reduced_adult_chytrid"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_pct_reduced_adult_chytrid")]))
+    parameterByIterTracking[i, "s_pct_reduced_juvenile_adult_chytrid"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_pct_reduced_juvenile_adult_chytrid")]))
+    # parameterByIterTracking[i, "s_pct_reduced_adult_chytrid"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_pct_reduced_adult_chytrid")]))
   }
   
   ######### Select the survival parameters for this iteration - % reduction in survival due to roads. #########

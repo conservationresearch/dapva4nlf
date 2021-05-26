@@ -277,12 +277,12 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       s_yoy
     
     s_juv_afterThreats <- (1-as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_juvenile_roads")])/100)*
-      (1-as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_juvenile_chytrid")])/100)*
+      (1-as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_juvenile_adult_chytrid")])/100)*
       (1-s_pct_reduced_juv_bullfrogs/100)*
       s_juv
     
     s_adult_afterThreats <- (1-as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_adult_roads")])/100)*
-      (1-as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_adult_chytrid")])/100)*
+      (1-as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_juvenile_adult_chytrid")])/100)*
       (1-s_pct_reduced_adult_bullfrogs/100)*
       s_adult
     

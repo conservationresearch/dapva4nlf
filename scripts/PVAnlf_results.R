@@ -1349,20 +1349,92 @@ stats::qbeta(EV_percentile, alpha, beta)
 # the qbeta function does not allow it.
 
 
-# BEta distribution for visualizations
-mean <- 0.5
-sd <- 0.14 #mean*0.2
+# BEta distribution for visualizations - egg survival
+mean <- 0.04
+sd <- .07 #0.07 #.1  #0.14    # 0.001 is too small, 0.2 is too big
 dist <- dapva::estBetaParams(mean = mean, sd = sd)
 
 pl.beta(dist$alpha, 
         dist$beta, 
         title = "beta distribution2") 
 
-stats::qbeta(0.999, dist$alpha, dist$beta)
+
+stats::qbeta(0.9, dist$alpha, dist$beta)
+stats::qbeta(0.1, dist$alpha, dist$beta)
+
+stats::qbeta(0.99, dist$alpha, dist$beta)
+stats::qbeta(0.01, dist$alpha, dist$beta)
 
 
 
 
+# BEta distribution for visualizations - tadpole survival
+mean <- 0.04
+sd <- .08 #use .06 as best guess, .05 is reasonable, 0.07 is good, 0.14 not as good, .01 seems narrow, ok as a low plausible, .1 seems too big - ok to as upper bound
+dist <- dapva::estBetaParams(mean = mean, sd = sd)
+
+pl.beta(dist$alpha, 
+        dist$beta, 
+        title = "beta distribution2") 
+
+
+stats::qbeta(0.9, dist$alpha, dist$beta)
+stats::qbeta(0.1, dist$alpha, dist$beta)
+
+stats::qbeta(0.99, dist$alpha, dist$beta)
+stats::qbeta(0.01, dist$alpha, dist$beta)
+
+
+
+# BEta distribution for visualizations - tadpole survival
+mean <- 0.04
+sd <- .08 #use .06 as best guess, .05 is reasonable, 0.07 is good, 0.14 not as good, .01 seems narrow, ok as a low plausible, .1 seems too big - ok to as upper bound
+dist <- dapva::estBetaParams(mean = mean, sd = sd)
+
+pl.beta(dist$alpha, 
+        dist$beta, 
+        title = "beta distribution2") 
+
+
+stats::qbeta(0.9, dist$alpha, dist$beta)
+stats::qbeta(0.1, dist$alpha, dist$beta)
+
+stats::qbeta(0.99, dist$alpha, dist$beta)
+stats::qbeta(0.01, dist$alpha, dist$beta)
+
+
+# BEta distribution for visualizations - yoy survival
+mean <- 0.1
+sd <- 0.001 # 0.001 is absolute low, 0.04 is a good low guess, 0.07 is a good best guess, 0.1 is a good high, 0.14 seems a little high - ok for the upper bound
+dist <- dapva::estBetaParams(mean = mean, sd = sd)
+
+pl.beta(dist$alpha, 
+        dist$beta, 
+        title = "beta distribution2") 
+
+
+stats::qbeta(0.9, dist$alpha, dist$beta)
+stats::qbeta(0.1, dist$alpha, dist$beta)
+
+stats::qbeta(0.99, dist$alpha, dist$beta)
+stats::qbeta(0.01, dist$alpha, dist$beta)
+
+
+# BEta distribution for visualizations - juv survival
+mean <- 0.4
+sd <- 0.14 # 0.001 is absolute low, 0.04 is a good low guess, 0.07 is a good best guess, 0.1 is a good high, 0.14 seems a little high - ok for the upper bound
+dist <- dapva::estBetaParams(mean = mean, sd = sd)
+
+pl.beta(dist$alpha, 
+        dist$beta, 
+        title = "beta distribution2") 
+
+
+stats::qbeta(0.9, dist$alpha, dist$beta)
+stats::qbeta(0.1, dist$alpha, dist$beta)
+
+stats::qbeta(0.99, dist$alpha, dist$beta)
+stats::qbeta(0.01, dist$alpha, dist$beta)
 
 
 

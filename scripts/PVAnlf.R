@@ -602,9 +602,8 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_eggs_chytrid")] <- "egg survival reduction from chytrid"
   tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_tadpoles_chytrid")] <- "tadpoles survival reduction from chytrid"
   tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_yoy_chytrid")] <- "yoy survival reduction from chytrid"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_juvenile_chytrid")] <- "juvenile survival reduction from chytrid"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_adult_chytrid")] <- "adult survival reduction from chytrid"
-  
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_juvenile_adult_chytrid")] <- "juvenile/adult survival reduction from chytrid"
+
   # Survival - pct reduced, drawdown
   tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_tadpoles_drawdownPartial")] <- "tadpoles survival reduction from partial drawdown"
   tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_tadpoles_drawdownComplete")] <- "tadpoles survival reduction from complete drawdown"
