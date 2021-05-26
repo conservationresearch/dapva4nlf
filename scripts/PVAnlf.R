@@ -68,7 +68,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                ) %dopar% {
                                                 # ) %do% {
 
-                                                print(paste("Choosing parameters for interation # ", m))
+                                                print(paste("Choosing parameters for iteration # ", m))
                                                 parameterByIterTracking <- dapva4nlf::selectNLFIdahoParameterByIterTracking(inputs)
                                                 return(parameterByIterTracking)
                                                 
@@ -94,6 +94,8 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   # and relplace the standard deviation with 10% of the mean (something small) to make it work.
   # NOTE: IF THIS WORKS, CAN TAKE OUT OF dapva::selectPercentileBetaDistribution in the annual loop.
   
+  # MIGHT BE ABLE TO TAKE THIS OUTNOW THAT HAVE IMPROVED STANDRAD DEVIATION INPUTS, DOUBLE CHECK THAT
+  # THIS ISN"T PULLING ANY OUT ANYMORE
 
   parameterByIterTracking_replace_invalid_beta_shapeParam <- function(parameterByIterTracking, mean, sd){
     
@@ -106,9 +108,9 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
     rows_with_invalid_alpha <- which(test[,1] <=0)
     rows_with_invalid_beta <- which(test[,2] <=0)
     rows_with_invalid_shapeParam <- unique(c(rows_with_invalid_alpha, rows_with_invalid_beta))
+    parameterByIterTracking_updated <- parameterByIterTracking # initalize
     if(length(rows_with_invalid_shapeParam)>0){
       print(paste("Replacing for ", length(rows_with_invalid_shapeParam), "iterations: sd with 10 pct of the mean"))
-      parameterByIterTracking_updated <- parameterByIterTracking # initalize
       parameterByIterTracking_updated[rows_with_invalid_shapeParam, paste(sd)] <- parameterByIterTracking[rows_with_invalid_shapeParam, paste(mean)]*0.1 
       
     }
@@ -123,12 +125,12 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                                      sd = "p_females_lay_eggs_sd_A2")
   
   parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking, 
-                                                                                     mean = "p_females_lay_eggs_mean_A3", 
-                                                                                     sd = "p_females_lay_eggs_sd_A3")
-  
-  parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking, 
-                                                                                     mean = "p_females_lay_eggs_mean_A4plus", 
-                                                                                     sd = "p_females_lay_eggs_sd_A4plus")
+                                                                                     mean = "p_females_lay_eggs_mean_A3_A4plus", 
+                                                                                     sd = "p_females_lay_eggs_sd_A3_A4plus")
+  # 
+  # parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking, 
+  #                                                                                    mean = "p_females_lay_eggs_mean_A4plus", 
+  #                                                                                    sd = "p_females_lay_eggs_sd_A4plus")
   # Check and update survival if needed
   
   parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking, 

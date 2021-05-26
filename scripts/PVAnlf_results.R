@@ -1422,7 +1422,40 @@ stats::qbeta(0.01, dist$alpha, dist$beta)
 
 # BEta distribution for visualizations - juv survival
 mean <- 0.4
-sd <- 0.14 # 0.001 is absolute low, 0.04 is a good low guess, 0.07 is a good best guess, 0.1 is a good high, 0.14 seems a little high - ok for the upper bound
+sd <- 0.01 # 0.05  # 0.04 as low, 0.1 as high, 0.07  as best guess
+dist <- dapva::estBetaParams(mean = mean, sd = sd)
+
+pl.beta(dist$alpha, 
+        dist$beta, 
+        title = "beta distribution2") 
+
+
+stats::qbeta(0.9, dist$alpha, dist$beta)
+stats::qbeta(0.1, dist$alpha, dist$beta)
+
+stats::qbeta(0.99, dist$alpha, dist$beta)
+stats::qbeta(0.01, dist$alpha, dist$beta)
+
+
+# BEta distribution for visualizations - prop that lay eggs, A2
+mean <- 0.75
+sd <- .07 # 0.07 as best guess, 0.05 as low plausible   0.14 is too wide, 0.1 is a reasonable high, 0.12 as absolute max, 0.01 is too narrow - ok for lower bound
+dist <- dapva::estBetaParams(mean = mean, sd = sd)
+
+pl.beta(dist$alpha, 
+        dist$beta, 
+        title = "beta distribution2") 
+
+
+stats::qbeta(0.9, dist$alpha, dist$beta)
+stats::qbeta(0.1, dist$alpha, dist$beta)
+
+stats::qbeta(0.99, dist$alpha, dist$beta)
+stats::qbeta(0.01, dist$alpha, dist$beta)
+
+# BEta distribution for visualizations - prop that lay eggs, A3 and A4
+mean <- 0.9
+sd <- .12 # 0.05 as best guess, 0.09 for plausible high, 0.03 for plausible low, .01 for absolute low, 0.12 reasonable absolute max
 dist <- dapva::estBetaParams(mean = mean, sd = sd)
 
 pl.beta(dist$alpha, 

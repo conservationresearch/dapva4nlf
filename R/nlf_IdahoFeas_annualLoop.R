@@ -331,8 +331,8 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       )
         })) 
     
-    p_females_lay_eggs_mean_A3 <- as.numeric(parameterByIterTracking[i, paste0("p_females_lay_eggs_mean_A3")])
-    p_females_lay_eggs_sd_A3 <- as.numeric(parameterByIterTracking[i, paste0("p_females_lay_eggs_sd_A3")])
+    p_females_lay_eggs_mean_A3 <- as.numeric(parameterByIterTracking[i, paste0("p_females_lay_eggs_mean_A3_A4plus")])
+    p_females_lay_eggs_sd_A3 <- as.numeric(parameterByIterTracking[i, paste0("p_females_lay_eggs_sd_A3_A4plus")])
     p_females_lay_eggs_A3 <- unlist(lapply(1:length(wetlands_without_outside), function(x) {
       dapva::selectPercentileBetaDistribution(
         mean = p_females_lay_eggs_mean_A3,
@@ -344,18 +344,21 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       )
     })) 
     
-    p_females_lay_eggs_mean_A4plus <- as.numeric(parameterByIterTracking[i, paste0("p_females_lay_eggs_mean_A4plus")])
-    p_females_lay_eggs_sd_A4plus <- as.numeric(parameterByIterTracking[i, paste0("p_females_lay_eggs_sd_A4plus")])
-    p_females_lay_eggs_A4plus <- unlist(lapply(1:length(wetlands_without_outside), function(x) {
-      dapva::selectPercentileBetaDistribution(
-        mean = p_females_lay_eggs_mean_A4plus,
-        sd = p_females_lay_eggs_sd_A4plus,
-        EV_percentile = percentilesEV_reproduction$all_wetlands[j],
-        neg_shape_param_update_sd = TRUE,
-        neg_shape_param_update_sd_pct_mean = 10 # need this because the uniform SD means that sometimes the SD is too big for the mean, the 10% is from Karen and Travis' NLF pop modelling paper
-        
-      )
-    })) 
+    # p_females_lay_eggs_mean_A4plus <- as.numeric(parameterByIterTracking[i, paste0("p_females_lay_eggs_mean_A3_A4plus")])
+    # p_females_lay_eggs_sd_A4plus <- as.numeric(parameterByIterTracking[i, paste0("p_females_lay_eggs_sd_A3_A4plus")])
+    # p_females_lay_eggs_A4plus <- unlist(lapply(1:length(wetlands_without_outside), function(x) {
+    #   dapva::selectPercentileBetaDistribution(
+    #     mean = p_females_lay_eggs_mean_A4plus,
+    #     sd = p_females_lay_eggs_sd_A4plus,
+    #     EV_percentile = percentilesEV_reproduction$all_wetlands[j],
+    #     neg_shape_param_update_sd = TRUE,
+    #     neg_shape_param_update_sd_pct_mean = 10 # need this because the uniform SD means that sometimes the SD is too big for the mean, the 10% is from Karen and Travis' NLF pop modelling paper
+    #     
+    #   )
+    # })) 
+    p_females_lay_eggs_A4plus <- p_females_lay_eggs_A3 # same for A3 and A4plus; where this differs is in the number of eggs per age group
+      
+      
     
     # Pull all together into one dataframe for tidiness and label them by wetland
     p_females_lay_eggs <- as.data.frame(cbind(0,0,0,0, p_females_lay_eggs_A2, p_females_lay_eggs_A3,p_females_lay_eggs_A4plus))
