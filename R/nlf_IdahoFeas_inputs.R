@@ -438,9 +438,9 @@ getNLFIdahoFeasinputs <- function() {
       source = "Lea and Rebecca on May 5, 2021", comments = "We think it is more likely that they will go shorter distances than longer ones."),
     
     c(input = "dispersal_allowed_outside", type = "dispersal", 
-      best_guess = 0.5, 
+      best_guess = 0, 
       best_guess_type = "probability", management_alternative = "status_quo", 
-      source = "LK Placeholder", comments = "LK Testing")
+      source = "Lea, May 26, 2021", comments = "The survival assessments already account for loss due to dispersal.")
     
     
   )
