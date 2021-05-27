@@ -239,9 +239,13 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                        
                                                                        # Select correlated EVs for wetlands cells 3/4 and 7
                                                                        # print("Test2a")
-                                                                       percentilesEV_survival_eggs_tad <- dapva::selectEVPercentilesNormal(input_names_w_EV = c("cells3and4", "cell7"),
-                                                                                                                                           correlation = parameterByIterTracking$wetland_eggTadSurv_TempCor_noEph[i],
-                                                                                                                                           n_years = yrs)
+                                                                       correlation <- parameterByIterTracking$wetland_eggTadSurv_TempCor_noEph[i]
+                                                                       sigma <- rbind(c(1,correlation), c(correlation,1)) # create the variance covariance matrix
+                                                                       colnames(sigma) <- c("cells3and4", "cell7")
+                                                                       rownames(sigma) <- c("cells3and4", "cell7")
+                                                                       
+                                                                       percentilesEV_survival_eggs_tad <- selectEVPercentilesNormal(varcov_mat = sigma, n_years = yrs)
+                                                                       
                                                                        # Separate out the EVs so that each wetland has its own col that can be called later
                                                                        percentilesEV_survival_eggs_tad$cell3 <- percentilesEV_survival_eggs_tad$cells3and4
                                                                        percentilesEV_survival_eggs_tad$cell4 <- percentilesEV_survival_eggs_tad$cells3and4
