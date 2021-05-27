@@ -560,12 +560,12 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   
   # Reprodcution - proportion of females who lay eggs
   tornado_parameter_labels$label[which(tornado_parameter_labels$name == "p_females_lay_eggs_mean_A2")] <- "proportion of A2 lay eggs - mean"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "p_females_lay_eggs_mean_A3")] <- "proportion of A3 lay eggs - mean"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "p_females_lay_eggs_mean_A4plus")] <- "proportion of A4plus lay eggs - mean"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "p_females_lay_eggs_mean_A3_A4plus")] <- "proportion of A3 and A4plus lay eggs - mean"
+  # tornado_parameter_labels$label[which(tornado_parameter_labels$name == "p_females_lay_eggs_mean_A4plus")] <- "proportion of A4plus lay eggs - mean"
   
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "p_females_lay_eggs_sd_A2")] <- "proportion of A2 lay eggs - sd"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "p_females_lay_eggs_sd_A3")] <- "proportion of A3 lay eggs - sd"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "p_females_lay_eggs_sd_A4plus")] <- "proportion of A4plus lay eggs - sd"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "p_females_lay_eggs_sd_A2")] <- "proportion of A2 lay eggs - temporal variation (sd)"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "p_females_lay_eggs_sd_A3_A4plus")] <- "proportion of A3 and A4plus lay eggs - temporal variation (sd)"
+  # tornado_parameter_labels$label[which(tornado_parameter_labels$name == "p_females_lay_eggs_sd_A4plus")] <- "proportion of A4plus lay eggs - temporal variation (sd)"
   
   # Reproduction - number of eggs per reproductively active female
   tornado_parameter_labels$label[which(tornado_parameter_labels$name == "num_eggs_per_active_female_mean_A2")] <- "number of eggs per A2 if lay eggs  - mean"
@@ -579,11 +579,11 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_mean_juv_no_threats")] <- "juv survival - mean"
   tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_mean_adult_no_threats")] <- "adult survival - mean"
   
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_sd_eggs_no_threats")] <- "egg survival - sd"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_sd_tadpoles_no_threats")] <- "tadpole survival - sd"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_sd_yoy_no_threats")] <- "yoy survival - sd"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_sd_juv_no_threats")] <- "juv survival - sd"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_sd_adult_no_threats")] <- "adult survival - sd"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_sd_eggs_no_threats")] <- "egg survival - temporal variation (sd)"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_sd_tadpoles_no_threats")] <- "tadpole survival - temporal variation (sd)"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_sd_yoy_no_threats")] <- "yoy survival - temporal variation (sd)"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_sd_juv_no_threats")] <- "juv survival - temporal variation (sd)"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_sd_adult_no_threats")] <- "adult survival - temporal variation (sd)"
   
   
   # Survival - pct reduced, bullfrogs
