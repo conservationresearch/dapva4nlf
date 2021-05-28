@@ -31,7 +31,7 @@ num_indiv_per_pop_class = c(1000, 100, 20), sex = "female"
 )
 survivalMatrix_test <- dapva::makeSurvivalMatrix(
  class_names = c("pop1 eggs", "pop1 tadpoles", "pop1 adults"),
- survival_rates = c(0.5, 0.2, 0.9)
+ survival_rates = c(0.5, 0.4, 0.9)
 )
 survived_the_winter_test <- dapva4nlf::survivalOverwinter(popSizeVector_test, 
                                                          survivalMatrix_test,

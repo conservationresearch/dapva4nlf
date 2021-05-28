@@ -2,7 +2,7 @@
 % Please edit documentation in R/nlf_IdahoFeas_survival.R
 \name{survivalEggs}
 \alias{survivalEggs}
-\title{INSERT}
+\title{Calculate egg survival.}
 \usage{
 survivalEggs(popSizeVector, survivalMatrix, demographic_stochasticity = TRUE)
 }
@@ -15,9 +15,22 @@ of makePopSizeVector() for the relevant year.}
 \item{demographic_stochasticity}{TRUE or FALSE, defaults to TRUE}
 }
 \description{
-INSERT
+Applies the survival matrix to eggs after masking the other life stages 
+in the population vector and survival matrix.
 }
 \examples{
-# Still to do
+library(dapva)
+
+  popSizeVector_test <- dapva::makePopSizeVector(
+  pop_class_names = c("pop1 eggs", "pop1 tadpoles", "pop1 adults"),
+  num_indiv_per_pop_class = c(1000, 100, 20), sex = "female"
+  )
+  survivalMatrix_test <- dapva::makeSurvivalMatrix(
+  class_names = c("pop1 eggs", "pop1 tadpoles", "pop1 adults"),
+  survival_rates = c(0.5, 0.4, 0.9)
+  )
+  egg_survival_test <- dapva4nlf::survivalEggs(popSizeVector_test, 
+  survivalMatrix_test,
+  demographic_stochasticity = FALSE)
 
 }
