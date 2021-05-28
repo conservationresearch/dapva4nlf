@@ -1,5 +1,5 @@
 # This script runs a decision-analytic population viability analysis for
-# a Northern Leopard Frog feasibility analysis. 
+# a Northern Leopard Frog reintroduction feasibility analysis. 
 
 # The goal statement for this feasibility analysis is: The Idaho Department of
 # Fish and Game, Wildlife Bureau is trying to gain insight into the likelihood
@@ -8,7 +8,7 @@
 # northern Idaho given that they are currently extirpated from the region.
 
 # Main coder: Laura Keating
-# Modeling subcommittee: 
+# Modeling subcommittee: Lea Randall,	Rebecca Stanton, Casey McCormack, Travis Seaborn
 # April-June 2021
 
 system.time({ # turn on the timer
@@ -24,8 +24,6 @@ library(dapva4nlf) # this is our own internal library that houses functions used
 library(dplyr) # for summarise
 library(foreach) # for %do% nd %dopar%; this might come as part of DoParallel which is loaded later, test this later by trying without
 library(R.utils) # for withTimeout
-
-
 
 # Set up for parallel computing - e.g. https://privefl.github.io/blog/a-guide-to-parallelism-in-r/
 library(doParallel)  # see https://www.r-bloggers.com/2016/07/lets-be-faster-and-more-parallel-in-r-with-doparallel-package/
@@ -45,9 +43,15 @@ rows_to_run <- c(10) # note that can't call 1 but just 0s anyways; all the rest 
 #---- Specify number of iterations and number of runs per iterations.  -------------
 n_iter  <- 1200 # 2000# 500
 flexible_convergence_iteration_on <- "yes" # 'yes' or 'no', generally choose yes unless you are running a tornado and want to specify a # of iter
-
 max_n_runs_per_iter <- 1000 # flexible convergence is always on at the run level
 
+baseCase <- "yes" # 'yes' or 'no'
+
+if(baseCase == 'yes'){
+  print(paste("Using one iteration of basecase parameters"))
+  n_iter  <- 1
+  flexible_convergence_iteration_on <- "no"
+}
 
 #---- Start the scenario loop.  -------------
 for(m in 1:length(rows_to_run)){ # loop through the different scenarios requested in the scenarios_to_run file
@@ -55,33 +59,32 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   print(paste0("Running alternative ", alternatives_to_run$alt_name_short[row_to_run]))
   alternative_details <- alternatives_to_run[row_to_run,]
   
-#---- Get the inputs.  -------------
-
+  #---- Get the inputs.  -------------
   inputs_all <- dapva4nlf::getNLFIdahoFeasinputs()
   inputs <- inputs_all[[1]]
   wetland_distances_km <- inputs_all[[2]]
   
-#---- Choose the parameters for each iteration (i.e. parametric uncertainty). ----
+  #---- Choose the parameters for each iteration (i.e. parametric uncertainty). ----
   print("Selecting the parameters for each iteration in parallel.")
-  parameterByIterTracking <- foreach::foreach(m=1:n_iter,  .combine=rbind,
-                                              .packages='dapva4nlf'
-                                               ) %dopar% {
-                                                # ) %do% {
+  
+  if(baseCase == 'no'){
+    parameterByIterTracking <- foreach::foreach(m=1:n_iter, .combine=rbind, 
+                                                .packages='dapva4nlf') %dopar% {
+      print(paste("Choosing parameters for iteration # ", m))
+      parameterByIterTracking <- dapva4nlf::selectNLFIdahoParameterByIterTracking(inputs)
+      return(parameterByIterTracking)
+    }
+  }
+  
+  if(baseCase == 'yes'){
+    # Then just use the base case values
+    parameterByIterTracking_baseCase <- dapva4nlf::selectNLFIdahoParameterByIterTracking(inputs, base_case = TRUE)
+    parameterByIterTracking <-  parameterByIterTracking_baseCase
+  }
 
-                                                print(paste("Choosing parameters for iteration # ", m))
-                                                parameterByIterTracking <- dapva4nlf::selectNLFIdahoParameterByIterTracking(inputs)
-                                                return(parameterByIterTracking)
-                                                
-                                               }
-  
-  # If running using just base case inputs (i.e. one iteration with best guess values),
-  # then uncomment the lines below.
-  # parameterByIterTracking_baseCase <- selectNLFIdahoParameterByIterTracking(inputs, base_case = TRUE)
-  # parameterByIterTracking <-  parameterByIterTracking_baseCase
-  # n_iter <- 1
-  
-  
+  #---- Update  parameters with the condition of bullfrog management being effective. ----
   # Replace any iterations where bullfrog management is effective to NA for all the bullfrog threat related survival inputs.
+  # This allows sensitivity to be calculated properly for the tornado
   rows_bullfrogMgt_effective <- which(parameterByIterTracking$bullfrogMgmt_effective == "yes")
   parameterByIterTracking$s_pct_reduced_eggs_bullfrogs[rows_bullfrogMgt_effective] <- NA
   parameterByIterTracking$s_pct_reduced_tadpoles_bullfrogs[rows_bullfrogMgt_effective] <- NA
@@ -89,80 +92,45 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   parameterByIterTracking$s_pct_reduced_juvenile_bullfrogs[rows_bullfrogMgt_effective] <- NA
   parameterByIterTracking$s_pct_reduced_adult_bullfrogs[rows_bullfrogMgt_effective] <- NA
   
+  #---- Update reproduction and survival parameters that don't have valid beta distribution shape parameters. ----
   
-  # Identify any survival inputs that don't have valid beta distribution shape paramaters 
-  # and relplace the standard deviation with 10% of the mean (something small) to make it work.
-  # NOTE: IF THIS WORKS, CAN TAKE OUT OF dapva::selectPercentileBetaDistribution in the annual loop.
-  
-  # MIGHT BE ABLE TO TAKE THIS OUTNOW THAT HAVE IMPROVED STANDRAD DEVIATION INPUTS, DOUBLE CHECK THAT
-  # THIS ISN"T PULLING ANY OUT ANYMORE
-  
-  # This happens rarely now but still once and a while (e.g. p of A2 females laying eggs really small with relatively large sd)
+  # Identify any survival and reproduction inputs that don't have valid beta distribution shape parameters 
+  # and replace the standard deviation with 10% of the mean (something small) to make it work.
+  # This happens rarely but still once and a while (e.g. p of A2 females laying eggs 
+  # really small with relatively large sd)
 
-  parameterByIterTracking_replace_invalid_beta_shapeParam <- function(parameterByIterTracking, mean, sd){
-
-    test <- do.call("rbind",lapply(1:nrow(parameterByIterTracking),
-                                   function(x)dapva::estBetaParams(mean = parameterByIterTracking[x, paste(mean)],
-                                                                   sd = parameterByIterTracking[x, paste(sd)])
-    )
-    )
-
-    rows_with_invalid_alpha <- which(test[,1] <=0)
-    rows_with_invalid_beta <- which(test[,2] <=0)
-    rows_with_invalid_shapeParam <- unique(c(rows_with_invalid_alpha, rows_with_invalid_beta))
-    parameterByIterTracking_updated <- parameterByIterTracking # initalize
-    if(length(rows_with_invalid_shapeParam)>0){
-      print(paste("Replacing for ", length(rows_with_invalid_shapeParam), "iterations: sd with 10 pct of the mean"))
-      parameterByIterTracking_updated[rows_with_invalid_shapeParam, paste(sd)] <- parameterByIterTracking[rows_with_invalid_shapeParam, paste(mean)]*0.1
-
-    }
-
-    return(parameterByIterTracking_updated)
-  }
-
-  # Check and update reproduction if needed
   parameterByIterTracking_orig <- parameterByIterTracking # keep the orig in case want to refer back later
-  parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
+  parameterByIterTracking <- dapva::parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
                                                                                      mean = "p_females_lay_eggs_mean_A2",
                                                                                      sd = "p_females_lay_eggs_sd_A2")
 
-  parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
+  parameterByIterTracking <- dapva::parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
                                                                                      mean = "p_females_lay_eggs_mean_A3_A4plus",
                                                                                      sd = "p_females_lay_eggs_sd_A3_A4plus")
-  #
-  # parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
-  #                                                                                    mean = "p_females_lay_eggs_mean_A4plus",
-  #                                                                                    sd = "p_females_lay_eggs_sd_A4plus")
-  # Check and update survival if needed
 
-  parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
+  parameterByIterTracking <- dapva::parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
                                                                                     mean = "s_mean_eggs_no_threats",
                                                                                     sd = "s_sd_eggs_no_threats")
 
-  parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
+  parameterByIterTracking <- dapva::parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
                                                                                      mean = "s_mean_tadpoles_no_threats",
                                                                                      sd = "s_sd_tadpoles_no_threats")
 
-  parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
+  parameterByIterTracking <- dapva::parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
                                                                                      mean = "s_mean_yoy_no_threats",
                                                                                      sd = "s_sd_yoy_no_threats")
 
-  parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
+  parameterByIterTracking <- dapva::parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
                                                                                      mean = "s_mean_juv_no_threats",
                                                                                      sd = "s_sd_juv_no_threats")
 
-  parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
+  parameterByIterTracking <- dapva::parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
                                                                                      mean = "s_mean_adult_no_threats",
                                                                                      sd = "s_sd_adult_no_threats")
-
-
-
-
-#---- Run the PVA. ----
-  # Need to have run the foreach loop for parameterByIterTracking first
-  print("Running the PVA with each iteration in parallel.")
-  
+  #---- Run the PVA. ----
   # set it up to run in batches of 100 so we can monitor progress, frustrated by the lack of ability to have a progress bar
+  
+  print("Running the PVA with each iteration in parallel.")
   
   results_summary_all_iterations_overall_int  <- list() # initialize
   results_summary_all_iterations_by_pop_int  <- list() # initialize
@@ -170,7 +138,6 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   
   batch_size <-  100 # always at least one batch
   batches <- split(1:n_iter, ceiling(seq_along(1:n_iter)/batch_size ))
-  
   
   # Inputs for convergence criteria at the iteration level
   convergence_band_halfwidth_iter <- 0.025 # between 0 and 1 since will base it on the probability objective metrics
@@ -194,7 +161,6 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                    'dapva',# need foreach in here as per https://stackoverflow.com/questions/21128122/function-do-not-found-on-win-platform-only-when-using-plyr-and-doparallel
                                                                    'dapva4nlf',
                                                                    'R.utils')) %dopar% {  # change 'dopar' to 'do' if don't want to do the parallel computing
-           
                                                                      
                                                                      results_annual <- list() # initalize
                                                                      finish <- FALSE # initalize
@@ -208,16 +174,15 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                      converged_for_persist <- "no"
                                                                      converged_for_selfsustain <- "no"
                                                                      
+                                                                     # Start the run loop
                                                                      for(q in 1:max_n_runs_per_iter){# not in parallel here; in parallel at the iteration level
-                                                                       
-                                                                       # print("Test - checking if got back up here to start next iteration")
-                                                                       
+
                                                                        # Specify a few more inputs for this iteration
                                                                        initial_year <- parameterByIterTracking$initial_year[i]
                                                                        yrs <- parameterByIterTracking$yrs[i]
                                                                        stage_classes <- c("eggs", "tadpoles", "yoy", "juv", "A2", "A3", "A4plus")
                                                                        
-                                                                       # print("Test1")
+                                                                       # No longer using the 'outside' bucket in dispersal, leave functionality in in case change mind later
                                                                        if(alternative_details$restore_ephemeralWetlands == "yes"){
                                                                          wetlands <- c("cell3", "cell4", "cell7", "ephemeral_wetlands", "outside")
                                                                        }
@@ -226,7 +191,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                        } 
                                                                        
                                                               
-                                                                       #Select the EV percentiles for each year in this run.
+                                                                       # Select the EV percentiles for each year in this run.
  
                                                                        # Survival for eggs and tadpoles correlated 100% (i.e. use the same percentiles)
                                                                        # Survival for the other life stages correlated (but not correlated with eggs/tadpoles)  (i.e. use the same percentiles)
@@ -237,11 +202,6 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                        # Cell 7 may be different because closer to agriculture. 
                                                                        # Ephemeral wetlands is a different type of system so definitely have the potential to be different, treat as uncorrelated.
              
-                                                                       # print("Test2")
-                                                                       
-                                                                       # Select correlated EVs for wetlands cells 3/4 and 7
-                                                                       # print("Test2a")
-                                                                       
                                                                        if(alternative_details$restore_ephemeralWetlands == "no"){
                                                                          correlation <- parameterByIterTracking$wetland_eggTadSurv_TempCor_noEph[i]
                                                                          sigma <- rbind(c(1,correlation), c(correlation,1)) # create the variance covariance matrix
@@ -270,36 +230,23 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                          percentilesEV_survival_eggs_tad <- percentilesEV_survival_eggs_tad[,c("cell3", "cell4", "cell7", "ephemeral_wetlands")]
                                                                        }
                                                                 
-                                                                       
-                                                                       
-          
-                                                                       # print("Test3")
                                                                        sigma3 <- rbind(c(1,1), c(1,1)) # create the variance covariance matrix; make 2 fully correlated vectors and just use one, when time update code so that it can have just one var
                                                                        percentilesEV_survival_yoy_adult <- dapva::selectEVPercentilesNormal(cor_mat = sigma3, n_years = parameterByIterTracking$yrs[i])
                                                                        colnames(percentilesEV_survival_yoy_adult)[1] <- c("all_wetlands")
-                                                                      
-                                                                       
-                                                                       # print("Test4")
 
                                                                        sigma4 <- rbind(c(1,1), c(1,1)) # create the variance covariance matrix; make 2 fully correlated vectors and just use one, when time update code so that it can have just one var
                                                                        percentilesEV_reproduction <- dapva::selectEVPercentilesNormal(cor_mat = sigma4, n_years = parameterByIterTracking$yrs[i])
                                                                        colnames(percentilesEV_reproduction)[1] <- c("all_wetlands")
                                                                        
-                                                                       
-                                                                                                                             
-                                                                       # print("Test5")
-                                                                       
-                                                                       # Check if there is an existing pop in this alternative or not
+                                                                       # Check if there is an existing population in this alternative or not
+                                                                       # Used for testing
                                                                        if(alternative_details$assume_existing_pop == "yes"){
                                                                          exisiting_pop <- TRUE
                                                                        }
                                                                        if(alternative_details$assume_existing_pop == "no"){
                                                                          exisiting_pop <- FALSE
                                                                        }
-                                                                       
-                                                                       
-                                                                       
-                                                                       
+
                                                                        # Run the annual loop
                                                                        results_annual[[q]] <- dapva4nlf::runAnnualLoopNLFIdahoPVA(parameterByIterTracking, yrs, i, q,
                                                                                                                                   wetland_distances_km,
@@ -311,8 +258,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                                                                                   exisiting_pop,
                                                                                                                                   dispersal_allowed_outside = parameterByIterTracking$dispersal_allowed_outside[i])
 
-                                                                       # Then check to see what the probability metric is
-                                                                       
+                                                                       # Then check to see what the probability metrics are
                                                                        results_all_so_far <- plyr::rbind.fill(results_annual)
                                                                        
                                                                        check_if_enough_runs <- dapva::makeResultsSummaryOneIteration(results_all_so_far,
@@ -336,10 +282,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                        convergence_tracking_persis[q] <- as.numeric(prob_of_persis_so_far)
                                                                        convergence_tracking_selfsustain[q] <- as.numeric(prob_of_selfsustain_so_far)
                                                                        
-                                                                       # if(q >= burnin){ # for every iteration after the burn in + convergence band length 
-                                                                         
-                                                                         
-                                                                         if(q >= (burnin + convergence_band_length)){
+                                                                       if(q >= (burnin + convergence_band_length)){
                                                                            
                                                                            CB_persis_upper_limit <- convergence_tracking_persis[q - convergence_band_length] + convergence_band_halfwidth
                                                                            CB_persis_lower_limit <- convergence_tracking_persis[q - convergence_band_length] - convergence_band_halfwidth
@@ -363,58 +306,22 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                              finish <- TRUE
                                                                            }      
                                                                          }
-                                                                       # }
-                                                                       
-                                                                       
-                                                                       
-                                                                       
-                                                                       
-                                                                       
-                                                                       # if(q == max_n_runs_per_iter*0.1){ # if we have run 10% of the max number of runs per iterations
-                                                                       # 
-                                                                       #    # Check to see if within 5% of either 0 or 1 since we noticed from covergence
-                                                                       #    # plots that if it is at either of these two extremes, more iterations are typically not necessary
-                                                                       # 
-                                                                       #    results_all_so_far <- plyr::rbind.fill(results_annual)
-                                                                       # 
-                                                                       #    check_if_enough_runs <- makeResultsSummaryOneIteration(results_all_so_far,
-                                                                       #                                                          by_pop = 'no',
-                                                                       #                                                           initial_year = parameterByIterTracking$initial_year[i],
-                                                                       #                                                           yrs = parameterByIterTracking$yrs[i],
-                                                                       #                                                           n_iter,
-                                                                       #                                                           n_runs_per_iter = q,
-                                                                       #                                                           alternative = paste0(alternative_details$alt_name_full),
-                                                                       #                                                           iteration_number = i)
-                                                                       # 
-                                                                       #    prob_of_persis_so_far <- check_if_enough_runs[which(check_if_enough_runs$metric == "probability of persistence"),
-                                                                       #                                                  paste(parameterByIterTracking$initial_year[i] + parameterByIterTracking$yrs[i]-1)]
-                                                                       # 
-                                                                       #    # if with 5% of 0 or 1, then no need to do more runs
-                                                                       #   if(prob_of_persis_so_far <= 0.05){finish <- TRUE}
-                                                                       #    if(prob_of_persis_so_far >= 0.95){finish <- TRUE}
-                                                                       #  }
-
+                                                                  
                                                                         if(finish == TRUE){
                                                                           print(paste('Iteration', i, "stopped at", q, "runs"))
                                                                         break
                                                                         }
-                                                                       
-                                                                        # Return the results for this run
-                                                                       # return(results_annual)
+                                                                     } # close the run loop
                                                                      
-                                                                     }
+                                                                     results_all_for_this_iteration <- plyr::rbind.fill(results_annual)
                                                                      
-                                                                     
-                                                                      results_all_for_this_iteration <- plyr::rbind.fill(results_annual)
-                                                                      
-                                                               
-                                                                      # Remove eggs and tadpoles as they are intermediate stages in the year and we just want the pop size at the fall census
-                                                                      results_all_for_this_iteration_fall <- results_all_for_this_iteration # initalize
-                                                                      results_all_for_this_iteration_fall[which(results_all_for_this_iteration_fall$class == "eggs"),paste(1:yrs)] <- 0
-                                                                      results_all_for_this_iteration_fall[which(results_all_for_this_iteration_fall$class == "tadpoles"),paste(1:yrs)] <- 0
+                                                                     # Remove eggs and tadpoles as they are intermediate stages in the year and we just want the pop size at the fall census
+                                                                     results_all_for_this_iteration_fall <- results_all_for_this_iteration # initialize
+                                                                     results_all_for_this_iteration_fall[which(results_all_for_this_iteration_fall$class == "eggs"),paste(1:yrs)] <- 0
+                                                                     results_all_for_this_iteration_fall[which(results_all_for_this_iteration_fall$class == "tadpoles"),paste(1:yrs)] <- 0
                                                                       
                                                                      # Overall results
-                                                                      results_summary_for_this_iteration_overall <- dapva::makeResultsSummaryOneIteration(results_all_for_this_iteration_fall,
+                                                                     results_summary_for_this_iteration_overall <- dapva::makeResultsSummaryOneIteration(results_all_for_this_iteration_fall,
                                                                                                                                                    by_pop = 'no',
                                                                                                                                                    initial_year = parameterByIterTracking$initial_year[i],
                                                                                                                                                    yrs = parameterByIterTracking$yrs[i],
@@ -426,7 +333,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                                                                                                    lambda_over_x_years = 10)
 
                                                                      # Results by colony
-                                                                      results_summary_for_this_iteration_by_pop <- dapva::makeResultsSummaryOneIteration( results_all_for_this_iteration_fall,
+                                                                     results_summary_for_this_iteration_by_pop <- dapva::makeResultsSummaryOneIteration( results_all_for_this_iteration_fall,
                                                                                                                                                   by_pop = 'yes',
                                                                                                                                                   initial_year = parameterByIterTracking$initial_year[i],
                                                                                                                                                   yrs = parameterByIterTracking$yrs[i],
@@ -436,12 +343,10 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                                                                                                   iteration_number = i,
                                                                                                                                                   prob_self_sustain = TRUE,
                                                                                                                                                   lambda_over_x_years = 10)
-
-                                                                      return(list(results_summary_for_this_iteration_overall, results_summary_for_this_iteration_by_pop,
-                                                                                  results_all_for_this_iteration))
-                                                                   
-                                                                   # return(results_all_for_this_iteration)   
-                                                                      } # end iteration loop
+                                                                     return(list(results_summary_for_this_iteration_overall, 
+                                                                                 results_summary_for_this_iteration_by_pop,
+                                                                                 results_all_for_this_iteration))
+                                                                     } # end iteration loop
     
     n_it_w_results <- dim(results_summary_all_iterations)[1] # not the same as batch size as we removed those where there was an error
     if(n_it_w_results > 1){
@@ -462,8 +367,8 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
       int_persis <- makeResultsSummary(results_summary_all_iterations = results_summary_all_iterations_overall,
                                        metric = "probability of persistence", initial_year = 1, credible_interval = 0.95)
       
-      # Calulate how many iterations have returned results so far (not the same as i necessaryily since the parallal computing throws out results if it gives an error)
-      # Also renumber the iteraitons outside of the dataframe so can use it below
+      # Calculate how many iterations have returned results so far (not the same as i necessarily since the parallel 
+      # computing throws out results if it gives an error). Also renumber the iterations outside of the dataframe so can use it below.
       n_iter_so_far <- length(unique(results_summary_all_iterations_overall$iteration))
       n_iter_so_far - convergence_band_length_n_iter
       iteration_renumbered  <- rep(1:n_iter_so_far, each = 3)
@@ -499,37 +404,24 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
           converged_for_selfsustain_iter <- "yes"
         }
         
-        if(converged_for_persist_iter == "yes" & 
-           converged_for_selfsustain_iter == "yes") {
+        if(converged_for_persist_iter == "yes" & converged_for_selfsustain_iter == "yes") {
           print("Reached enough iterations, breaking out of iteration batch for loop")
           break # break out of the for loop
         }     
-        
-      }
-    }
-    
-
-    
+      } # close if(batch >= min_n_batches)
+    } # close if(flexible_convergence_iteration_on == 'yes')
   }
+
+  # Note: If have to stop code early, can continue on here to use what we have so far
   
-  
-  # If have to stop code early, can continue on here to use what we have so far
-  
+  # Combine the results from all the batches
   results_summary_all_iterations_overall <- do.call("rbind", results_summary_all_iterations_overall_int)
   results_summary_all_iterations_by_pop <- do.call("rbind", results_summary_all_iterations_by_pop_int)
   results_all_iterations <- do.call("rbind", results_all_iterations)
-  
-  
-  
-  
-#---- Do the sensitivity analysis on the overall results. ----
 
-  # TO DO: Add something in here so that it checks what the actual number of 
-  #iterations used was and then update the parameter by tracking accordingly
-  # Need to do this now that have added in this flexible way of determining the # of iterations
+  #---- Do the sensitivity analysis on the overall results. ----
+  # Note: Not set up to do it by population/colony
   
-  
-  # Not set up to do it by populations/colony
   print("Running the sensitivity analysis.")
   
   # Specify which variables don't make sense to include in the sensitivity analysis
@@ -548,8 +440,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   parameterByIterTracking_this_alt <- parameterByIterTracking
   results_all_this_alt  <- results_summary_all_iterations_overall
   
-  # Clean up parameterByIterTracking_this_alt and remove any variables that don't
-  # make sense to include in the sensitivity analysis
+  # Clean up - remove any variables that don't make sense to include in the sensitivity analysis
   parameterByIterTracking_this_alt_clean <- parameterByIterTracking_this_alt[ , !(names(parameterByIterTracking_this_alt) %in% drops)]
   
   # Add order to the ones that are factors
@@ -559,80 +450,11 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                                  levels = c("CSF", "MoreGoShort"))
   parameterByIterTracking_this_alt_clean$bullfrogMgmt_effective <- ordered(parameterByIterTracking_this_alt_clean$bullfrogMgmt_effective, 
                                                                            levels = c("no", "yes"))
-  
   parameterByIterTracking_this_alt_clean$dispersal_allowed_outside <- ordered(parameterByIterTracking_this_alt_clean$dispersal_allowed_outside, 
                                                                            levels = c("no", "yes"))
   
-  tornado_parameter_labels <- as.data.frame(matrix(nrow = ncol(parameterByIterTracking_this_alt_clean), ncol = 2))
-  colnames(tornado_parameter_labels) <- c("name", "label")
-  tornado_parameter_labels$name <- colnames(parameterByIterTracking_this_alt_clean)
-  tornado_parameter_labels$label <- paste(tornado_parameter_labels$name) # for now, same as name. Can tweak later if desired.
-  
-  # Update a few tornado labels - could tidy this up by putting it in a function and moving it to a different file, do later if time
-  
-  # Reprodcution - proportion of females who lay eggs
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "p_females_lay_eggs_mean_A2")] <- "proportion of A2 lay eggs - mean"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "p_females_lay_eggs_mean_A3_A4plus")] <- "proportion of A3 and A4plus lay eggs - mean"
-  # tornado_parameter_labels$label[which(tornado_parameter_labels$name == "p_females_lay_eggs_mean_A4plus")] <- "proportion of A4plus lay eggs - mean"
-  
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "p_females_lay_eggs_sd_A2")] <- "proportion of A2 lay eggs - temporal variation (sd)"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "p_females_lay_eggs_sd_A3_A4plus")] <- "proportion of A3 and A4plus lay eggs - temporal variation (sd)"
-  # tornado_parameter_labels$label[which(tornado_parameter_labels$name == "p_females_lay_eggs_sd_A4plus")] <- "proportion of A4plus lay eggs - temporal variation (sd)"
-  
-  # Reproduction - number of eggs per reproductively active female
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "num_eggs_per_active_female_mean_A2")] <- "number of eggs per A2 if lay eggs  - mean"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "num_eggs_per_active_female_mean_A3")] <- "number of eggs per A3 if lay eggs  - mean"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "num_eggs_per_active_female_mean_A4plus")] <- "number of eggs per A4plus if lay eggs  - mean"
-  
-  # Survival
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_mean_eggs_no_threats")] <- "egg survival - mean"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_mean_tadpoles_no_threats")] <- "tadpole survival - mean"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_mean_yoy_no_threats")] <- "yoy survival - mean"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_mean_juv_no_threats")] <- "juv survival - mean"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_mean_adult_no_threats")] <- "adult survival - mean"
-  
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_sd_eggs_no_threats")] <- "egg survival - temporal variation (sd)"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_sd_tadpoles_no_threats")] <- "tadpole survival - temporal variation (sd)"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_sd_yoy_no_threats")] <- "yoy survival - temporal variation (sd)"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_sd_juv_no_threats")] <- "juv survival - temporal variation (sd)"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_sd_adult_no_threats")] <- "adult survival - temporal variation (sd)"
-  
-  
-  # Survival - pct reduced, bullfrogs
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_eggs_bullfrogs")] <- "egg survival reduction if bullfrogMgt not effective"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_tadpoles_bullfrogs")] <- "tadpoles survival reduction if bullfrogMgt not effective"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_yoy_bullfrogs")] <- "yoy survival reduction if bullfrogMgt not effective"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_juvenile_bullfrogs")] <- "juvenile survival reduction if bullfrogMgt not effective"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_adult_bullfrogs")] <- "adult survival reduction if bullfrogMgt not effective"
-  
-  # Survival - pct reduced, roads
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_eggs_roads")] <- "egg survival reduction from roads"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_tadpoles_roads")] <- "tadpoles survival reduction from roads"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_yoy_roads")] <- "yoy survival reduction from roads"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_juvenile_roads")] <- "juvenile survival reduction from roads"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_adult_roads")] <- "adult survival reduction from roads"
-  
-  # Survival - pct reduced, chytrid
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_eggs_chytrid")] <- "egg survival reduction from chytrid"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_tadpoles_chytrid")] <- "tadpoles survival reduction from chytrid"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_yoy_chytrid")] <- "yoy survival reduction from chytrid"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_juvenile_adult_chytrid")] <- "juvenile/adult survival reduction from chytrid"
-
-  # Survival - pct reduced, drawdown
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_tadpoles_drawdownPartial")] <- "tadpoles survival reduction from partial drawdown"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_tadpoles_drawdownComplete")] <- "tadpoles survival reduction from complete drawdown"
-  
-  # Other
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "drawdown_completeVSpartial_freq")] <- "frequency of complete vs. partial drawdowns"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "bullfrogMgmt_effective")] <- "bullfrog mgmt. effective (yes = high, no = low)"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "drawdown_beforeMidJuly")] <- "drawdowns before mid-July (yes = high, no = low)"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "ephemeral_freq_dry")] <- "frequency of ephemeral wetland dry years"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "carrying_capacity_BSCWMA")] <- "carrying capacity"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "quasi_extinction_threshold")] <- "quasi-extinction threshold"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "wetland_eggTadSurv_TempCor_noEph")] <- "wetland correlation for egg and tadpole survival"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "p_yoy_disperse")] <- "proportion of yoy that disperse"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "dispersal_CSF_vs_MoreGoShort")] <- "dispersal model (CSF = low, MoreGoShort = high)"
-  
+  # Make tornado parameter labels
+  tornado_parameter_labels <- dapva4nlf::makeTornadoParameterLabels(parameterByIterTracking = parameterByIterTracking_this_alt_clean)
   
   # Do the sensitivity analysis
   paramSens_persist <- dapva::makeParameterSens(parameterByIterTracking = parameterByIterTracking_this_alt_clean,
@@ -649,17 +471,16 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                 nyrs = 50,
                                                 parameter_labels = tornado_parameter_labels)
   
-#---- Store the name of the scenario. ----
+  #---- Store the name of the scenario. ----
   # Store the name as an object we know which scenario these results belong to
   name <- paste0(alternative_details$alt_name_short)
-#---- Save the results for this scenario. ----
+  #---- Save the results for this scenario. ----
   save.image(file=paste0(name, version,".RData"))
   
 #---- Close the scenarios loop. ----
 }
 #---- Stop the parallel computing and stop the timing. ----
 parallel::stopCluster(cl)
-
 
 }) # turn off sys.time
 

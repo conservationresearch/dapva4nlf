@@ -2,6 +2,7 @@
 
 export(dispersalTracking)
 export(getNLFIdahoFeasinputs)
+export(makeTornadoParameterLabels)
 export(runAnnualLoopNLFIdahoPVA)
 export(selectNLFIdahoParameterByIterTracking)
 export(survivalEggs)
