@@ -96,66 +96,68 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   
   # MIGHT BE ABLE TO TAKE THIS OUTNOW THAT HAVE IMPROVED STANDRAD DEVIATION INPUTS, DOUBLE CHECK THAT
   # THIS ISN"T PULLING ANY OUT ANYMORE
-# 
-#   parameterByIterTracking_replace_invalid_beta_shapeParam <- function(parameterByIterTracking, mean, sd){
-#     
-#     test <- do.call("rbind",lapply(1:nrow(parameterByIterTracking), 
-#                                    function(x)dapva::estBetaParams(mean = parameterByIterTracking[x, paste(mean)], 
-#                                                                    sd = parameterByIterTracking[x, paste(sd)])
-#     )
-#     )
-#     
-#     rows_with_invalid_alpha <- which(test[,1] <=0)
-#     rows_with_invalid_beta <- which(test[,2] <=0)
-#     rows_with_invalid_shapeParam <- unique(c(rows_with_invalid_alpha, rows_with_invalid_beta))
-#     parameterByIterTracking_updated <- parameterByIterTracking # initalize
-#     if(length(rows_with_invalid_shapeParam)>0){
-#       print(paste("Replacing for ", length(rows_with_invalid_shapeParam), "iterations: sd with 10 pct of the mean"))
-#       parameterByIterTracking_updated[rows_with_invalid_shapeParam, paste(sd)] <- parameterByIterTracking[rows_with_invalid_shapeParam, paste(mean)]*0.1 
-#       
-#     }
-# 
-#     return(parameterByIterTracking_updated)
-#   }
-#   
-#   # Check and update reproduction if needed
-#   
-#   parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking, 
-#                                                                                      mean = "p_females_lay_eggs_mean_A2", 
-#                                                                                      sd = "p_females_lay_eggs_sd_A2")
-#   
-#   parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking, 
-#                                                                                      mean = "p_females_lay_eggs_mean_A3_A4plus", 
-#                                                                                      sd = "p_females_lay_eggs_sd_A3_A4plus")
-#   # 
-#   # parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking, 
-#   #                                                                                    mean = "p_females_lay_eggs_mean_A4plus", 
-#   #                                                                                    sd = "p_females_lay_eggs_sd_A4plus")
-#   # Check and update survival if needed
-#   
-#   parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking, 
-#                                                                                     mean = "s_mean_eggs_no_threats", 
-#                                                                                     sd = "s_sd_eggs_no_threats")
-# 
-#   parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking, 
-#                                                                                      mean = "s_mean_tadpoles_no_threats", 
-#                                                                                      sd = "s_sd_tadpoles_no_threats")
-#   
-#   parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking, 
-#                                                                                      mean = "s_mean_yoy_no_threats", 
-#                                                                                      sd = "s_sd_yoy_no_threats")
-#   
-#   parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking, 
-#                                                                                      mean = "s_mean_juv_no_threats", 
-#                                                                                      sd = "s_sd_juv_no_threats")
-#   
-#   parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking, 
-#                                                                                      mean = "s_mean_adult_no_threats", 
-#                                                                                      sd = "s_sd_adult_no_threats")
-#   
-#   
-#   
   
+  # This happens rarely now but still once and a while (e.g. p of A2 females laying eggs really small with relatively large sd)
+
+  parameterByIterTracking_replace_invalid_beta_shapeParam <- function(parameterByIterTracking, mean, sd){
+
+    test <- do.call("rbind",lapply(1:nrow(parameterByIterTracking),
+                                   function(x)dapva::estBetaParams(mean = parameterByIterTracking[x, paste(mean)],
+                                                                   sd = parameterByIterTracking[x, paste(sd)])
+    )
+    )
+
+    rows_with_invalid_alpha <- which(test[,1] <=0)
+    rows_with_invalid_beta <- which(test[,2] <=0)
+    rows_with_invalid_shapeParam <- unique(c(rows_with_invalid_alpha, rows_with_invalid_beta))
+    parameterByIterTracking_updated <- parameterByIterTracking # initalize
+    if(length(rows_with_invalid_shapeParam)>0){
+      print(paste("Replacing for ", length(rows_with_invalid_shapeParam), "iterations: sd with 10 pct of the mean"))
+      parameterByIterTracking_updated[rows_with_invalid_shapeParam, paste(sd)] <- parameterByIterTracking[rows_with_invalid_shapeParam, paste(mean)]*0.1
+
+    }
+
+    return(parameterByIterTracking_updated)
+  }
+
+  # Check and update reproduction if needed
+  parameterByIterTracking_orig <- parameterByIterTracking # keep the orig in case want to refer back later
+  parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
+                                                                                     mean = "p_females_lay_eggs_mean_A2",
+                                                                                     sd = "p_females_lay_eggs_sd_A2")
+
+  parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
+                                                                                     mean = "p_females_lay_eggs_mean_A3_A4plus",
+                                                                                     sd = "p_females_lay_eggs_sd_A3_A4plus")
+  #
+  # parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
+  #                                                                                    mean = "p_females_lay_eggs_mean_A4plus",
+  #                                                                                    sd = "p_females_lay_eggs_sd_A4plus")
+  # Check and update survival if needed
+
+  parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
+                                                                                    mean = "s_mean_eggs_no_threats",
+                                                                                    sd = "s_sd_eggs_no_threats")
+
+  parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
+                                                                                     mean = "s_mean_tadpoles_no_threats",
+                                                                                     sd = "s_sd_tadpoles_no_threats")
+
+  parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
+                                                                                     mean = "s_mean_yoy_no_threats",
+                                                                                     sd = "s_sd_yoy_no_threats")
+
+  parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
+                                                                                     mean = "s_mean_juv_no_threats",
+                                                                                     sd = "s_sd_juv_no_threats")
+
+  parameterByIterTracking <- parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
+                                                                                     mean = "s_mean_adult_no_threats",
+                                                                                     sd = "s_sd_adult_no_threats")
+
+
+
+
 #---- Run the PVA. ----
   # Need to have run the foreach loop for parameterByIterTracking first
   print("Running the PVA with each iteration in parallel.")
