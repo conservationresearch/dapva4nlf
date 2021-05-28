@@ -13,10 +13,15 @@ dispersalTracking(
   wetlands,
   wetland_distances_km,
   parameterByIterTracking,
-  allow_outside
+  allow_outside,
+  demographic_stochasticity = TRUE
 )
 }
 \arguments{
+\item{resultsTracking_popSize_females}{Formatted as per the function dapva::makeResultsTracking()}
+
+\item{yoy_rows}{which(resultsTracking_popSize_females$class == "yoy")}
+
 \item{i}{Iteration #}
 
 \item{j}{Year}
@@ -30,14 +35,39 @@ that contains the following dispersal related inputs: dispersal_CSF_vs_MoreGoSho
 dispersal_CSFmodel_lessEqual1km, etc.}
 
 \item{allow_outside}{"yes" or "no", allow frogs to disperse outside of the WMA or not.}
+
+\item{demographic_stochasticity}{TRUE or FALSE, defaults to TRUE}
 }
 \description{
 The rows are the 'from' wetland and the columns are the 'to' wetland/location.
 }
-\details{
-INSERT
-}
 \examples{
-# Still to do
+resultsTracking_popSize_females <- dapva::makeResultsTracking(i = 1,
+                                                             yrs = 50, 
+                                                             initial_year = 1,
+                                                             pops = c("cell3", "cell4", "cell7"), 
+                                                             class_names = c("eggs", "tadpoles", 
+                                                                             "yoy", "juv", "A2", 
+                                                                             "A3", "A4plus"),
+                                                             sex = "female")
+
+resultsTracking_popSize_females[,paste("1")] <- 100 # put 100 in each wetland and age class
+
+yoy_rows <- which(resultsTracking_popSize_females$class == "yoy")
+
+inputs_all <- dapva4nlf::getNLFIdahoFeasinputs()
+inputs <- inputs_all[[1]]
+wetland_distances_km <- inputs_all[[2]]
+
+parameterByIterTracking_baseCase <- dapva4nlf::selectNLFIdahoParameterByIterTracking(inputs, base_case = TRUE)
+
+# Run the dispersal function
+dispersal_results <- dispersalTracking(resultsTracking_popSize_females, 
+                                      yoy_rows, i = 1, j = 1,
+                                      wetlands = c("cell3", "cell4", "cell7"),
+                                      wetland_distances_km,
+                                      parameterByIterTracking = parameterByIterTracking_baseCase,
+                                      allow_outside = 'no', 
+                                      demographic_stochasticity = FALSE)
 
 }

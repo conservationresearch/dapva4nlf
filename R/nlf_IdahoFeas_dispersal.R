@@ -7,19 +7,15 @@
 # Laura Keating
 # May 2021
 
-# Example still needed
-
 ##### dispersalTracking  #####
 
 #' Applies the dispersal models and returns a matrix showing how many yoy dispersed 
 #' from one wetland cell to another.
 #' 
 #' The rows are the 'from' wetland and the columns are the 'to' wetland/location.
-#'
-#' INSERT
-#' 
-#' @param resultsTracking_popSize_females
-#' @param yoy_rows
+
+#' @param resultsTracking_popSize_females Formatted as per the function dapva::makeResultsTracking()
+#' @param yoy_rows which(resultsTracking_popSize_females$class == "yoy")
 #' @param i Iteration #
 #' @param j Year
 #' @param wetlands A vector of the wetland names that are available in the WMA.
@@ -28,23 +24,61 @@
 #'  that contains the following dispersal related inputs: dispersal_CSF_vs_MoreGoShort,
 #'  dispersal_CSFmodel_lessEqual1km, etc.
 #' @param allow_outside "yes" or "no", allow frogs to disperse outside of the WMA or not.
+#' @param demographic_stochasticity TRUE or FALSE, defaults to TRUE
 #'
 #' @examples
-#' # Still to do
+#' resultsTracking_popSize_females <- dapva::makeResultsTracking(i = 1,
+#'                                                              yrs = 50, 
+#'                                                              initial_year = 1,
+#'                                                              pops = c("cell3", "cell4", "cell7"), 
+#'                                                              class_names = c("eggs", "tadpoles", 
+#'                                                                              "yoy", "juv", "A2", 
+#'                                                                              "A3", "A4plus"),
+#'                                                              sex = "female")
+#'
+#'resultsTracking_popSize_females[,paste("1")] <- 100 # put 100 in each wetland and age class
+#'
+#'yoy_rows <- which(resultsTracking_popSize_females$class == "yoy")
+#'
+#'inputs_all <- dapva4nlf::getNLFIdahoFeasinputs()
+#'inputs <- inputs_all[[1]]
+#'wetland_distances_km <- inputs_all[[2]]
+#'
+#'parameterByIterTracking_baseCase <- dapva4nlf::selectNLFIdahoParameterByIterTracking(inputs, base_case = TRUE)
+#'
+#'# Run the dispersal function
+#'dispersal_results <- dispersalTracking(resultsTracking_popSize_females, 
+#'                                       yoy_rows, i = 1, j = 1,
+#'                                       wetlands = c("cell3", "cell4", "cell7"),
+#'                                       wetland_distances_km,
+#'                                       parameterByIterTracking = parameterByIterTracking_baseCase,
+#'                                       allow_outside = 'no', 
+#'                                       demographic_stochasticity = FALSE)
 #' 
 #' @export
-# unit test STILL TO DO
+# unit test in place, needs more testing
 dispersalTracking <- function(resultsTracking_popSize_females, yoy_rows, i, j,
                                wetlands,
                               wetland_distances_km,
                               parameterByIterTracking,
-                              allow_outside){
+                              allow_outside, 
+                              demographic_stochasticity = TRUE){
   
   
   p_yoy_disperse <- as.numeric(parameterByIterTracking[i, paste0("p_yoy_disperse")])
   
-  n_dispersing_per_wetland <- stats::rbinom(size = resultsTracking_popSize_females[yoy_rows, paste(j)], 
-                                            n = length(yoy_rows), prob = p_yoy_disperse)
+  if(demographic_stochasticity == TRUE){
+    n_dispersing_per_wetland <- stats::rbinom(size = resultsTracking_popSize_females[yoy_rows, paste(j)], 
+                                              n = length(yoy_rows), prob = p_yoy_disperse)
+  }
+  if(demographic_stochasticity == FALSE){
+    n_dispersing_per_wetland <- resultsTracking_popSize_females[yoy_rows, paste(j)] * p_yoy_disperse
+  }
+  
+  
+  if(allow_outside == 'no'){
+    wetlands <- wetlands[which(wetlands != "outside")]
+  }
   
   wetland_distances_km_relevant <- wetland_distances_km[paste(wetlands), paste(wetlands)]
   
@@ -64,24 +98,45 @@ dispersalTracking <- function(resultsTracking_popSize_females, yoy_rows, i, j,
       dispersal_model <- parameterByIterTracking[i, paste0("dispersal_CSF_vs_MoreGoShort")]
       
       # Which distance bucket to each of them decide to go to?
-      if(dispersal_model == "CSF"){
-        n_to_each_distance <-  sample(c("lessEqual_1km", "greater1lessEqual2km", "greater2km"), 
+      if(demographic_stochasticity == TRUE){
+        if(dispersal_model == "CSF"){
+          n_to_each_distance <-  sample(c("lessEqual_1km", "greater1lessEqual2km", "greater2km"), 
+                                        n_dispersing, replace = TRUE, 
+                                        prob = c(as.numeric(parameterByIterTracking[i, paste0("dispersal_CSFmodel_lessEqual1km")]),
+                                                 as.numeric(parameterByIterTracking[i, paste0("dispersal_CSFmodel_greater1kmlessequal2km")]),
+                                                 as.numeric(parameterByIterTracking[i, paste0("dispersal_CSFmodel_greater2km")])))
+          
+          
+        }
+        
+        if(dispersal_model == "MoreGoShort"){
+          n_to_each_distance <-sample(c("lessEqual_1km", "greater1lessEqual2km", "greater2km"), 
                                       n_dispersing, replace = TRUE, 
-                                      prob = c(as.numeric(parameterByIterTracking[i, paste0("dispersal_CSFmodel_lessEqual1km")]),
-                                      as.numeric(parameterByIterTracking[i, paste0("dispersal_CSFmodel_greater1kmlessequal2km")]),
-                                      as.numeric(parameterByIterTracking[i, paste0("dispersal_CSFmodel_greater2km")])))
-
-
+                                      prob = c(as.numeric(parameterByIterTracking[i, paste0("dispersal_MoreGoShortmodel_lessEqual1km")]),
+                                               as.numeric(parameterByIterTracking[i, paste0("dispersal_MoreGoShortmodel_greater1kmlessequal2km")]),
+                                               as.numeric(parameterByIterTracking[i, paste0("dispersal_MoreGoShortmodel_greater2km")])))
+          
+        }
       }
       
-      if(dispersal_model == "MoreGoShort"){
-        n_to_each_distance <-sample(c("lessEqual_1km", "greater1lessEqual2km", "greater2km"), 
-                                    n_dispersing, replace = TRUE, 
-                                    prob = c(as.numeric(parameterByIterTracking[i, paste0("dispersal_MoreGoShortmodel_lessEqual1km")]),
-                                          as.numeric(parameterByIterTracking[i, paste0("dispersal_MoreGoShortmodel_greater1kmlessequal2km")]),
-                                           as.numeric(parameterByIterTracking[i, paste0("dispersal_MoreGoShortmodel_greater2km")])))
-   
+      if(demographic_stochasticity == FALSE){
+        if(dispersal_model == "CSF"){
+          n_to_each_distance <- rep(c("lessEqual_1km", "greater1lessEqual2km", "greater2km"), 
+                                    times = round(n_dispersing*c(as.numeric(parameterByIterTracking[i, paste0("dispersal_CSFmodel_lessEqual1km")]),
+                                                                 as.numeric(parameterByIterTracking[i, paste0("dispersal_CSFmodel_greater1kmlessequal2km")]),
+                                                                 as.numeric(parameterByIterTracking[i, paste0("dispersal_CSFmodel_greater2km")]))))
+          
+          
+        }
+        
+        if(dispersal_model == "MoreGoShort"){
+          n_to_each_distance <- rep(c("lessEqual_1km", "greater1lessEqual2km", "greater2km"), 
+                                    times = round(n_dispersing*c(as.numeric(parameterByIterTracking[i, paste0("dispersal_MoreGoShortmodel_lessEqual1km")]),
+                                                          as.numeric(parameterByIterTracking[i, paste0("dispersal_MoreGoShortmodel_greater1kmlessequal2km")]),
+                                                          as.numeric(parameterByIterTracking[i, paste0("dispersal_MoreGoShortmodel_greater2km")]))))
+        }
       }
+
       
       
       n_lessEqual_1km <- length(which(n_to_each_distance == "lessEqual_1km"))
@@ -90,14 +145,17 @@ dispersalTracking <- function(resultsTracking_popSize_females, yoy_rows, i, j,
       
       
       # What other wetlands fall into each of our three buckets
-      wetland_distances <- wetland_distances_km[paste(wetland),]
-      wetlands_lessEqual_1km <- colnames(wetland_distances_km)[which(wetland_distances > 0 & wetland_distances<= 1)]
-      wetlands_greater1lessEqual2km <- colnames(wetland_distances_km)[which(wetland_distances > 1 & wetland_distances <= 2)]
-      wetlands_greater2km <- colnames(wetland_distances_km)[which(wetland_distances > 2)]
+      wetland_distances <- wetland_distances_km_relevant[paste(wetland),]
+      wetlands_lessEqual_1km <- colnames(wetland_distances_km_relevant)[which(wetland_distances > 0 & wetland_distances<= 1)]
+      wetlands_greater1lessEqual2km <- colnames(wetland_distances_km_relevant)[which(wetland_distances > 1 & wetland_distances <= 2)]
+      wetlands_greater2km <- colnames(wetland_distances_km_relevant)[which(wetland_distances > 2)]
       
-      # Since all wetlands are less than 1km from the outside, add the outside bucket as an option to all distance buckets
-      wetlands_greater1lessEqual2km <- unique(c(wetlands_greater1lessEqual2km, "outside"))
-      wetlands_greater2km <- unique(c(wetlands_greater2km, "outside"))
+      if(allow_outside == "yes"){
+        # Since all wetlands are less than 1km from the outside, add the outside bucket as an option to all distance buckets
+        wetlands_greater1lessEqual2km <- unique(c(wetlands_greater1lessEqual2km, "outside"))
+        wetlands_greater2km <- unique(c(wetlands_greater2km, "outside"))
+      }
+
       
       # If frogs are not allowed outside, then remove the outside option 
       if(allow_outside == "no"){
@@ -124,7 +182,10 @@ dispersalTracking <- function(resultsTracking_popSize_females, yoy_rows, i, j,
       if(length(which(wetlands == "ephemeral_wetlands")) > 0){ # i.e. this alternative has restoration for the ephemeral wetlands
         dispersal_tracking[paste(wetland),"ephemeral_wetlands"] <- length(which(destinations == "ephemeral_wetlands"))
       }
-      dispersal_tracking[paste(wetland),"outside"] <- length(which(destinations == "outside"))
+      if(allow_outside == 'yes'){
+        dispersal_tracking[paste(wetland),"outside"] <- length(which(destinations == "outside"))
+        
+      }
       
 
     }

@@ -43,7 +43,7 @@
 #'   existing population there. Defaults to FALSE. Turn to TRUE only when
 #'   exploring the implications of having an established population from the
 #'   start.
-#' @param dispersal_allowed_outside TRUE OR FALSE, defaults to FALSE
+#' @param dispersal_allowed_outside 'yes' or 'no, defaults to 'no'
 #'
 #' @importFrom dplyr %>%
 #'
@@ -56,7 +56,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
                                      percentilesEV_reproduction,
                                      alternative_details, 
                                      exisiting_pop = FALSE, 
-                                     dispersal_allowed_outside = FALSE) {
+                                     dispersal_allowed_outside = 'no') {
   # Collect some info
   n_wetlands <- length(wetlands)
   wetlands_without_outside <- wetlands[which(wetlands != "outside")]
@@ -485,8 +485,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       resultsTracking_popSize_females[tadpole_rows, paste(j)] <- eggs_survive_to_tadpoles[grepl("tadpole" , rownames(eggs_survive_to_tadpoles))]
       
       # If it is a translocation year, add the translocated tadpoles
-      if(translocation_year == 'yes'){ # then it is a transloication year
-        # see n_female_tadpoles_released from year 1 above
+      if(translocation_year == 'yes'){
         resultsTracking_popSize_females[rows_for_trans, paste(j)] <- resultsTracking_popSize_females[rows_for_trans, paste(j)] + round(n_female_tadpoles_released /length(rows_for_trans)) # round so that releasing whole individuals :)
       }
 
@@ -526,8 +525,6 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       A2_rows <- which(resultsTracking_popSize_females$class == "A2")
       A3_rows <- which(resultsTracking_popSize_females$class == "A3")
       A4plus_rows <- which(resultsTracking_popSize_females$class == "A4plus")
-      # outside_rows <- which(resultsTracking_popSize_females$pop == "outside")
-      # Note: not tracking numbers outside anyways so don't need to exclude here
       
       terrestrial_rows <- c(yoy_rows, juv_rows, A2_rows, A3_rows, A4plus_rows)
       terrestrial_pop_size_each_stage_wetland <- resultsTracking_popSize_females[terrestrial_rows, paste(j)]

@@ -7,8 +7,6 @@
 # Laura Keating
 # May 2021
 
-# Example still needed
-
 ##### survivalEggs  #####
 
 #' Calculate egg survival.
