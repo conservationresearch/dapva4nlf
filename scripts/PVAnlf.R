@@ -15,7 +15,7 @@ system.time({ # turn on the timer
 
 #---- Clear the workspace. ----
 rm(list = ls())
-version <- "_v1test11_1200it" # insert short description to append to results to help identify
+version <- "_v1test11_basecase" # insert short description to append to results to help identify
 
 #---- Load libraries, and set the random seed.  -------------
 ## Import libraries
@@ -347,14 +347,15 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                                  results_summary_for_this_iteration_by_pop,
                                                                                  results_all_for_this_iteration))
                                                                      } # end iteration loop
-    
+
     n_it_w_results <- dim(results_summary_all_iterations)[1] # not the same as batch size as we removed those where there was an error
+    if(n_iter == 1){ n_it_w_results <- 1}
     if(n_it_w_results > 1){
       results_summary_all_iterations_overall_int[[batch]] <- do.call("rbind", results_summary_all_iterations[1:n_it_w_results])
       results_summary_all_iterations_by_pop_int[[batch]] <- do.call("rbind", results_summary_all_iterations[(n_it_w_results+1):(n_it_w_results*2)])
       results_all_iterations[[batch]] <- do.call("rbind", results_summary_all_iterations[(n_it_w_results*2+1):(n_it_w_results*3)])
     }
-    if(n_it_w_results == 1 || n_iter == 1){ # e.g. when you are running a baseline case and so just have one iteration
+    if(n_it_w_results == 1){ # e.g. when you are running a baseline case and so just have one iteration
       results_summary_all_iterations_overall_int[[batch]] <- results_summary_all_iterations[[1]]
       results_summary_all_iterations_by_pop_int[[batch]] <- results_summary_all_iterations[[2]]
       results_all_iterations[[batch]] <- results_summary_all_iterations[[3]]

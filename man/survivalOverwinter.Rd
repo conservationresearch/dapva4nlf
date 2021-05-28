@@ -2,7 +2,7 @@
 % Please edit documentation in R/nlf_IdahoFeas_survival.R
 \name{survivalOverwinter}
 \alias{survivalOverwinter}
-\title{INSERT}
+\title{Calculate overwinter survival of terrestrial (i.e. the ones that overwinter) life stages.}
 \usage{
 survivalOverwinter(
   popSizeVector_fallLastYear,
@@ -12,16 +12,29 @@ survivalOverwinter(
 }
 \arguments{
 \item{popSizeVector_fallLastYear}{Female population sizes formatted in the style
-of makePopSizeVector() for the previous year.}
+of dapva::makePopSizeVector() for the previous year.}
 
-\item{survivalMatrix}{Survival matrix formatted in INSERT.}
+\item{survivalMatrix}{Survival matrix formatted as per dapva::makeSurvivalMatrix().}
 
 \item{demographic_stochasticity}{TRUE or FALSE, defaults to TRUE}
 }
 \description{
-INSERT
+Applies the survival matrix to the fall population size vector after masking eggs 
+and tadpoles (since those are intermediate stages that are grown into young-of-year by the fall)
+to calculate how many of each terrestrial age class survives over winter to the spring.
 }
 \examples{
-# Still to do
+library(dapva)
+popSizeVector_test <- dapva::makePopSizeVector(
+pop_class_names = c("pop1 eggs", "pop1 tadpoles", "pop1 adults"),
+num_indiv_per_pop_class = c(1000, 100, 20), sex = "female"
+)
+survivalMatrix_test <- dapva::makeSurvivalMatrix(
+ class_names = c("pop1 eggs", "pop1 tadpoles", "pop1 adults"),
+ survival_rates = c(0.5, 0.2, 0.9)
+)
+survived_the_winter_test <- dapva4nlf::survivalOverwinter(popSizeVector_test, 
+                                                         survivalMatrix_test,
+                                                         demographic_stochasticity = FALSE)
 
 }
