@@ -39,7 +39,8 @@ clusterSetRNGStream(cl, iseed = 30) # without parallel computing can just do set
 alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are preloaded in for easy calling
 
 #rows_to_run <- c(10) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
-rows_to_run <- c(2:9) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
+# rows_to_run <- c(2:9) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
+rows_to_run <- c(6) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
 
 #---- Specify number of iterations and number of runs per iterations.  -------------
 n_iter  <- 2000# 500
@@ -89,6 +90,13 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   #parameterByIterTracking_baseCase$wetland_eggTadSurv_TempCor_noEph <- 0.01 # prob of persist is 0.6117, self sustain is 0.3529; new random seed - prob of persist is 0.60927 , self sustain is 0.3311258
   # parameterByIterTracking_baseCase$wetland_eggTadSurv_TempCor_noEph[1] <- 1 # prob of persist 50 is 0.5125, self sustain is 0.2750
   #parameterByIterTracking <-  parameterByIterTracking_baseCase
+  
+  
+  # Add in fix for when bullfrog management is no. Then the parameter for bullfrog management effective should always also be no.
+  if(alternative_details$bullfrog_management == "no"){
+    parameterByIterTracking$bullfrogMgmt_effective <- "no"
+  }
+  
   
   #---- Update  parameters with the condition of bullfrog management being effective. ----
   # Replace any iterations where bullfrog management is effective to NA for all the bullfrog threat related survival inputs.
