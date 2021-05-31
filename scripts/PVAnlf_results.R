@@ -39,28 +39,31 @@ for (i in 1:length(files)){
             file = paste0("paramSens_selfsustain", name, version,".csv"), row.names = FALSE)
 
   # Draw the associated tornado
-  tornado_persist <- dapva::drawTornado(paramSens = paramSens_persist,
-                         metric = "probability of persistence",
+  tornado_persist_all <- dapva::drawTornado(paramSens = paramSens_persist,
+                         metric = "Probability of persistence",
                          year = 50,
-                         title = paste(name), breaks = 0.1)
+                         title = paste(name), breaks = 0.1,
+                         num_bars_to_show = 'all')
   
-  tornado_selfsustain <- dapva::drawTornado(paramSens = paramSens_selfsustain,
-                                        metric = "probability of self-sustaining population",
+  
+  tornado_selfsustain_all <- dapva::drawTornado(paramSens = paramSens_selfsustain,
+                                        metric = "Probability of a self-sustaining population",
                                         year = 50,
-                                        title = paste(name), breaks = 0.1)
+                                        title = paste(name), breaks = 0.1,
+                                        num_bars_to_show = 'all')
   
 
   # Export the tornado diagram
   tiff(filename = paste0("tornado_persist_", name,version,".tiff"),
        width=12, height=6, units="in",
        pointsize=8, compression="lzw", bg="white", res=600)
-  print(tornado_persist)
+  print(tornado_persist_all)
   dev.off()
   
   tiff(filename = paste0("tornado_selfsustain_", name,version,".tiff"),
        width=12, height=6, units="in",
        pointsize=8, compression="lzw", bg="white", res=600)
-  print(tornado_selfsustain)
+  print(tornado_selfsustain_all)
   dev.off()
   
   
@@ -201,13 +204,13 @@ dev.off()
 # Make an output table with the format we want for the report
  results_summary_prob_persist_table <- results_summary_prob_persist[which(results_summary_prob_persist$year == yrs),]
 # Export this probability of persistence results summary table
-filename <- paste("probPersist_summary_table", version, "_iter_", n_iter, ".csv", sep="")
+filename <- paste("ForReport/probPersist_summary_table", version, "_iter_", n_iter, ".csv", sep="")
 write.csv(results_summary_prob_persist_table, file = filename)
 
 # Make an output table with the format we want for the report
 results_summary_prob_selfsustaining_table <- results_summary_prob_selfsustaining[which(results_summary_prob_selfsustaining$year == yrs),]
 # Export this probability of persistence results summary table
-filename <- paste("probSelfSustain_summary_table", version, "_iter_", n_iter, ".csv", sep="")
+filename <- paste("ForReport/probSelfSustain_summary_table", version, "_iter_", n_iter, ".csv", sep="")
 write.csv(results_summary_prob_selfsustaining_table, file = filename)
 
 
@@ -584,6 +587,79 @@ grid.arrange(persist_goBigVar_graph1,  selfsustain_goBigVar_graph1,
              ncol = 2, nrow = 2)
 dev.off()
 
+
+
+
+
+
+
+
+
+#---- Make graphs for the report -goBig tornados, panel for export. ----
+
+path_to_results_folder <- "C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results"# on my work PC
+#path_to_results_folder <- "/Users/laurakeating/Documents/R/R_scripts/BTPD_PVA/Results/BTPD_baseline_results_march17"# on my mac
+setwd(path_to_results_folder) # on my mac
+file_goBig <-  list.files(path = ".","*goBig_v1test12w2500it.RData", full.names="TRUE")
+load(file_goBig)
+
+# Draw the associated tornado
+tornado_persist_all <- dapva::drawTornado(paramSens = paramSens_persist,
+                                          metric = "Probability of persistence",
+                                          year = 50,
+                                          title = "A)", breaks = 0.05,
+                                          num_bars_to_show = 'all')
+
+tornado_persist_top10 <- dapva::drawTornado(paramSens = paramSens_persist,
+                                            metric = "Probability of persistence",
+                                            year = 50,
+                                            title = "A)", breaks = 0.05,
+                                            num_bars_to_show = 10)
+
+tornado_selfsustain_all <- dapva::drawTornado(paramSens = paramSens_selfsustain,
+                                              metric = "Probability of a self-sustaining population",
+                                              year = 50,
+                                              title = "B)", breaks = 0.05,
+                                              num_bars_to_show = 'all')
+
+tornado_selfsustain_top10 <- dapva::drawTornado(paramSens = paramSens_selfsustain,
+                                                metric = "Probability of a self-sustaining population",
+                                                year = 50,
+                                                title = "B)", breaks = 0.05,
+                                                num_bars_to_show = 10)
+
+# Export the tornado diagrams - main report
+
+
+filename <- paste("ForReport/tornados_top10_goBigVar", version,".tiff", sep="")
+tiff(filename, width=12, height=8, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600,
+     restoreConsole=TRUE)
+grid.arrange(tornado_persist_top10,  tornado_selfsustain_top10,
+             ncol = 1, nrow = 2)
+dev.off()
+
+filename <- paste("ForReport/tornados_allBars_goBigVar", version,".tiff", sep="")
+tiff(filename, width=12, height=16, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600,
+     restoreConsole=TRUE)
+grid.arrange(tornado_persist_all,  tornado_selfsustain_all,
+             ncol = 1, nrow = 2)
+dev.off()
+
+
+
+tiff(filename = paste0("tornado_persist_", name,version,".tiff"),
+     width=12, height=6, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600)
+print(tornado_persist)
+dev.off()
+
+tiff(filename = paste0("tornado_selfsustain_", name,version,".tiff"),
+     width=12, height=6, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600)
+print(tornado_selfsustain)
+dev.off()
 
 
 
@@ -1600,3 +1676,62 @@ results_all_for_this_iteration_fall[which(results_all_for_this_iteration_fall$cl
   
   # Pretty variable, the numbers are generally much higher than in Tischindorf - do we need to revisit our K? Discuss
   
+  
+  ############## Investing relationshop between abundance and prob metric #####################
+  
+  # Load in GoBig alternative with lots of iterations
+  load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test12w2500it.RData")
+  
+  # Plot abundance vs persistence
+  
+  results_all_this_alt_yr50 <- as.data.frame(results_all_this_alt[,c( "iteration", "metric", "50")])
+  colnames(results_all_this_alt_yr50) <- c( "iteration", "metric", "value")
+  
+  
+  
+  library(ggplot2)
+  library(dplyr)
+  library(tidyr)
+  results_all_this_alt_yr50_wide <- results_all_this_alt_yr50 %>% 
+    pivot_wider(names_from = metric, values_from = value)
+  colnames(results_all_this_alt_yr50_wide) <- c("iteration", "mean_abundance", "prob_of_persis", "prob_of_selfsustain")
+  
+  ggplot2::ggplot(results_all_this_alt_yr50_wide, ggplot2::aes(x = mean_abundance, y = prob_of_persis)) +
+    ggplot2::geom_point()
+  
+  ggplot2::ggplot(results_all_this_alt_yr50_wide, ggplot2::aes(x = mean_abundance, y = prob_of_selfsustain)) +
+    ggplot2::geom_point()
+  
+  p_persis_vs_selfsustain <- ggplot2::ggplot(results_all_this_alt_yr50_wide, ggplot2::aes(x = prob_of_persis, y = prob_of_selfsustain)) +
+    ggplot2::geom_point() +
+    geom_abline(slope=1, intercept=0, lty= "dashed")  +
+    ggplot2::labs(x = "Probability of Persistence") +
+    ggplot2::labs(y = "Probability of a Self-Sustaining Population") +
+    ggplot2::ggtitle("Example from Go Big or Go Home Alternative Results") +
+    ggplot2::theme_bw() +
+    ggplot2::theme(
+      panel.grid.major = ggplot2::element_blank(),
+      panel.grid.minor = ggplot2::element_blank(),
+      strip.background = ggplot2::element_blank(),
+      panel.border = ggplot2::element_rect(colour = "black"),
+      text = ggplot2::element_text(size = 12),
+      axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+      legend.position = "none"
+    )
+  
+  filename <- paste("ForReport/graph_persis_vs_selfsustain", version, "_iter_", n_iter, ".tiff", sep="")
+  tiff(filename, width=12, height=6, units="in",pointsize=8, compression="lzw", bg="white", res=600)
+  print(p_persis_vs_selfsustain)
+  dev.off()
+  
+  
+# On average, mean abundance of 1000 gives over 50% chance of self sustain
+  min(results_all_this_alt_yr50_wide$mean_abundance[which(results_all_this_alt_yr50_wide$prob_of_selfsustain > 0.5)]) #9414.26
+  
+  min(results_all_this_alt_yr50_wide$prob_of_selfsustain[which(results_all_this_alt_yr50_wide$mean_abundance > 10000)]) #9414.26
+  
+  
+  # Are there any iterations where the prob of persistence for the ephemeral wetlands was higher than the other wetlands
+  # Might have to look more closely at within one run to really get at this
+  
+  # Try running for base case with the freq of dry set to really low vs really high
