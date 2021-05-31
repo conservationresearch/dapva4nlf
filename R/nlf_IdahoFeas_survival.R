@@ -7,13 +7,12 @@
 # Laura Keating
 # May 2021
 
-# Example still needed
-
 ##### survivalEggs  #####
 
-#' INSERT 
+#' Calculate egg survival.
 #'
-#' INSERT
+#' Applies the survival matrix to eggs after masking the other life stages 
+#' in the population vector and survival matrix.
 #' 
 #' @param popSizeVector Female population sizes formatted in the style
 #' of makePopSizeVector() for the relevant year.
@@ -21,10 +20,22 @@
 #' @param demographic_stochasticity TRUE or FALSE, defaults to TRUE
 #'
 #' @examples
-#' # Still to do
+#' library(dapva)
+#' 
+#'   popSizeVector_test <- dapva::makePopSizeVector(
+#'   pop_class_names = c("pop1 eggs", "pop1 tadpoles", "pop1 adults"),
+#'   num_indiv_per_pop_class = c(1000, 100, 20), sex = "female"
+#'   )
+#'   survivalMatrix_test <- dapva::makeSurvivalMatrix(
+#'   class_names = c("pop1 eggs", "pop1 tadpoles", "pop1 adults"),
+#'   survival_rates = c(0.5, 0.4, 0.9)
+#'   )
+#'   egg_survival_test <- dapva4nlf::survivalEggs(popSizeVector_test, 
+#'   survivalMatrix_test,
+#'   demographic_stochasticity = FALSE)
 #' 
 #' @export
-# unit test STILL TO DO
+# unit test in place
 survivalEggs <- function(popSizeVector, 
                              survivalMatrix,
                              demographic_stochasticity = TRUE) {
@@ -47,20 +58,31 @@ survivalEggs <- function(popSizeVector,
 
 ##### survivalTadpoles  #####
 
-#' INSERT 
+#' Calculate tadpole survival.
 #'
-#' INSERT
+#' Applies the survival matrix to tadpoles after masking the other life stages 
+#' in the population vector and survival matrix.
 #' 
 #' @param popSizeVector Female population sizes formatted in the style
 #' of makePopSizeVector() for the relevant year.
-#' @param survivalMatrix Survival matrix formatted in INSERT.
+#' @param survivalMatrix Survival matrix formatted as per dapva::makeSurvivalMatrix().
 #' @param demographic_stochasticity TRUE or FALSE, defaults to TRUE
 #'
 #' @examples
-#' # Still to do
-#' 
+#' library(dapva)
+#'   popSizeVector_test <- dapva::makePopSizeVector(
+#'   pop_class_names = c("pop1 eggs", "pop1 tadpoles", "pop1 adults"),
+#'   num_indiv_per_pop_class = c(1000, 100, 20), sex = "female"
+#'   )
+#'   survivalMatrix_test <- dapva::makeSurvivalMatrix(
+#'   class_names = c("pop1 eggs", "pop1 tadpoles", "pop1 adults"),
+#'   survival_rates = c(0.5, 0.4, 0.9)
+#'   )
+#'   tadpole_survival_test <- dapva4nlf::survivalTadpoles(popSizeVector_test, 
+#'                                                        survivalMatrix_test,
+#'                                                        demographic_stochasticity = FALSE)
 #' @export
-# unit test STILL TO DO
+# unit test in place
 survivalTadpoles <- function(popSizeVector, 
                              survivalMatrix,
                              demographic_stochasticity = TRUE) {
@@ -82,27 +104,40 @@ survivalTadpoles <- function(popSizeVector,
 
 ##### survivalOverwinter  #####
 
-#' INSERT 
+#' Calculate overwinter survival of terrestrial (i.e. the ones that overwinter) life stages.
 #'
-#' INSERT
-#' 
+#' Applies the survival matrix to the fall population size vector after masking eggs 
+#' and tadpoles (since those are intermediate stages that are grown into young-of-year by the fall)
+#' to calculate how many of each terrestrial age class survives over winter to the spring.
+#'
 #' @param popSizeVector_fallLastYear Female population sizes formatted in the style
-#' of makePopSizeVector() for the previous year.
-#' @param survivalMatrix Survival matrix formatted in INSERT.
+#' of dapva::makePopSizeVector() for the previous year.
+#' @param survivalMatrix Survival matrix formatted as per dapva::makeSurvivalMatrix().
 #' @param demographic_stochasticity TRUE or FALSE, defaults to TRUE
 #'
 #' @examples
-#' # Still to do
+#' library(dapva)
+#' popSizeVector_test <- dapva::makePopSizeVector(
+#' pop_class_names = c("pop1 eggs", "pop1 tadpoles", "pop1 adults"),
+#' num_indiv_per_pop_class = c(1000, 100, 20), sex = "female"
+#' )
+#' survivalMatrix_test <- dapva::makeSurvivalMatrix(
+#'  class_names = c("pop1 eggs", "pop1 tadpoles", "pop1 adults"),
+#'  survival_rates = c(0.5, 0.4, 0.9)
+#')
+#' survived_the_winter_test <- dapva4nlf::survivalOverwinter(popSizeVector_test, 
+#'                                                          survivalMatrix_test,
+#'                                                          demographic_stochasticity = FALSE)
 #' 
 #' @export
-# unit test STILL TO DO
+# unit test in place
 survivalOverwinter <- function(popSizeVector_fallLastYear, 
                              survivalMatrix,
                              demographic_stochasticity = TRUE) {
   
   # for package checking; binding the variable locally to the function (see https://www.r-bloggers.com/2019/08/no-visible-binding-for-global-variable/)
   
-  # Mask the matrix to only be for the lifestages that overwinter (yoy, juvenile, and adults). 
+  # Mask the matrix to only be for the life stages that overwinter (yoy, juvenile, and adults). 
   popSizeVector_overwinter <- popSizeVector_fallLastYear # initalize
   popSizeVector_overwinter[grepl("eggs" , rownames(popSizeVector_overwinter)),] <- 0
   popSizeVector_overwinter[grepl("tadpoles" , rownames(popSizeVector_overwinter)),] <- 0

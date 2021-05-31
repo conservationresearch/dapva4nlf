@@ -24,7 +24,7 @@ runAnnualLoopNLFIdahoPVA(
   percentilesEV_reproduction,
   alternative_details,
   exisiting_pop = FALSE,
-  dispersal_allowed_outside = TRUE
+  dispersal_allowed_outside = "no"
 )
 }
 \arguments{
@@ -68,7 +68,7 @@ existing population there. Defaults to FALSE. Turn to TRUE only when
 exploring the implications of having an established population from the
 start.}
 
-\item{dispersal_allowed_outside}{TRUE OR FALSE, defaults to TRUE}
+\item{dispersal_allowed_outside}{'yes' or 'no, defaults to 'no'}
 }
 \description{
 This functions contains the annual loop of the Idaho Feasability 

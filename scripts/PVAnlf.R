@@ -15,7 +15,7 @@ system.time({ # turn on the timer
 
 #---- Clear the workspace. ----
 rm(list = ls())
-version <- "_v1test11_1200it" # insert short description to append to results to help identify
+version <- "_v1test12" # insert short description to append to results to help identify
 
 #---- Load libraries, and set the random seed.  -------------
 ## Import libraries
@@ -33,19 +33,20 @@ cl <- parallel::makeCluster(no_cores, type="FORK") # if on windows, try this ins
 doParallel::registerDoParallel(cl)
 
 # Set the seed in a way that works for parallel computing (each core needs a separate random seed) (e.g. https://www.r-bloggers.com/2020/09/future-1-19-1-making-sure-proper-random-numbers-are-produced-in-parallel-processing/)
-clusterSetRNGStream(cl, iseed = 29) # without parallel computing can just do set.seed(1234)
+clusterSetRNGStream(cl, iseed = 30) # without parallel computing can just do set.seed(1234)
 
 #---- Specify the alternatives to run.  -------------
 alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are preloaded in for easy calling
 
-rows_to_run <- c(10) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
+#rows_to_run <- c(10) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
+rows_to_run <- c(2:9) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
 
 #---- Specify number of iterations and number of runs per iterations.  -------------
-n_iter  <- 1200 # 2000# 500
+n_iter  <- 2000# 500
 flexible_convergence_iteration_on <- "yes" # 'yes' or 'no', generally choose yes unless you are running a tornado and want to specify a # of iter
 max_n_runs_per_iter <- 1000 # flexible convergence is always on at the run level
 
-baseCase <- "yes" # 'yes' or 'no'
+baseCase <- "no" # 'yes' or 'no'
 
 if(baseCase == 'yes'){
   print(paste("Using one iteration of basecase parameters"))
@@ -81,7 +82,14 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
     parameterByIterTracking_baseCase <- dapva4nlf::selectNLFIdahoParameterByIterTracking(inputs, base_case = TRUE)
     parameterByIterTracking <-  parameterByIterTracking_baseCase
   }
-
+  
+  # Trying to better understand wetland correlations
+  # using alternative 10 - testing existing pop
+  # This is going the way I expected so appears to be working - less correlated is better
+  #parameterByIterTracking_baseCase$wetland_eggTadSurv_TempCor_noEph <- 0.01 # prob of persist is 0.6117, self sustain is 0.3529; new random seed - prob of persist is 0.60927 , self sustain is 0.3311258
+  # parameterByIterTracking_baseCase$wetland_eggTadSurv_TempCor_noEph[1] <- 1 # prob of persist 50 is 0.5125, self sustain is 0.2750
+  #parameterByIterTracking <-  parameterByIterTracking_baseCase
+  
   #---- Update  parameters with the condition of bullfrog management being effective. ----
   # Replace any iterations where bullfrog management is effective to NA for all the bullfrog threat related survival inputs.
   # This allows sensitivity to be calculated properly for the tornado
@@ -347,14 +355,15 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                                  results_summary_for_this_iteration_by_pop,
                                                                                  results_all_for_this_iteration))
                                                                      } # end iteration loop
-    
+
     n_it_w_results <- dim(results_summary_all_iterations)[1] # not the same as batch size as we removed those where there was an error
+    if(n_iter == 1){ n_it_w_results <- 1}
     if(n_it_w_results > 1){
       results_summary_all_iterations_overall_int[[batch]] <- do.call("rbind", results_summary_all_iterations[1:n_it_w_results])
       results_summary_all_iterations_by_pop_int[[batch]] <- do.call("rbind", results_summary_all_iterations[(n_it_w_results+1):(n_it_w_results*2)])
       results_all_iterations[[batch]] <- do.call("rbind", results_summary_all_iterations[(n_it_w_results*2+1):(n_it_w_results*3)])
     }
-    if(n_it_w_results == 1 || n_iter == 1){ # e.g. when you are running a baseline case and so just have one iteration
+    if(n_it_w_results == 1){ # e.g. when you are running a baseline case and so just have one iteration
       results_summary_all_iterations_overall_int[[batch]] <- results_summary_all_iterations[[1]]
       results_summary_all_iterations_by_pop_int[[batch]] <- results_summary_all_iterations[[2]]
       results_all_iterations[[batch]] <- results_summary_all_iterations[[3]]
