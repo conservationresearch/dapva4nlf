@@ -40,7 +40,7 @@ alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are p
 
 #rows_to_run <- c(10) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
 # rows_to_run <- c(2:9) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
-rows_to_run <- c(6) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
+rows_to_run <- c(6, 10, 11, 12) # run No bullfrog plus the three hypothetical scenarios
 
 #---- Specify number of iterations and number of runs per iterations.  -------------
 n_iter  <- 2000# 500
