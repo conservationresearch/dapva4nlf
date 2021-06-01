@@ -14,6 +14,7 @@ path_to_results_folder <- "C:/Users/LauraK/The Calgary Zoological Society/Conser
 #path_to_results_folder <- "/Users/laurakeating/Documents/R/R_scripts/BTPD_PVA/Results/BTPD_baseline_results_march17"# on my mac
 setwd(path_to_results_folder) # on my mac
 
+yrs <- 50
 #---- Extract the results from the Rdata files saved for each scenario. ----
 # One by one, load in the Rdata files and then export the results to csvs
 
@@ -202,7 +203,7 @@ dev.off()
 
 
 # Make an output table with the format we want for the report
- results_summary_prob_persist_table <- results_summary_prob_persist[which(results_summary_prob_persist$year == yrs),]
+ results_summary_prob_persist_table <- results_summary_prob_persist[which(results_summary_prob_persist$year == yrs),] # yrs
 # Export this probability of persistence results summary table
 filename <- paste("ForReport/probPersist_summary_table", version, "_iter_", n_iter, ".csv", sep="")
 write.csv(results_summary_prob_persist_table, file = filename)
@@ -444,9 +445,11 @@ int5 <- results_summary_prob_persist[c(which(results_summary_prob_persist$altern
 int5$alternative[which(int5$alternative == goBig_alt_name)] <- "Go Big or Go Home" # get rid of the extra space
 
 
-int5$alternative<- factor(int5$alternative, levels=c("Go Big or Go Home", "Try Hard but Few Tadpoles",
-                                                   "Try Hard but No Bullfrog Management", "Try Hard but No Habitat Restoration",
-                                                   "Try Hard but Short", "Try Hard at One Wetland")) # reorder factor levels
+int5$alternative<- factor(int5$alternative, levels=c("Go Big or Go Home", "Try Hard at One Wetland",
+                                                     "Try Hard but No Habitat Restoration",
+                                                     "Try Hard but Short",
+                                                     "Try Hard but Few Tadpoles",
+                                                   "Try Hard but No Bullfrog Management")) # reorder factor levels
 
 (persist_goBigVar_graph1 <- graphResultsSummary(results_summary = int5,
                                               overlap = FALSE,
@@ -465,13 +468,14 @@ int6 <- results_all_iter[c(which(results_all_iter$alternative == goBig_alt_name)
                            which(results_all_iter$alternative == short_alt_name)),]
 int6$alternative[which(int6$alternative == goBig_alt_name)] <- "Go Big or Go Home" # get rid of the extra space
 int6$alternative[which(int6$alternative == noBFM_alt_name)] <- "Try Hard but \n No Bullfrog Management" # put it on two lines
+int6$alternative[which(int6$alternative == noHabRest_alt_name)] <- "Try Hard but \n No Habitat Restoration" # put it on two lines
 
 
-int6$alternative<- factor(int6$alternative, levels=c("Try Hard at One Wetland",
+int6$alternative<- factor(int6$alternative, levels=c("Try Hard but \n No Bullfrog Management",
+                                                     "Try Hard but Few Tadpoles", 
                                                      "Try Hard but Short",
-                                                     "Try Hard but No Habitat Restoration",
-                                                     "Try Hard but \n No Bullfrog Management", 
-                                                     "Try Hard but Few Tadpoles",
+                                                     "Try Hard but \n No Habitat Restoration",
+                                                     "Try Hard at One Wetland",
                                                      "Go Big or Go Home")) # reorder factor levels
 
 
@@ -527,9 +531,11 @@ int7 <- results_summary_prob_selfsustaining[c(which(results_summary_prob_selfsus
 int7$alternative[which(int7$alternative == goBig_alt_name)] <- "Go Big or Go Home" # get rid of the extra space
 
 
-int7$alternative<- factor(int7$alternative, levels=c("Go Big or Go Home", "Try Hard but Few Tadpoles",
-                                                     "Try Hard but No Bullfrog Management", "Try Hard but No Habitat Restoration",
-                                                     "Try Hard but Short", "Try Hard at One Wetland")) # reorder factor levels
+int7$alternative<- factor(int7$alternative, levels=c("Go Big or Go Home", "Try Hard at One Wetland",
+                                                     "Try Hard but No Habitat Restoration",
+                                                     "Try Hard but Short",
+                                                     "Try Hard but Few Tadpoles",
+                                                     "Try Hard but No Bullfrog Management")) # reorder factor levels
 
 (selfsustain_goBigVar_graph1 <- graphResultsSummary(results_summary = int7,
                                                   overlap = FALSE,
@@ -550,12 +556,13 @@ int8 <- results_all_iter[c(which(results_all_iter$alternative == goBig_alt_name)
                            which(results_all_iter$alternative == short_alt_name)),]
 int8$alternative[which(int8$alternative == goBig_alt_name)] <- "Go Big or Go Home" # get rid of the extra space
 int8$alternative[which(int8$alternative == noBFM_alt_name)] <- "Try Hard but \n No Bullfrog Management" # put it on two lines
+int8$alternative[which(int8$alternative == noHabRest_alt_name)] <- "Try Hard but \n No Habitat Restoration" # put it on two lines
 
-int8$alternative<- factor(int8$alternative, levels=c("Try Hard at One Wetland",
+int8$alternative<- factor(int8$alternative, levels=c("Try Hard but \n No Bullfrog Management",
+                                                     "Try Hard but Few Tadpoles", 
                                                      "Try Hard but Short",
-                                                     "Try Hard but No Habitat Restoration",
-                                                     "Try Hard but \n No Bullfrog Management", 
-                                                     "Try Hard but Few Tadpoles",
+                                                     "Try Hard but \n No Habitat Restoration",
+                                                     "Try Hard at One Wetland",
                                                      "Go Big or Go Home")) # reorder factor levels
 
 (selfsustain_goBigVar_flyingBars1 <- graphFlyingBars(results_summary_all_iterations = int8,
@@ -646,21 +653,6 @@ tiff(filename, width=12, height=16, units="in",
 grid.arrange(tornado_persist_all,  tornado_selfsustain_all,
              ncol = 1, nrow = 2)
 dev.off()
-
-
-
-tiff(filename = paste0("tornado_persist_", name,version,".tiff"),
-     width=12, height=6, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600)
-print(tornado_persist)
-dev.off()
-
-tiff(filename = paste0("tornado_selfsustain_", name,version,".tiff"),
-     width=12, height=6, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600)
-print(tornado_selfsustain)
-dev.off()
-
 
 
 ############## Show what results would have looked like if combined parametric and process uncertainty ######
