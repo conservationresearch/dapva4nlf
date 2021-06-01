@@ -86,7 +86,9 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
     parameterByIterTracking <-  parameterByIterTracking_baseCase
   }
   if(doingRunConvTest == 'yes'){
-    load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test12w2500it_parameterByIterTracking_forRunConvTest.RData")
+    # load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test12w2500it_parameterByIterTracking_forRunConvTest.RData")
+    load("/Users/laurakeating/Documents/R/R_scripts/NLF_PVA/Results/goBig_v1test12w2500it_parameterByIterTracking_forRunConvTest.RData")# on my mac
+  
     flexible_convergence_run_on <- "no" 
     parameterByIterTracking <-  parameterByIterTracking_forRunConvTest
     n_iter  <- nrow(parameterByIterTracking_forRunConvTest)
