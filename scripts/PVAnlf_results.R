@@ -611,23 +611,13 @@ file_goBig <-  list.files(path = ".","*goBig_v1test12w2500it.RData", full.names=
 load(file_goBig)
 
 # Draw the associated tornado
-tornado_persist_all <- dapva::drawTornado(paramSens = paramSens_persist,
-                                          metric = "Probability of persistence",
-                                          year = 50,
-                                          title = "A)", breaks = 0.05,
-                                          num_bars_to_show = 'all')
+
 
 tornado_persist_top10 <- dapva::drawTornado(paramSens = paramSens_persist,
                                             metric = "Probability of persistence",
                                             year = 50,
                                             title = "A)", breaks = 0.05,
                                             num_bars_to_show = 10)
-
-tornado_selfsustain_all <- dapva::drawTornado(paramSens = paramSens_selfsustain,
-                                              metric = "Probability of a self-sustaining population",
-                                              year = 50,
-                                              title = "B)", breaks = 0.05,
-                                              num_bars_to_show = 'all')
 
 tornado_selfsustain_top10 <- dapva::drawTornado(paramSens = paramSens_selfsustain,
                                                 metric = "Probability of a self-sustaining population",
@@ -637,7 +627,6 @@ tornado_selfsustain_top10 <- dapva::drawTornado(paramSens = paramSens_selfsustai
 
 # Export the tornado diagrams - main report
 
-
 filename <- paste("ForReport/tornados_top10_goBigVar", version,".tiff", sep="")
 tiff(filename, width=12, height=8, units="in",
      pointsize=8, compression="lzw", bg="white", res=600,
@@ -645,6 +634,25 @@ tiff(filename, width=12, height=8, units="in",
 grid.arrange(tornado_persist_top10,  tornado_selfsustain_top10,
              ncol = 1, nrow = 2)
 dev.off()
+
+#---- Appendix: full tornado diagrams. ----
+
+# Include all bars in the appendix
+tornado_persist_all <- dapva::drawTornado(paramSens = paramSens_persist,
+                                          metric = "Probability of persistence",
+                                          year = 50,
+                                          title = "A)", breaks = 0.05,
+                                          num_bars_to_show = 'all')
+
+
+tornado_selfsustain_all <- dapva::drawTornado(paramSens = paramSens_selfsustain,
+                                              metric = "Probability of a self-sustaining population",
+                                              year = 50,
+                                              title = "B)", breaks = 0.05,
+                                              num_bars_to_show = 'all')
+
+
+# Export the tornado diagrams - all bars for Appendix
 
 filename <- paste("ForReport/tornados_allBars_goBigVar", version,".tiff", sep="")
 tiff(filename, width=12, height=16, units="in",
@@ -654,6 +662,445 @@ grid.arrange(tornado_persist_all,  tornado_selfsustain_all,
              ncol = 1, nrow = 2)
 dev.off()
 
+#---- Load one alternative to use for convergence testing. ----
+
+# TO DO: UPDATE CODE SO THAT CAN TURN FLEXIBLE CONVERGENCE AT THE RUN LEVEL OFF SO CAN SHOW THIS
+# Load the Rdata file
+files <-  list.files(path = ".","*.RData", full.names="TRUE")
+i <- 2  
+load(files[i])
+yrs <- 50
+# Remove eggs and tadpoles as they are intermediate stages in the year and we just want the pop size at the fall census
+results_all_iterations_fall <- results_all_iterations # initalize
+
+for(j in 1:yrs){
+  nrow(results_all_iterations_fall)
+  results_all_iterations_fall[which(results_all_iterations_fall$class == "eggs"),paste(j)] <- 0
+  results_all_iterations_fall[which(results_all_iterations_fall$class == "tadpoles"),paste(j)] <- 0 
+}
+
+#---- Appendix: convergence plots - number of runs per iteration. ----
+
+# Intalize the a list to store results for a handful of itrations
+convergence_test_runs_per_iter <- list()
+
+# Pick some iterations that will show a range of outcomes
+# 1570 has prob of persistence 1
+# 1131 has prob of persistence of approx 0.97
+# 495 has prob of persistence of approx 0.5
+# 2056 has prob of persistence of approx 0.05
+# 2323 has prob of persistence of approx 0
+
+# parameterByIterTracking_forRunConvTest <- parameterByIterTracking[c(1570, 1131, 495, 2056, 2323),]
+# Saved the workspace now and will use this on my mac to run
+
+for(i in c(1570, 1131, 495, 2056, 2323)){
+# for(i in 1:4){
+  convergence_test_runs_per_iter[[i]] <- dapva::convergenceTestRunsPerIteration(
+    results_all_for_this_iteration = results_all_iterations_fall[which(results_all_iterations_fall$iteration == i),],
+    test_interval = 10,
+    iteration_number = i,
+    initial_year = 1,
+    final_year = 50,
+    num_rand_pulls_per_subset_size = 100)
+}
+
+convergence_test_runs_multiple_iter <- do.call("rbind", convergence_test_runs_per_iter)
+
+
+graphs <- dapva::graphCongvTestRunsPerIter(convergence_test_runs_multiple_iter,
+                                           x_location_vertical_line = 1000,
+                                           title = " ")
+# graphs[[1]]
+graphs[[2]]
+
+#---- Appendix: convergence plots - number of iterations. ----
+
+
+# NEed to use a dataset with more iterations than needed so can show convergence
+# For example, if using 500 iterations need to use a dataset with e.g. 2000 iterations here
+
+# Resample to visually inspect convergence
+convergence_test <- dapva::convergenceTestIterations(results_all_this_alt = results_summary_all_iterations_overall,
+                                                     test_interval = 100,
+                                                     num_rand_pulls_per_subset_size = 100,
+                                                     initial_year = 1,
+                                                     final_year = 50)
+
+
+# Make graphs for visual inspection
+graphs <- dapva::graphCongvTestIter(convergence_test, x_location_vertical_line = 500,
+                                    title = " ")
+
+(p_prob_persist_conv_iter_mean <- graphs[[2]])
+(p_prob_persist_conv_iter_median <- graphs[[4]])
+
+(p_abundance_conv_iter_mean <- graphs[[1]])
+(p_abundance_conv_iter_median <- graphs[[3]])
+
+
+
+
+# Export the graphss
+# Do later
+
+
+# Extract the range of prob of persistence from 500 iterations
+int <- convergence_test$prob_persist_mean[which(convergence_test$subset_size == 500)]
+min(int) 
+max(int) 
+max(int) - min(int)
+
+#---- Load base case results for one alternative to use in the examples in the appendices----
+# Load the Rdata file
+
+files_basecase <-  list.files(path = ".","*basecase.RData", full.names="TRUE")
+i = 1  
+load(files_basecase[i])
+
+# Make the classes factors
+
+results_all_iterations$class <- factor(results_all_iterations$class, levels = c("eggs", "tadpoles", "yoy", "juv", "A2", "A3", "A4plus"))
+results_basecase <- results_all_iterations # initalize
+
+# Remove eggs and tadpoles as they are intermediate stages in the year and we just want the pop size at the fall census
+results_basecase_fall <- results_all_iterations # initalize
+
+for(j in 1:yrs){
+  nrow(results_basecase_fall)
+  results_basecase_fall[which(results_basecase_fall$class == "eggs"),paste(j)] <- 0
+  results_basecase_fall[which(results_basecase_fall$class == "tadpoles"),paste(j)] <- 0 
+}
+
+#---- Appendix: mean survival rates after incorporating threats (base case example). ----
+
+# BASE CASE
+inputs_all <- dapva4nlf::getNLFIdahoFeasinputs()
+inputs <- inputs_all[[1]]
+parameterByIterTracking_baseCase <- selectNLFIdahoParameterByIterTracking(inputs, base_case = TRUE)
+parameterByIterTracking <- parameterByIterTracking_baseCase
+
+# BASE CASE - eggs, no threats
+s_eggs_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_eggs_no_threats")])
+s_eggs_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_eggs_no_threats")])
+
+# BASE CASE - eggs with threats
+s_pct_reduced_eggs_bullfrogs <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_eggs_bullfrogs")])
+s_pct_reduced_eggs_chytrid <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_eggs_chytrid")])
+s_pct_reduced_eggs_roads <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_eggs_roads")])
+
+# BASE CASE - tadpoles, no threats
+s_tadpoles_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_tadpoles_no_threats")])
+s_tadpoles_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_tadpoles_no_threats")])
+s_tadpoles_no_threats_dist <- dapva::estBetaParams(mean = s_tadpoles_mean, sd = s_tadpoles_sd)
+
+
+# BASE CASE - tadpoles with threats
+s_pct_reduced_tadpoles_bullfrogs <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_tadpoles_bullfrogs")])
+s_pct_reduced_tadpoles_chytrid <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_tadpoles_chytrid")])
+s_pct_reduced_tadpoles_roads <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_tadpoles_roads")])
+
+# BASE CASE - yoy, no threats
+s_yoy_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_yoy_no_threats")])
+s_yoy_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_yoy_no_threats")])
+s_yoy_no_threats_dist <- dapva::estBetaParams(mean = s_yoy_mean, sd = s_yoy_sd)
+
+# BASE CASE - yoy with threats
+s_pct_reduced_yoy_bullfrogs <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_yoy_bullfrogs")])
+s_pct_reduced_yoy_chytrid <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_yoy_chytrid")])
+s_pct_reduced_yoy_roads <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_yoy_roads")])
+
+# BASE CASE - juv, no threats
+s_juv_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_juv_no_threats")])
+s_juv_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_juv_no_threats")])
+
+# BASE CASE - juv with threats
+s_pct_reduced_juv_bullfrogs <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_juvenile_bullfrogs")])
+s_pct_reduced_juv_chytrid <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_juvenile_adult_chytrid")])
+s_pct_reduced_juv_roads <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_juvenile_roads")])
+
+# BASE CASE - adult, no threats
+s_adult_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_adult_no_threats")])
+s_adult_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_adult_no_threats")])
+s_adult_no_threats_dist <- dapva::estBetaParams(mean = s_adult_mean, sd = s_adult_sd)
+
+# BASE CASE - adult with threats
+s_pct_reduced_adult_bullfrogs <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_adult_bullfrogs")])
+s_pct_reduced_adult_chytrid <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_juvenile_adult_chytrid")])
+s_pct_reduced_adult_roads <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_adult_roads")])
+
+survival_w_threats_comparison <- as.data.frame(matrix(nrow = 5, ncol = 7))
+colnames(survival_w_threats_comparison) <- c("life_stage", "no_threat", "chytrid", "roads", "bullfrogs", "chytrid_and_roads",  "all_three")
+
+survival_w_threats_comparison$life_stage[1] <- "eggs to tadpoles"
+survival_w_threats_comparison$no_threat[1] <- s_eggs_mean
+survival_w_threats_comparison$chytrid[1] <- (1-s_pct_reduced_eggs_chytrid/100)*s_eggs_mean 
+survival_w_threats_comparison$roads[1] <- (1-s_pct_reduced_eggs_roads/100)*s_eggs_mean 
+survival_w_threats_comparison$chytrid_and_roads[1] <- (1-s_pct_reduced_eggs_chytrid/100)*
+  (1-s_pct_reduced_eggs_roads/100)*s_eggs_mean 
+survival_w_threats_comparison$bullfrogs[1] <- (1-s_pct_reduced_eggs_bullfrogs/100)*s_eggs_mean 
+survival_w_threats_comparison$all_three[1] <- (1-s_pct_reduced_eggs_chytrid/100)*
+  (1-s_pct_reduced_eggs_roads/100)*
+  (1-s_pct_reduced_eggs_bullfrogs/100)*s_eggs_mean 
+
+survival_w_threats_comparison$life_stage[2] <- "tadpoles to yoy"
+survival_w_threats_comparison$no_threat[2] <- s_tadpoles_mean
+survival_w_threats_comparison$chytrid[2] <- (1-s_pct_reduced_tadpoles_chytrid/100)*s_tadpoles_mean 
+survival_w_threats_comparison$roads[2] <- (1-s_pct_reduced_tadpoles_roads/100)*s_tadpoles_mean 
+survival_w_threats_comparison$chytrid_and_roads[2] <- (1-s_pct_reduced_tadpoles_chytrid/100)*
+  (1-s_pct_reduced_tadpoles_roads/100)*s_tadpoles_mean 
+survival_w_threats_comparison$bullfrogs[2] <- (1-s_pct_reduced_tadpoles_bullfrogs/100)*s_tadpoles_mean 
+survival_w_threats_comparison$all_three[2] <- (1-s_pct_reduced_tadpoles_chytrid/100)*
+  (1-s_pct_reduced_tadpoles_roads/100)*
+  (1-s_pct_reduced_tadpoles_bullfrogs/100)*s_tadpoles_mean 
+
+
+survival_w_threats_comparison$life_stage[3] <- "yoy to juv"
+survival_w_threats_comparison$no_threat[3] <- s_yoy_mean
+survival_w_threats_comparison$chytrid[3] <- (1-s_pct_reduced_yoy_chytrid/100)*s_yoy_mean 
+survival_w_threats_comparison$roads[3] <- (1-s_pct_reduced_yoy_roads/100)*s_yoy_mean 
+survival_w_threats_comparison$chytrid_and_roads[3] <- (1-s_pct_reduced_yoy_chytrid/100)*
+  (1-s_pct_reduced_yoy_roads/100)*s_yoy_mean 
+survival_w_threats_comparison$bullfrogs[3] <- (1-s_pct_reduced_yoy_bullfrogs/100)*s_yoy_mean 
+survival_w_threats_comparison$all_three[3] <- (1-s_pct_reduced_yoy_chytrid/100)*
+  (1-s_pct_reduced_yoy_roads/100)*
+  (1-s_pct_reduced_yoy_bullfrogs/100)*s_yoy_mean 
+
+
+survival_w_threats_comparison$life_stage[4] <- "juv to adult"
+survival_w_threats_comparison$no_threat[4] <- s_juv_mean
+survival_w_threats_comparison$chytrid[4] <- (1-s_pct_reduced_juv_chytrid/100)*s_juv_mean 
+survival_w_threats_comparison$roads[4] <- (1-s_pct_reduced_juv_roads/100)*s_juv_mean 
+survival_w_threats_comparison$chytrid_and_roads[4] <- (1-s_pct_reduced_juv_chytrid/100)*
+  (1-s_pct_reduced_juv_roads/100)*s_juv_mean 
+survival_w_threats_comparison$bullfrogs[4] <- (1-s_pct_reduced_juv_bullfrogs/100)*s_juv_mean 
+survival_w_threats_comparison$all_three[4] <- (1-s_pct_reduced_juv_chytrid/100)*
+  (1-s_pct_reduced_juv_roads/100)*
+  (1-s_pct_reduced_juv_bullfrogs/100)*s_juv_mean 
+
+survival_w_threats_comparison$life_stage[5] <- "adult to adult"
+survival_w_threats_comparison$no_threat[5] <- s_adult_mean
+survival_w_threats_comparison$chytrid[5] <- (1-s_pct_reduced_adult_chytrid/100)*s_adult_mean 
+survival_w_threats_comparison$roads[5] <- (1-s_pct_reduced_adult_roads/100)*s_adult_mean 
+survival_w_threats_comparison$chytrid_and_roads[5] <- (1-s_pct_reduced_adult_chytrid/100)*
+  (1-s_pct_reduced_adult_roads/100)*s_adult_mean 
+survival_w_threats_comparison$bullfrogs[5] <- (1-s_pct_reduced_adult_bullfrogs/100)*s_adult_mean 
+survival_w_threats_comparison$all_three[5] <- (1-s_pct_reduced_adult_chytrid/100)*
+  (1-s_pct_reduced_adult_roads/100)*
+  (1-s_pct_reduced_adult_bullfrogs/100)*s_adult_mean 
+
+
+survival_w_threats_comparison$life_stage <- factor(survival_w_threats_comparison$life_stage, 
+                                                   levels = c("eggs to tadpoles",
+                                                              "tadpoles to yoy", 
+                                                              "yoy to juv", 
+                                                              "juv to adult", "adult to adult"))
+
+
+survival_w_threats_comparison_long <- reshape2::melt(survival_w_threats_comparison,  id.vars=c("life_stage"))
+colnames(survival_w_threats_comparison_long) <- c("life_stage", "threats" , "survival_rate" )
+
+
+p_basecase_survival_means <- ggplot2::ggplot(survival_w_threats_comparison_long, ggplot2::aes(x = threats, y = survival_rate)) +
+  ggplot2::geom_bar(stat="identity") +
+  ggplot2::facet_wrap(~life_stage) +
+  ggplot2::labs(x = "Threats") +
+  ggplot2::labs(y = "Survival Rate") +
+  ggplot2::ggtitle("Base case (P50) mean survival rates with compounding threats") +
+  ggplot2::theme_bw() +
+  ggplot2::theme(
+    panel.grid.major = ggplot2::element_blank(),
+    panel.grid.minor = ggplot2::element_blank(),
+    strip.background = ggplot2::element_blank(),
+    panel.border = ggplot2::element_rect(colour = "black"),
+    text = ggplot2::element_text(size = 12),
+    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+    legend.position = "none"
+  )
+
+filename <- paste("ForReport/appendix_graph_survival_means_basecase", version,".tiff", sep="")
+tiff(filename, width=12, height=8, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600,
+     restoreConsole=TRUE)
+  p_basecase_survival_means
+dev.off()
+
+
+#---- Appendix: base case for Go Big or Go Home - example: individual runs. ----
+
+# Start by showing for each class and population; include eggs and tadpoles for illustrative purposes rather than the fall numbers used for the totals
+results_to_use <- results_basecase  # results_basecase_fall if want to get the total #
+# results_to_use <- results_basecase[1:100,]  # results_basecase_fall if want to get the total #
+
+library(reshape2)
+test2 <- reshape2::melt(results_to_use, id.vars=c("iteration", "run", "pop", "class", "sex"))
+colnames(test2)[which(colnames(test2) == "variable")]<- "year"
+colnames(test2)[which(colnames(test2) == "value")]<- "number_of_indiv"
+test2$year <- as.numeric(as.character(test2$year))
+
+p_basecase_runs_example <- ggplot2::ggplot(test2[which(test2$run <= 10),], ggplot2::aes(x = year, y = number_of_indiv, group = run, color = run)) +
+  ggplot2::geom_point() +
+  ggplot2::geom_line() + 
+  ggplot2::facet_grid(pop ~ class) + 
+  ggplot2::labs(x = "Year") +
+  ggplot2::labs(y = "Number of Individuals") +
+  ggplot2::ggtitle("Example of 10 runs for basecase parameters. \n Note: when pop totals are calculated, eggs and tadpoles not included because using fall census") +
+  ggplot2::theme_bw() +
+  ggplot2::theme(
+    panel.grid.major = ggplot2::element_blank(),
+    panel.grid.minor = ggplot2::element_blank(),
+    strip.background = ggplot2::element_blank(),
+    panel.border = ggplot2::element_rect(colour = "black"),
+    text = ggplot2::element_text(size = 12),
+    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+    legend.position = "none"
+  )
+
+filename <- paste("ForReport/appendix_graph_basecase_runs_example", version,".tiff", sep="")
+tiff(filename, width=12, height=8, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600,
+     restoreConsole=TRUE)
+p_basecase_runs_example
+dev.off()
+
+
+# TO show totals at fall census by run
+
+library(dplyr)
+# from code fin dapva::makeResultsSummaryOneIteration
+results_total_by_run <- results_basecase_fall %>%
+  dplyr::group_by(run) %>%
+  dplyr::summarise(dplyr::across(paste(initial_year:(initial_year + yrs - 1)), sum))
+results_total_by_run$metric <- "number_of_indiv"
+
+
+results_summary_for_this_iteration <- results_total_by_run[, c("run",  "metric", paste(initial_year:(initial_year + yrs - 1)))] # Reorganize the results for easier viewing
+
+library(reshape2)
+test <- melt(results_summary_for_this_iteration, id.vars=c("run", "metric"))
+colnames(test)[which(colnames(test) == "variable")]<- "year"
+colnames(test)[which(colnames(test) == "value")]<- "number_of_indiv"
+test$year <- as.numeric(as.character(test$year))
+# test$run <- as.factor(test$run)
+
+runs <- length(unique(test$run))
+test$facet <- rep(1:(runs/10), each = runs/10)
+
+ggplot2::ggplot(test[which(test$run <=10),], ggplot2::aes(x = year, y = number_of_indiv, group = run, color = run)) +
+  ggplot2::geom_point() +
+  ggplot2::geom_line() +
+  ggplot2::theme_bw() +
+  ggplot2::theme(
+    panel.grid.major = ggplot2::element_blank(),
+    panel.grid.minor = ggplot2::element_blank(),
+    strip.background = ggplot2::element_blank(),
+    panel.border = ggplot2::element_rect(colour = "black"),
+    text = ggplot2::element_text(size = 12),
+    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+    legend.position = "none"
+  )
+
+#---- Appendix: base case for Go Big or Go Home - example: one iteration ----
+# Might also be useful to make a function where you can plot the results of a few iterations
+
+# ALso to do: Make graphs of the survival rates with the different threats to show Lea and Rebecca 
+
+test4 <- dapva::makeResultsSummaryOneIteration(results_basecase_fall,
+                                               by_pop = 'yes',
+                                               initial_year = 1,
+                                               yrs = 50,
+                                               n_iter = 1,
+                                               n_runs_per_iter = length(unique(results_basecase_fall$run)),
+                                               alternative = paste0(alternative_details$alt_name_full),
+                                               iteration_number = 1,
+                                               prob_self_sustain = TRUE,
+                                               lambda_over_x_years = 10)
+
+
+results_summary_num_indiv <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations  = test4 ,
+                                                                  metric = "mean total number of individuals",
+                                                                  initial_year = 1, credible_interval = 0.95)
+
+results_summary_prob_persist <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations  = test4 ,
+                                                                     metric = "probability of persistence",
+                                                                     initial_year = 1, credible_interval = 0.95)
+
+results_summary_prob_selfsustaining <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations  = test4 ,
+                                                                            metric = "probability of self-sustaining population",
+                                                                            initial_year = 1, credible_interval = 0.95)
+
+
+(abundance_graph <- dapva::graphResultsSummary(results_summary_num_indiv))
+
+(persistence_graph <- dapva::graphResultsSummary(results_summary_prob_persist))
+(persistence_flyingBars <- dapva::graphFlyingBars(results_summary_all_iterations = test4,
+                                                  metric = "probability of persistence",
+                                                  year = 50,
+                                                  credible_interval = 0.95))
+
+(selfsustaining_graph <- dapva::graphResultsSummary(results_summary_prob_selfsustaining))
+(selfsustaining_flyingBars <- dapva::graphFlyingBars(results_summary_all_iterations = test4,
+                                                     metric = "probability of self-sustaining population",
+                                                     year = 50,
+                                                     credible_interval = 0.95))
+
+
+
+filename <- paste("ForReport/appendix_graph_basecase_iteration_example", version,".tiff", sep="")
+tiff(filename, width=12, height=8, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600,
+     restoreConsole=TRUE)
+grid.arrange(persistence_graph ,  selfsustaining_graph,
+             ncol = 2, nrow = 1)
+dev.off()
+
+#---- Appendix: relationship between persistence and self-sustaining. ----
+
+# Load in GoBig alternative with lots of iterations
+load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test12w2500it.RData")
+
+# Plot abundance vs persistence
+
+results_all_this_alt_yr50 <- as.data.frame(results_all_this_alt[,c( "iteration", "metric", "50")])
+colnames(results_all_this_alt_yr50) <- c( "iteration", "metric", "value")
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+results_all_this_alt_yr50_wide <- results_all_this_alt_yr50 %>% 
+  pivot_wider(names_from = metric, values_from = value)
+colnames(results_all_this_alt_yr50_wide) <- c("iteration", "mean_abundance", "prob_of_persis", "prob_of_selfsustain")
+
+ggplot2::ggplot(results_all_this_alt_yr50_wide, ggplot2::aes(x = mean_abundance, y = prob_of_persis)) +
+  ggplot2::geom_point()
+
+ggplot2::ggplot(results_all_this_alt_yr50_wide, ggplot2::aes(x = mean_abundance, y = prob_of_selfsustain)) +
+  ggplot2::geom_point()
+
+p_persis_vs_selfsustain <- ggplot2::ggplot(results_all_this_alt_yr50_wide, ggplot2::aes(x = prob_of_persis, y = prob_of_selfsustain)) +
+  ggplot2::geom_point() +
+  geom_abline(slope=1, intercept=0, lty= "dashed")  +
+  ggplot2::labs(x = "Probability of Persistence") +
+  ggplot2::labs(y = "Probability of a Self-Sustaining Population") +
+  ggplot2::ggtitle("Example from Go Big or Go Home Alternative Results") +
+  ggplot2::theme_bw() +
+  ggplot2::theme(
+    panel.grid.major = ggplot2::element_blank(),
+    panel.grid.minor = ggplot2::element_blank(),
+    strip.background = ggplot2::element_blank(),
+    panel.border = ggplot2::element_rect(colour = "black"),
+    text = ggplot2::element_text(size = 12),
+    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+    legend.position = "none"
+  )
+
+filename <- paste("ForReport/graph_persis_vs_selfsustain", version, "_iter_", n_iter, ".tiff", sep="")
+tiff(filename, width=12, height=6, units="in",pointsize=8, compression="lzw", bg="white", res=600)
+print(p_persis_vs_selfsustain)
+dev.off()
+
+
+#---- Extra: combining vs separating parametric uncertainty. ----
 
 ############## Show what results would have looked like if combined parametric and process uncertainty ######
 path_to_results_folder <- "C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results"# on my work PC
@@ -904,221 +1351,9 @@ dev.off()
 
 
 
-############## Load basecase results for one alternative to use in the examples in the appendices ######
-# Load the Rdata file
-
-files_basecase <-  list.files(path = ".","*basecase.RData", full.names="TRUE")
-i = 1  
-load(files_basecase[i])
-
-# Make the classes factors
-
-results_all_iterations$class <- factor(results_all_iterations$class, levels = c("eggs", "tadpoles", "yoy", "juv", "A2", "A3", "A4plus"))
-results_basecase <- results_all_iterations # initalize
-
-# Remove eggs and tadpoles as they are intermediate stages in the year and we just want the pop size at the fall census
-results_basecase_fall <- results_all_iterations # initalize
-
-for(j in 1:yrs){
-  nrow(results_basecase_fall)
-  results_basecase_fall[which(results_basecase_fall$class == "eggs"),paste(j)] <- 0
-  results_basecase_fall[which(results_basecase_fall$class == "tadpoles"),paste(j)] <- 0 
-}
-
-############## basecase - Graphs of individual runs to show the process ######
-
-# Start by showing for each class and population; include eggs and tadpoles for illustrative purposes rather than the fall numbers used for the totals
-results_to_use <- results_basecase  # results_basecase_fall if want to get the total #
-# results_to_use <- results_basecase[1:100,]  # results_basecase_fall if want to get the total #
-
-library(reshape2)
-test2 <- reshape2::melt(results_to_use, id.vars=c("iteration", "run", "pop", "class", "sex"))
-colnames(test2)[which(colnames(test2) == "variable")]<- "year"
-colnames(test2)[which(colnames(test2) == "value")]<- "number_of_indiv"
-test2$year <- as.numeric(as.character(test2$year))
-
-ggplot2::ggplot(test2[which(test2$run <= 10),], ggplot2::aes(x = year, y = number_of_indiv, group = run, color = run)) +
-  ggplot2::geom_point() +
-  ggplot2::geom_line() + 
-  ggplot2::facet_grid(pop ~ class) + 
-  ggplot2::labs(x = "Year") +
-  ggplot2::labs(y = "Number of Individuals") +
-  ggplot2::ggtitle("Example of 10 runs for basecase parameters. \n Note: when pop totals are calculated, eggs and tadpoles not included because using fall census") +
-  ggplot2::theme_bw() +
-  ggplot2::theme(
-    panel.grid.major = ggplot2::element_blank(),
-    panel.grid.minor = ggplot2::element_blank(),
-    strip.background = ggplot2::element_blank(),
-    panel.border = ggplot2::element_rect(colour = "black"),
-    text = ggplot2::element_text(size = 12),
-    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
-    legend.position = "none"
-  )
 
 
 
-
-# TO show totals at fall census by run
-
-# from code fin dapva::makeResultsSummaryOneIteration
-results_total_by_run <- results_basecase_fall %>%
-  dplyr::group_by(run) %>%
-  dplyr::summarise(dplyr::across(paste(initial_year:(initial_year + yrs - 1)), sum))
-results_total_by_run$metric <- "number_of_indiv"
-
-
-results_summary_for_this_iteration <- results_total_by_run[, c("run",  "metric", paste(initial_year:(initial_year + yrs - 1)))] # Reorganize the results for easier viewing
-
-library(reshape2)
-test <- melt(results_summary_for_this_iteration, id.vars=c("run", "metric"))
-colnames(test)[which(colnames(test) == "variable")]<- "year"
-colnames(test)[which(colnames(test) == "value")]<- "number_of_indiv"
-test$year <- as.numeric(as.character(test$year))
-# test$run <- as.factor(test$run)
-
-runs <- length(unique(test$run))
-test$facet <- rep(1:(runs/10), each = runs/10)
-
-ggplot2::ggplot(test[which(test$run <=10),], ggplot2::aes(x = year, y = number_of_indiv, group = run, color = run)) +
-  ggplot2::geom_point() +
-  ggplot2::geom_line() + 
-  ggplot2::theme_bw() +
-  ggplot2::theme(
-    panel.grid.major = ggplot2::element_blank(),
-    panel.grid.minor = ggplot2::element_blank(),
-    strip.background = ggplot2::element_blank(),
-    panel.border = ggplot2::element_rect(colour = "black"),
-    text = ggplot2::element_text(size = 12),
-    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
-    legend.position = "none"
-  )
-
-
-
-############## basecase - Graphs of the one iteration to show the process ######
-
-# Might also be useful to make a function where you can plot the results of a few iterations
-
-# ALso to do: Make graphs of the survival rates with the different threats to show Lea and Rebecca 
-
-
-
-test4 <- dapva::makeResultsSummaryOneIteration(results_basecase_fall,
-                                               by_pop = 'yes',
-                                               initial_year = 1,
-                                               yrs = 50,
-                                               n_iter = 1,
-                                               n_runs_per_iter = length(unique(results_basecase_fall$run)),
-                                               alternative = paste0(alternative_details$alt_name_full),
-                                               iteration_number = 1,
-                                               prob_self_sustain = TRUE,
-                                               lambda_over_x_years = 10)
-  
-  
-results_summary_num_indiv <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations  = test4 ,
-                                                                  metric = "mean total number of individuals",
-                                                                  initial_year = 1, credible_interval = 0.95)
-
-results_summary_prob_persist <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations  = test4 ,
-                                                                     metric = "probability of persistence",
-                                                                     initial_year = 1, credible_interval = 0.95)
-
-results_summary_prob_selfsustaining <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations  = test4 ,
-                                                                            metric = "probability of self-sustaining population",
-                                                                            initial_year = 1, credible_interval = 0.95)
-
-
-(abundance_graph <- dapva::graphResultsSummary(results_summary_num_indiv))
-
-(persistence_graph <- dapva::graphResultsSummary(results_summary_prob_persist))
-(persistence_flyingBars <- dapva::graphFlyingBars(results_summary_all_iterations = test4,
-                                                  metric = "probability of persistence",
-                                                  year = 50,
-                                                  credible_interval = 0.95))
-
-(selfsustaining_graph <- dapva::graphResultsSummary(results_summary_prob_selfsustaining))
-(selfsustaining_flyingBars <- dapva::graphFlyingBars(results_summary_all_iterations = test4,
-                                                     metric = "probability of self-sustaining population",
-                                                     year = 50,
-                                                     credible_interval = 0.95))
-
-############## Load one alternative to use in the examples for convergence testing ######
-# Load the Rdata file
-i = 1  
-load(files[i])
-
-# Remove eggs and tadpoles as they are intermediate stages in the year and we just want the pop size at the fall census
-results_all_iterations_fall <- results_all_iterations # initalize
-
-for(j in 1:yrs){
-  nrow(results_all_iterations_fall)
-  results_all_iterations_fall[which(results_all_iterations_fall$class == "eggs"),paste(j)] <- 0
-  results_all_iterations_fall[which(results_all_iterations_fall$class == "tadpoles"),paste(j)] <- 0 
-}
-
-############## Convergence testing - number of runs per iteration ######
-
-# Still do to - update code so can be more flexible on the # of runs
-# e.g. min always of 100, after that check after x incremets etc. rather than all the way to 1000
-
-# Intalize the a list to store results for a handful of itrations
-convergence_test_runs_per_iter <- list()
-
-for(i in 1:4){
-  convergence_test_runs_per_iter[[i]] <- dapva::convergenceTestRunsPerIteration(
-    results_all_for_this_iteration = results_all_iterations_fall[which(results_all_iterations_fall$iteration == i),],
-    test_interval = 10,
-    iteration_number = i,
-    initial_year = 1,
-    final_year = 50,
-    num_rand_pulls_per_subset_size = 100)
-}
-
-convergence_test_runs_multiple_iter <- do.call("rbind", convergence_test_runs_per_iter)
-
-
-graphs <- dapva::graphCongvTestRunsPerIter(convergence_test_runs_multiple_iter,
-                                           x_location_vertical_line = 1000,
-                                           title = " ")
-graphs[[1]]
-graphs[[2]]
-
-############## Convergence testing - number of iterations ######
-
-
-# NEed to use a dataset with more iterations than needed so can show convergence
-# For example, if using 500 iterations need to use a dataset with e.g. 2000 iterations here
-
-# Resample to visually inspect convergence
-convergence_test <- dapva::convergenceTestIterations(results_all_this_alt = results_summary_all_iterations_overall,
-                                                     test_interval = 100,
-                                                     num_rand_pulls_per_subset_size = 100,
-                                                     initial_year = 1,
-                                                     final_year = 50)
-
-
-# Make graphs for visual inspection
-graphs <- dapva::graphCongvTestIter(convergence_test, x_location_vertical_line = 500,
-                                    title = " ")
-
-(p_prob_persist_conv_iter_mean <- graphs[[2]])
-(p_prob_persist_conv_iter_median <- graphs[[4]])
-
-(p_abundance_conv_iter_mean <- graphs[[1]])
-(p_abundance_conv_iter_median <- graphs[[3]])
-
-
-
-
-# Export the graphss
-# Do later
-
-
-# Extract the range of prob of persistence from 500 iterations
-int <- convergence_test$prob_persist_mean[which(convergence_test$subset_size == 500)]
-min(int) 
-max(int) 
-max(int) - min(int)
 
 
 ############## Explore what the results would have looked like if we combined parametric and process uncertainty to one prob value ######
@@ -1158,166 +1393,15 @@ results_summary_prob_persist <- dapva::makeResultsSummaryMultipleAlt(results_sum
 
 
 
-############## Plot the survival distributions for multiple threats to illustrate for Lea and Rebecca. #####################
-
-# Update - perhaps for this best to just show means; need to explore the SD issue more separately
-
-# BASE CASE
-inputs_all <- dapva4nlf::getNLFIdahoFeasinputs()
-inputs <- inputs_all[[1]]
-parameterByIterTracking_baseCase <- selectNLFIdahoParameterByIterTracking(inputs, base_case = TRUE)
-parameterByIterTracking <- parameterByIterTracking_baseCase
-
-# BASE CASE - eggs, no threats
-s_eggs_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_eggs_no_threats")])
-s_eggs_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_eggs_no_threats")])
-
-
-# BASE CASE - eggs with threats
-s_pct_reduced_eggs_bullfrogs <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_eggs_bullfrogs")])
-s_pct_reduced_eggs_chytrid <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_eggs_chytrid")])
-s_pct_reduced_eggs_roads <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_eggs_roads")])
-
-
-# BASE CASE - tadpoles, no threats
-s_tadpoles_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_tadpoles_no_threats")])
-s_tadpoles_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_tadpoles_no_threats")])
-s_tadpoles_no_threats_dist <- dapva::estBetaParams(mean = s_tadpoles_mean, sd = s_tadpoles_sd)
-
-
-# BASE CASE - tadpoles with threats
-s_pct_reduced_tadpoles_bullfrogs <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_tadpoles_bullfrogs")])
-s_pct_reduced_tadpoles_chytrid <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_tadpoles_chytrid")])
-s_pct_reduced_tadpoles_roads <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_tadpoles_roads")])
-
-# BASE CASE - yoy, no threats
-s_yoy_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_yoy_no_threats")])
-s_yoy_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_yoy_no_threats")])
-s_yoy_no_threats_dist <- dapva::estBetaParams(mean = s_yoy_mean, sd = s_yoy_sd)
-
-# BASE CASE - yoy with threats
-s_pct_reduced_yoy_bullfrogs <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_yoy_bullfrogs")])
-s_pct_reduced_yoy_chytrid <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_yoy_chytrid")])
-s_pct_reduced_yoy_roads <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_yoy_roads")])
-
-
-
-# BASE CASE - juv, no threats
-s_juv_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_juv_no_threats")])
-s_juv_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_juv_no_threats")])
-
-
-# BASE CASE - juv with threats
-s_pct_reduced_juv_bullfrogs <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_juvenile_bullfrogs")])
-s_pct_reduced_juv_chytrid <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_juvenile_chytrid")])
-s_pct_reduced_juv_roads <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_juvenile_roads")])
-
-
-# BASE CASE - adult, no threats
-s_adult_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_adult_no_threats")])
-s_adult_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_adult_no_threats")])
-s_adult_no_threats_dist <- dapva::estBetaParams(mean = s_adult_mean, sd = s_adult_sd)
-
-
-# BASE CASE - adult with threats
-s_pct_reduced_adult_bullfrogs <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_adult_bullfrogs")])
-s_pct_reduced_adult_chytrid <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_adult_chytrid")])
-s_pct_reduced_adult_roads <- as.numeric(parameterByIterTracking[i, paste0("s_pct_reduced_adult_roads")])
 
 
 
 
-survival_w_threats_comparison <- as.data.frame(matrix(nrow = 5, ncol = 7))
-colnames(survival_w_threats_comparison) <- c("life_stage", "no_threat", "chytrid", "roads", "bullfrogs", "chytrid_and_roads",  "all_three")
-
-survival_w_threats_comparison$life_stage[1] <- "eggs to tadpoles"
-survival_w_threats_comparison$no_threat[1] <- s_eggs_mean
-survival_w_threats_comparison$chytrid[1] <- (1-s_pct_reduced_eggs_chytrid/100)*s_eggs_mean 
-survival_w_threats_comparison$roads[1] <- (1-s_pct_reduced_eggs_roads/100)*s_eggs_mean 
-survival_w_threats_comparison$chytrid_and_roads[1] <- (1-s_pct_reduced_eggs_chytrid/100)*
-  (1-s_pct_reduced_eggs_roads/100)*s_eggs_mean 
-survival_w_threats_comparison$bullfrogs[1] <- (1-s_pct_reduced_eggs_bullfrogs/100)*s_eggs_mean 
-survival_w_threats_comparison$all_three[1] <- (1-s_pct_reduced_eggs_chytrid/100)*
-  (1-s_pct_reduced_eggs_roads/100)*
-  (1-s_pct_reduced_eggs_bullfrogs/100)*s_eggs_mean 
-
-survival_w_threats_comparison$life_stage[2] <- "tadpoles to yoy"
-survival_w_threats_comparison$no_threat[2] <- s_tadpoles_mean
-survival_w_threats_comparison$chytrid[2] <- (1-s_pct_reduced_tadpoles_chytrid/100)*s_tadpoles_mean 
-survival_w_threats_comparison$roads[2] <- (1-s_pct_reduced_tadpoles_roads/100)*s_tadpoles_mean 
-survival_w_threats_comparison$chytrid_and_roads[2] <- (1-s_pct_reduced_tadpoles_chytrid/100)*
-  (1-s_pct_reduced_tadpoles_roads/100)*s_tadpoles_mean 
-survival_w_threats_comparison$bullfrogs[2] <- (1-s_pct_reduced_tadpoles_bullfrogs/100)*s_tadpoles_mean 
-survival_w_threats_comparison$all_three[2] <- (1-s_pct_reduced_tadpoles_chytrid/100)*
-  (1-s_pct_reduced_tadpoles_roads/100)*
-  (1-s_pct_reduced_tadpoles_bullfrogs/100)*s_tadpoles_mean 
 
 
-survival_w_threats_comparison$life_stage[3] <- "yoy to juv"
-survival_w_threats_comparison$no_threat[3] <- s_yoy_mean
-survival_w_threats_comparison$chytrid[3] <- (1-s_pct_reduced_yoy_chytrid/100)*s_yoy_mean 
-survival_w_threats_comparison$roads[3] <- (1-s_pct_reduced_yoy_roads/100)*s_yoy_mean 
-survival_w_threats_comparison$chytrid_and_roads[3] <- (1-s_pct_reduced_yoy_chytrid/100)*
-  (1-s_pct_reduced_yoy_roads/100)*s_yoy_mean 
-survival_w_threats_comparison$bullfrogs[3] <- (1-s_pct_reduced_yoy_bullfrogs/100)*s_yoy_mean 
-survival_w_threats_comparison$all_three[3] <- (1-s_pct_reduced_yoy_chytrid/100)*
-  (1-s_pct_reduced_yoy_roads/100)*
-  (1-s_pct_reduced_yoy_bullfrogs/100)*s_yoy_mean 
 
-
-survival_w_threats_comparison$life_stage[4] <- "juv to adult"
-survival_w_threats_comparison$no_threat[4] <- s_juv_mean
-survival_w_threats_comparison$chytrid[4] <- (1-s_pct_reduced_juv_chytrid/100)*s_juv_mean 
-survival_w_threats_comparison$roads[4] <- (1-s_pct_reduced_juv_roads/100)*s_juv_mean 
-survival_w_threats_comparison$chytrid_and_roads[4] <- (1-s_pct_reduced_juv_chytrid/100)*
-  (1-s_pct_reduced_juv_roads/100)*s_juv_mean 
-survival_w_threats_comparison$bullfrogs[4] <- (1-s_pct_reduced_juv_bullfrogs/100)*s_juv_mean 
-survival_w_threats_comparison$all_three[4] <- (1-s_pct_reduced_juv_chytrid/100)*
-  (1-s_pct_reduced_juv_roads/100)*
-  (1-s_pct_reduced_juv_bullfrogs/100)*s_juv_mean 
-
-survival_w_threats_comparison$life_stage[5] <- "adult to adult"
-survival_w_threats_comparison$no_threat[5] <- s_adult_mean
-survival_w_threats_comparison$chytrid[5] <- (1-s_pct_reduced_adult_chytrid/100)*s_adult_mean 
-survival_w_threats_comparison$roads[5] <- (1-s_pct_reduced_adult_roads/100)*s_adult_mean 
-survival_w_threats_comparison$chytrid_and_roads[5] <- (1-s_pct_reduced_adult_chytrid/100)*
-  (1-s_pct_reduced_adult_roads/100)*s_adult_mean 
-survival_w_threats_comparison$bullfrogs[5] <- (1-s_pct_reduced_adult_bullfrogs/100)*s_adult_mean 
-survival_w_threats_comparison$all_three[5] <- (1-s_pct_reduced_adult_chytrid/100)*
-  (1-s_pct_reduced_adult_roads/100)*
-  (1-s_pct_reduced_adult_bullfrogs/100)*s_adult_mean 
-
-
-survival_w_threats_comparison$life_stage <- factor(survival_w_threats_comparison$life_stage, 
-                                                   levels = c("eggs to tadpoles",
-                                                              "tadpoles to yoy", 
-                                                              "yoy to juv", 
-                                                              "juv to adult", "adult to adult"))
-
-
-survival_w_threats_comparison_long <- reshape2::melt(survival_w_threats_comparison,  id.vars=c("life_stage"))
-colnames(survival_w_threats_comparison_long) <- c("life_stage", "threats" , "survival_rate" )
-
-
-ggplot2::ggplot(survival_w_threats_comparison_long, ggplot2::aes(x = threats, y = survival_rate)) +
-  ggplot2::geom_bar(stat="identity") +
-  ggplot2::facet_wrap(~life_stage) +
-  ggplot2::labs(x = "Threats") +
-  ggplot2::labs(y = "Survival Rate") +
-  ggplot2::ggtitle("Base case (P50) mean survival rates with compounding threats") +
-  ggplot2::theme_bw() +
-  ggplot2::theme(
-    panel.grid.major = ggplot2::element_blank(),
-    panel.grid.minor = ggplot2::element_blank(),
-    strip.background = ggplot2::element_blank(),
-    panel.border = ggplot2::element_rect(colour = "black"),
-    text = ggplot2::element_text(size = 12),
-    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
-    legend.position = "none"
-  )
-
-
-############## Explore the problem with the beta distribution and too big SDs... #####################
+#---- OLD - exploring beta distributions  ----
+#### Explore the problem with the beta distribution and too big SDs... 
 
 # Visualization code from ?dbeta help file
 # dbeta is the density function where the x axis is the survival rate
@@ -1538,8 +1622,8 @@ stats::qbeta(0.99, dist$alpha, dist$beta)
 stats::qbeta(0.01, dist$alpha, dist$beta)
 
 
+#---- OLD - Investigating why some perist and others don't   ----
 
-############## Investigating why some perist and others don't #####################
 # Ran one iteration  - aftert 100 runs, this parameter draw has a prob of persis of 26% or something like that
 
 path_to_results_folder <- "C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/Investigating"# on my work PC
@@ -1644,86 +1728,10 @@ results_all_for_this_iteration_fall[which(results_all_for_this_iteration_fall$cl
 
   
   # The key seems to be having at least one? good year for yoy survival, this sets the age structure up for success
+  # Actually, really depends on the overall parameters. I don't think there is one rule of thumb like this necesarily
+  # Maybe could look at it as if the parameters for frogs are good overall, what is the age structure?
+  
+  
+  
 
   
-  
-  
-  ############# Load in run with existing pop, look at age structure for those that do persist. #######
-  
-  results_all_iterations$iterRun <- paste(results_all_iterations$iteration, results_all_iterations$run)
-  
-  int <- unique(results_all_iterations$iterRun[which(results_all_iterations[,"50"] >0)[1:10000]])
-  int
-  
-  test <- results_all_iterations[which(results_all_iterations$iterRun == "9 28"),c(1:10,50:56 )]
-  
-  (test_yoy_n_yr50 <- sum(test[which(test$class == "yoy"), "50"]))
-  (test_juv_n_yr50 <- sum(test[which(test$class == "juv"), "50"]))
-  (test_A2_n_yr50 <- sum(test[which(test$class == "A2"), "50"]))
-  (test_A3_n_yr50 <- sum(test[which(test$class == "A3"), "50"]))
-  (test_A4plus_n_yr50 <- sum(test[which(test$class == "A4plus"), "50"]))
-  
-  test_yoy_n_yr50/(test_yoy_n_yr50 + test_juv_n_yr50 + test_A2_n_yr50 + test_A3_n_yr50  + test_A4plus_n_yr50) # prop yoy
-  
-  
-  # Pretty variable, the numbers are generally much higher than in Tischindorf - do we need to revisit our K? Discuss
-  
-  
-  ############## Investing relationshop between abundance and prob metric #####################
-  
-  # Load in GoBig alternative with lots of iterations
-  load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test12w2500it.RData")
-  
-  # Plot abundance vs persistence
-  
-  results_all_this_alt_yr50 <- as.data.frame(results_all_this_alt[,c( "iteration", "metric", "50")])
-  colnames(results_all_this_alt_yr50) <- c( "iteration", "metric", "value")
-  
-  
-  
-  library(ggplot2)
-  library(dplyr)
-  library(tidyr)
-  results_all_this_alt_yr50_wide <- results_all_this_alt_yr50 %>% 
-    pivot_wider(names_from = metric, values_from = value)
-  colnames(results_all_this_alt_yr50_wide) <- c("iteration", "mean_abundance", "prob_of_persis", "prob_of_selfsustain")
-  
-  ggplot2::ggplot(results_all_this_alt_yr50_wide, ggplot2::aes(x = mean_abundance, y = prob_of_persis)) +
-    ggplot2::geom_point()
-  
-  ggplot2::ggplot(results_all_this_alt_yr50_wide, ggplot2::aes(x = mean_abundance, y = prob_of_selfsustain)) +
-    ggplot2::geom_point()
-  
-  p_persis_vs_selfsustain <- ggplot2::ggplot(results_all_this_alt_yr50_wide, ggplot2::aes(x = prob_of_persis, y = prob_of_selfsustain)) +
-    ggplot2::geom_point() +
-    geom_abline(slope=1, intercept=0, lty= "dashed")  +
-    ggplot2::labs(x = "Probability of Persistence") +
-    ggplot2::labs(y = "Probability of a Self-Sustaining Population") +
-    ggplot2::ggtitle("Example from Go Big or Go Home Alternative Results") +
-    ggplot2::theme_bw() +
-    ggplot2::theme(
-      panel.grid.major = ggplot2::element_blank(),
-      panel.grid.minor = ggplot2::element_blank(),
-      strip.background = ggplot2::element_blank(),
-      panel.border = ggplot2::element_rect(colour = "black"),
-      text = ggplot2::element_text(size = 12),
-      axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
-      legend.position = "none"
-    )
-  
-  filename <- paste("ForReport/graph_persis_vs_selfsustain", version, "_iter_", n_iter, ".tiff", sep="")
-  tiff(filename, width=12, height=6, units="in",pointsize=8, compression="lzw", bg="white", res=600)
-  print(p_persis_vs_selfsustain)
-  dev.off()
-  
-  
-# On average, mean abundance of 1000 gives over 50% chance of self sustain
-  min(results_all_this_alt_yr50_wide$mean_abundance[which(results_all_this_alt_yr50_wide$prob_of_selfsustain > 0.5)]) #9414.26
-  
-  min(results_all_this_alt_yr50_wide$prob_of_selfsustain[which(results_all_this_alt_yr50_wide$mean_abundance > 10000)]) #9414.26
-  
-  
-  # Are there any iterations where the prob of persistence for the ephemeral wetlands was higher than the other wetlands
-  # Might have to look more closely at within one run to really get at this
-  
-  # Try running for base case with the freq of dry set to really low vs really high

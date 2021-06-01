@@ -40,14 +40,16 @@ alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are p
 
 #rows_to_run <- c(10) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
 # rows_to_run <- c(2:9) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
-rows_to_run <- c(6, 10, 11, 12) # run No bullfrog plus the three hypothetical scenarios
-
+# rows_to_run <- c(6, 10, 11, 12) # run No bullfrog plus the three hypothetical scenarios
+rows_to_run <- c(2)
 #---- Specify number of iterations and number of runs per iterations.  -------------
 n_iter  <- 2000# 500
 flexible_convergence_iteration_on <- "yes" # 'yes' or 'no', generally choose yes unless you are running a tornado and want to specify a # of iter
 max_n_runs_per_iter <- 1000 # flexible convergence is always on at the run level
 
 baseCase <- "no" # 'yes' or 'no'
+
+doingRunConvTest <- "yes"  # 'yes' or 'no'
 
 if(baseCase == 'yes'){
   print(paste("Using one iteration of basecase parameters"))
@@ -82,6 +84,13 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
     # Then just use the base case values
     parameterByIterTracking_baseCase <- dapva4nlf::selectNLFIdahoParameterByIterTracking(inputs, base_case = TRUE)
     parameterByIterTracking <-  parameterByIterTracking_baseCase
+  }
+  if(doingRunConvTest == 'yes'){
+    load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test12w2500it_parameterByIterTracking_forRunConvTest.RData")
+    flexible_convergence_run_on <- "no" 
+    parameterByIterTracking <-  parameterByIterTracking_forRunConvTest
+    n_iter  <- nrow(parameterByIterTracking_forRunConvTest)
+    flexible_convergence_iteration_on <- "no"
   }
   
   # Trying to better understand wetland correlations
@@ -321,7 +330,11 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                               converged_for_selfsustain == "yes") {
                                                                              finish <- TRUE
                                                                            }      
-                                                                         }
+                                                                       }
+                                                                       
+                                                                       if(flexible_convergence_run_on =="no"){ # Then don't allow it to stop
+                                                                         finish <- FALSE
+                                                                       }
                                                                   
                                                                         if(finish == TRUE){
                                                                           print(paste('Iteration', i, "stopped at", q, "runs"))
