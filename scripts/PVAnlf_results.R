@@ -664,7 +664,6 @@ dev.off()
 
 #---- Load one alternative to use for convergence testing. ----
 
-# TO DO: UPDATE CODE SO THAT CAN TURN FLEXIBLE CONVERGENCE AT THE RUN LEVEL OFF SO CAN SHOW THIS
 # Load the Rdata file
 files <-  list.files(path = ".","*.RData", full.names="TRUE")
 i <- 2  
@@ -681,9 +680,6 @@ for(j in 1:yrs){
 
 #---- Appendix: convergence plots - number of runs per iteration. ----
 
-# Intalize the a list to store results for a handful of itrations
-convergence_test_runs_per_iter <- list()
-
 # Pick some iterations that will show a range of outcomes
 # 1570 has prob of persistence 1
 # 1131 has prob of persistence of approx 0.97
@@ -694,11 +690,29 @@ convergence_test_runs_per_iter <- list()
 # parameterByIterTracking_forRunConvTest <- parameterByIterTracking[c(1570, 1131, 495, 2056, 2323),]
 # Saved the workspace now and will use this on my mac to run
 
-for(i in c(1570, 1131, 495, 2056, 2323)){
-# for(i in 1:4){
+# Once run, load it back in and use going forward
+# memory.limit() # check current memory limit
+# memory.limit(24000) # increase memory limit if need be to load the file
+load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test12_runConvTestResult.RData")
+
+# Remove eggs and tadpoles as they are intermediate stages in the year and we just want the pop size at the fall census
+results_all_iterations_fall <- results_all_iterations # initalize
+
+for(j in 1:yrs){
+  nrow(results_all_iterations_fall)
+  results_all_iterations_fall[which(results_all_iterations_fall$class == "eggs"),paste(j)] <- 0
+  results_all_iterations_fall[which(results_all_iterations_fall$class == "tadpoles"),paste(j)] <- 0 
+}
+
+
+# Intalize the a list to store results for a handful of iterations
+convergence_test_runs_per_iter <- list()
+
+# Now run the convergence test code, takes approx 30 min to run on my work laptop
+for(i in 1:5){
   convergence_test_runs_per_iter[[i]] <- dapva::convergenceTestRunsPerIteration(
     results_all_for_this_iteration = results_all_iterations_fall[which(results_all_iterations_fall$iteration == i),],
-    test_interval = 10,
+    test_interval = 50,
     iteration_number = i,
     initial_year = 1,
     final_year = 50,
@@ -707,18 +721,33 @@ for(i in c(1570, 1131, 495, 2056, 2323)){
 
 convergence_test_runs_multiple_iter <- do.call("rbind", convergence_test_runs_per_iter)
 
+rows <- which(convergence_test_runs_multiple_iter$iteration_num != 1) # take out iteration 1 because it looks similar to 2
+convergence_test_runs_multiple_iter <- convergence_test_runs_multiple_iter[rows,]
+# Rename iteration numbers so shows 1-4 in the graph
+convergence_test_runs_multiple_iter$iteration_num <- convergence_test_runs_multiple_iter$iteration_num  -1
 
 graphs <- dapva::graphCongvTestRunsPerIter(convergence_test_runs_multiple_iter,
-                                           x_location_vertical_line = 1000,
+                                           x_location_vertical_line = 300,
                                            title = " ")
+
+
 # graphs[[1]]
 graphs[[2]]
 
+# Export graph for appendix
+filename <- paste("ForReport/appendix_graph_convergence_runs", version,".tiff", sep="")
+tiff(filename, width=12, height= 8, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600,
+     restoreConsole=TRUE)
+graphs[[2]]
+dev.off()
+
 #---- Appendix: convergence plots - number of iterations. ----
 
-
-# NEed to use a dataset with more iterations than needed so can show convergence
-# For example, if using 500 iterations need to use a dataset with e.g. 2000 iterations here
+# Need to use a data set with more iterations than needed so can show convergence
+# For example, if using 500 iterations need to use a data set with e.g. 2500 iterations here
+# This one didn't have the min 300 runs per iteration so will need to be redone once rerun with that update
+load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test12w2500it.RData")
 
 # Resample to visually inspect convergence
 convergence_test <- dapva::convergenceTestIterations(results_all_this_alt = results_summary_all_iterations_overall,
@@ -729,7 +758,7 @@ convergence_test <- dapva::convergenceTestIterations(results_all_this_alt = resu
 
 
 # Make graphs for visual inspection
-graphs <- dapva::graphCongvTestIter(convergence_test, x_location_vertical_line = 500,
+graphs <- dapva::graphCongvTestIter(convergence_test, x_location_vertical_line = 200,
                                     title = " ")
 
 (p_prob_persist_conv_iter_mean <- graphs[[2]])
@@ -738,15 +767,16 @@ graphs <- dapva::graphCongvTestIter(convergence_test, x_location_vertical_line =
 (p_abundance_conv_iter_mean <- graphs[[1]])
 (p_abundance_conv_iter_median <- graphs[[3]])
 
-
-
-
-# Export the graphss
-# Do later
-
+# Export graph for appendix
+filename <- paste("ForReport/appendix_graph_convergence_iterations", version,".tiff", sep="")
+tiff(filename, width=12, height= 8, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600,
+     restoreConsole=TRUE)
+p_prob_persist_conv_iter_mean 
+dev.off()
 
 # Extract the range of prob of persistence from 500 iterations
-int <- convergence_test$prob_persist_mean[which(convergence_test$subset_size == 500)]
+int <- convergence_test$prob_persist_mean[which(convergence_test$subset_size == 200)]
 min(int) 
 max(int) 
 max(int) - min(int)
@@ -1100,9 +1130,163 @@ print(p_persis_vs_selfsustain)
 dev.off()
 
 
-#---- Extra: combining vs separating parametric uncertainty. ----
+#---- Extra: combining vs separating parametric uncertainty - base case. ----
 
-############## Show what results would have looked like if combined parametric and process uncertainty ######
+# Let's start with the base case parameter draw
+load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test12_basecase.RData")
+yrs <- 50
+# Make the classes factors
+
+results_all_iterations$class <- factor(results_all_iterations$class, levels = c("eggs", "tadpoles", "yoy", "juv", "A2", "A3", "A4plus"))
+results_basecase <- results_all_iterations # initalize
+
+# Remove eggs and tadpoles as they are intermediate stages in the year and we just want the pop size at the fall census
+results_basecase_fall <- results_all_iterations # initalize
+
+for(j in 1:yrs){
+  nrow(results_basecase_fall)
+  results_basecase_fall[which(results_basecase_fall$class == "eggs"),paste(j)] <- 0
+  results_basecase_fall[which(results_basecase_fall$class == "tadpoles"),paste(j)] <- 0 
+}
+
+
+results_summary_basecase <- dapva::makeResultsSummaryOneIteration(results_basecase_fall,
+                                                                  by_pop = 'no',
+                                                                  initial_year = 1,
+                                                                  yrs = 50,
+                                                                  n_iter = 1,
+                                                                  n_runs_per_iter = length(unique(results_basecase_fall$run)),
+                                                                  alternative = paste0(alternative_details$alt_name_full),
+                                                                  iteration_number = 1,
+                                                                  prob_self_sustain = TRUE,
+                                                                  lambda_over_x_years = 10)
+#Write out the results so can load them all in later
+write.csv(results_summary_basecase, file = paste0("results_summary_basecase_", name, version,".csv"), row.names = FALSE)
+
+# Graph the results
+results_summary_prob_persist_basecase <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations  = results_summary_basecase,
+                                                                     metric = "probability of persistence",
+                                                                     initial_year = 1, credible_interval = 0.95)
+
+(persistence_graph_basecase <- dapva::graphResultsSummary(results_summary_prob_persist_basecase))
+
+
+
+#---- Extra: combining vs separating parametric uncertainty - parametric and process combined. ----
+
+# Now pretend parametric and process uncertainty together
+# Using the 'Go Big or Go Home' alternative
+load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test12w2500it.RData")
+
+# Remove eggs and tadpoles as they are intermediate stages in the year and we just want the pop size at the fall census
+results_all_iterations_fall <- results_all_iterations # initalize
+
+for(j in 1:yrs){
+  nrow(results_all_iterations_fall)
+  results_all_iterations_fall[which(results_all_iterations_fall$class == "eggs"),paste(j)] <- 0
+  results_all_iterations_fall[which(results_all_iterations_fall$class == "tadpoles"),paste(j)] <- 0 
+} # Takes a min or two
+
+# Rename the runs so that they have unique IDs with iteration and run since 
+# here pretending like they are all independent runs that we want one set of results for
+results_all_iterations_fall$run <- paste(results_all_iterations_fall$iteration, results_all_iterations_fall$run)
+
+# Run the prob of persistence function on the whole thing to show what it would look like if process and parametric were together
+n_iter_runcombos <- length(unique(paste(results_all_iterations_fall$iteration, results_all_iterations_fall$run)))
+results_summary_for_all_iter_and_runs_unct_comb <- dapva::makeResultsSummaryOneIteration(results_all_iterations_fall,
+                                                                               by_pop = 'no',
+                                                                               initial_year = 1,
+                                                                               yrs = 50,
+                                                                               n_iter = 1,
+                                                                               n_runs_per_iter = n_iter_runcombos,
+                                                                               alternative = paste0(alternative_details$alt_name_full),
+                                                                               iteration_number = 1,
+                                                                               prob_self_sustain = FALSE, # much faster without this, not needed here
+                                                                               lambda_over_x_years = 10)
+
+#Write out the results so can load them all in later
+write.csv(results_summary_for_all_iter_and_runs_unct_comb, file = paste0("results_summary_for_all_iter_and_runs_unct_comb", name, version,".csv"), row.names = FALSE)
+
+# Graph the results
+# Point here is that if we combine parametric and process uncertainty then:
+# Results seem more optimistic (in this case); point is that it is different
+# Don't get any insights into where we should put more effort to learn more to make a more informed decision
+
+results_summary_prob_persist_unct_comb <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations  = results_summary_for_all_iter_and_runs_unct_comb,
+                                                                     metric = "probability of persistence",
+                                                                     initial_year = 1, credible_interval = 0.95)
+
+
+(persistence_graph_unct_comb <- dapva::graphResultsSummary(results_summary_prob_persist_unct_comb))
+
+#---- Extra: combining vs separating parametric uncertainty - parametric and process seperated. ----
+# Using the 'Go Big or Go Home' alternative
+# memory.limit() # check current memory limit
+# memory.limit(24000) # increase memory limit if need be to load the file
+load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test12w2500it.RData")
+
+# Summarize the 'by population' results into 'overall' results and export that
+write.csv(results_summary_all_iterations_overall, file = paste0("results_overall_", name, version,".csv"), row.names = FALSE)
+
+#---- Extra: combining vs separating parametric uncertainty - combine the graphs. ----
+
+# Load each of the results csvs in
+
+results_summary_basecase <- read.csv("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/results_summary_basecase_goBig_v1test12_basecase.csv")
+results_summary_for_all_iter_and_runs_unct_comb <- read.csv("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/results_summary_for_all_iter_and_runs_unct_combgoBig_v1test12w2500it.csv")
+results_summary_for_all_iter_and_runs_unct_tgth <- read.csv("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/results_overall_goBig_v1test12w2500it.csv")
+
+colnames(results_summary_basecase)[7:56] <- 1:50
+colnames(results_summary_for_all_iter_and_runs_unct_comb)[7:56] <- 1:50
+colnames(results_summary_for_all_iter_and_runs_unct_tgth)[7:56] <- 1:50
+
+# Tweak them to make this graph look like how I want for now without having to change the dapva code
+results_summary_basecase$pop <- "Base Case"
+results_summary_basecase$alternative <- "A)"
+
+results_summary_for_all_iter_and_runs_unct_comb$pop <- "Parametric and Process Uncertainty Combined"
+results_summary_for_all_iter_and_runs_unct_comb$alternative <- "B)"
+
+results_summary_for_all_iter_and_runs_unct_tgth$pop <- "Parametric and Process Uncertainty Seperated"
+results_summary_for_all_iter_and_runs_unct_tgth$alternative <- "C)"
+
+
+# Use them to make graphs
+# Base case
+results_summary_prob_persist_basecase <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations  = results_summary_basecase,
+                                                                              metric = "probability of persistence",
+                                                                              initial_year = 1, credible_interval = 0.95)
+
+(persistence_graph_basecase <- dapva::graphResultsSummary(results_summary_prob_persist_basecase, y_lim = c(0,1)))
+
+# Parametric and process uncertainty combined
+results_summary_prob_persist_unct_comb <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations  = results_summary_for_all_iter_and_runs_unct_comb,
+                                                                               metric = "probability of persistence",
+                                                                               initial_year = 1, credible_interval = 0.95)
+
+
+(persistence_graph_unct_comb <- dapva::graphResultsSummary(results_summary_prob_persist_unct_comb, y_lim = c(0,1)))
+
+# Parametric and process uncertainty seperated
+results_summary_prob_persist_unct_tgth <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations  = results_summary_for_all_iter_and_runs_unct_tgth,
+                                                                               metric = "probability of persistence",
+                                                                               initial_year = 1, credible_interval = 0.95)
+
+
+(persistence_graph_unct_tgth <- dapva::graphResultsSummary(results_summary_prob_persist_unct_tgth, y_lim = c(0,1)))
+
+# Export the graphs using grid.arrange
+filename <- paste("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/ForReport/compare_persist_combineUnct", version,".tiff", sep="")
+tiff(filename, width=12, height=4, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600,
+     restoreConsole=TRUE)
+gridExtra:: grid.arrange(persistence_graph_basecase,  
+                         persistence_graph_unct_comb,
+                         persistence_graph_unct_tgth,
+                         ncol = 3, nrow = 1)
+dev.off()
+
+#---- OLD -  Show what results would have looked like if combined parametric and process uncertainty ######
 path_to_results_folder <- "C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results"# on my work PC
 #path_to_results_folder <- "/Users/laurakeating/Documents/R/R_scripts/BTPD_PVA/Results/BTPD_baseline_results_march17"# on my mac
 setwd(path_to_results_folder) # on my mac
@@ -1219,7 +1403,7 @@ gridExtra:: grid.arrange(persist_effort_graph1,
 dev.off()
 
 
-############## Try the same graph as above but with just base case parameter draw ######
+#---- OLD - Try the same graph as above but with just base case parameter draw ######
 path_to_results_folder <- "C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/basecase"# on my work PC
 #path_to_results_folder <- "/Users/laurakeating/Documents/R/R_scripts/BTPD_PVA/Results/BTPD_baseline_results_march17"# on my mac
 setwd(path_to_results_folder) # on my mac
@@ -1356,7 +1540,7 @@ dev.off()
 
 
 
-############## Explore what the results would have looked like if we combined parametric and process uncertainty to one prob value ######
+#---- OLD -  Explore what the results would have looked like if we combined parametric and process uncertainty to one prob value ######
 
 
 # Rename the runs so that they have unique IDs with iteration and run since 

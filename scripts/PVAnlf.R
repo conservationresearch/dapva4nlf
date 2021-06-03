@@ -15,7 +15,7 @@ system.time({ # turn on the timer
 
 #---- Clear the workspace. ----
 rm(list = ls())
-version <- "_v1test12" # insert short description to append to results to help identify
+version <- "_v1test13" # insert short description to append to results to help identify
 
 #---- Load libraries, and set the random seed.  -------------
 ## Import libraries
@@ -43,13 +43,13 @@ alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are p
 # rows_to_run <- c(6, 10, 11, 12) # run No bullfrog plus the three hypothetical scenarios
 rows_to_run <- c(2)
 #---- Specify number of iterations and number of runs per iterations.  -------------
-n_iter  <- 2000# 500
-flexible_convergence_iteration_on <- "yes" # 'yes' or 'no', generally choose yes unless you are running a tornado and want to specify a # of iter
+n_iter  <- 2500# 500
+flexible_convergence_iteration_on <- "no" # 'yes' or 'no', generally choose yes unless you are running a tornado and want to specify a # of iter
 max_n_runs_per_iter <- 1000 # flexible convergence is always on at the run level
 
 baseCase <- "no" # 'yes' or 'no'
 
-doingRunConvTest <- "yes"  # 'yes' or 'no'
+doingRunConvTest <- "no"  # 'yes' or 'no'
 
 if(baseCase == 'yes'){
   print(paste("Using one iteration of basecase parameters"))
@@ -194,8 +194,8 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                      
                                                                      # Inputs for convergence criteria at the run level
                                                                      convergence_band_halfwidth <- 0.025 # between 0 and 1 since will base it on the probability objective metrics
-                                                                     convergence_band_length <- 50 # number of run
-                                                                     burnin <- 100 # min number of runs (should rename, not true burn in because we do not discard these)
+                                                                     convergence_band_length <- 100 #50 # number of run
+                                                                     burnin <- 200 #100 # this plus convergence_band_length is min number of runs (should rename, not true burn in because we do not discard these)
                                                                      convergence_tracking_persis <- c(vector(), rep(NA, max_n_runs_per_iter)) # initalize
                                                                      convergence_tracking_selfsustain <- c(vector(), rep(NA, max_n_runs_per_iter)) # initalize
                                                                      converged_for_persist <- "no"
