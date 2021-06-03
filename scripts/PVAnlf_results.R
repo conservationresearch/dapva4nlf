@@ -635,6 +635,52 @@ grid.arrange(tornado_persist_top10,  tornado_selfsustain_top10,
              ncol = 1, nrow = 2)
 dev.off()
 
+
+#---- Explore more traditional sensitivity analysis graphs. ----
+# Uses the same results RData file that was loaded above for the tornado
+# Confirmed can get simular insights to tornado, tornado is easier and clearer in my opinion :)
+
+int <- "s_mean_yoy_no_threats"
+test <- cbind(parameterByIterTracking_this_alt_clean[,paste(int)],
+              results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])
+# colnames(test) <- c("s_tadpoles_mean", "prob_persist")
+colnames(test) <- c("survival", "prob_persist")
+
+best_guess_input <- as.numeric(as.character(inputs$best_guess[which(inputs$input == paste(int))]))
+min <- as.numeric(as.character(min(test$survival)))
+max <- as.numeric(as.character(max(test$survival)))
+P10_input <- as.numeric(as.character(quantile(test$survival, 0.1)))
+P90_input <- as.numeric(as.character(quantile(test$survival, 0.9)))
+
+ggplot2::ggplot(data = test, ggplot2::aes(x=survival, y = prob_persist)) +
+  ggplot2::geom_point() +
+   # ggplot2::geom_bin2d(bins = 50) + # from https://www.r-graph-gallery.com/2d-density-plot-with-ggplot2.html
+   # ggplot2::scale_fill_continuous(type = "viridis") +
+   ggplot2::stat_density_2d(ggplot2::aes(fill = ..level..), geom = "polygon", colour="white", alpha = 0.5) + 
+  # ggplot2::stat_density_2d(aes(fill = factor(stat(level))), geom = "polygon") +  # https://stackoverflow.com/questions/53172200/stat-density2d-what-does-the-legend-mean
+  # ggplot2::geom_density_2d_filled(alpha = 0.5) +
+  # ggplot2::geom_density_2d(size = 0.25, colour = "black") + 
+  # ggplot2:: stat_density2d(aes(alpha = ..density..), geom = "tile", contour = FALSE) + 
+  ggplot2::geom_tile() + 
+  ggplot2::geom_smooth(method = "lm") +
+  ggplot2::xlim(min, max) +
+  ggplot2::ylim(0,1) +
+  ggplot2::geom_vline(xintercept = best_guess_input, linetype = "dashed", color = "red") +
+  ggplot2::geom_vline(xintercept = P10_input, linetype = "dashed", color = "black") +
+  ggplot2::geom_vline(xintercept = P90_input, linetype = "dashed", color = "black") +
+  ggplot2::theme_bw() +
+  ggplot2::theme(
+    panel.grid.major = ggplot2::element_blank(),
+    panel.grid.minor = ggplot2::element_blank(),
+    strip.background = ggplot2::element_blank(),
+    panel.border = ggplot2::element_rect(colour = "black"),
+    text = ggplot2::element_text(size = 12),
+    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+    legend.position = "none" # density plot, light blue is the highest density, darker is lower density, white is lowest density
+  )
+
+
+
 #---- Appendix: full tornado diagrams. ----
 
 # Include all bars in the appendix
