@@ -583,7 +583,7 @@ int8$alternative<- factor(int8$alternative, levels=c("Try Hard but \n No Bullfro
 # dev.off()
 
 
-#---- Make graphs for the report -goBigVar, panel for export. ----
+#---- Make graphs for the report -variations on Go Big, panel for export. ----
 
 filename <- paste("ForReport/graph_panel_goBigVar", version,".tiff", sep="")
 tiff(filename, width=12, height=8, units="in",
@@ -602,6 +602,159 @@ dev.off()
 
 
 
+#---- Make graphs for the report - hypothetical scenarios, persistence. ----
+# Now move in the hypothetical scenarios results and move out the others
+# Get a fresh load of the results
+# Upload all of the results in the results folder and bind them together
+temp_iter <- list.files(pattern="*results_overall_")
+results_all_iter_list <- lapply(temp_iter, read.csv)
+results_all_iter <- do.call(rbind, results_all_iter_list)
+colnames(results_all_iter)[7:ncol(results_all_iter)] <- 1:50
+
+# Rename testing extreme releases B to just Extreme Releases
+results_all_iter$alternative[which(results_all_iter$alternative == "Testing Extreme Releases B")] <- "Testing Extreme Releases"
+
+# Graph over time
+# Pull out the results summary
+results_summary_prob_persist <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations  = results_all_iter,
+                                                                     metric = "probability of persistence",
+                                                                     initial_year = 1, credible_interval = 0.95)
+
+
+# Pull out the alternatives of interest
+existingPop_alt_name  <- "Testing Existing Population"
+# extremeRelA_alt_name  <- "Testing Extreme Releases A"
+extremeRelB_alt_name  <- "Testing Extreme Releases"
+
+int5b <- results_summary_prob_persist[c(which(results_summary_prob_persist$alternative == existingPop_alt_name),
+                                       # which(results_summary_prob_persist$alternative == extremeRelA_alt_name),
+                                       which(results_summary_prob_persist$alternative == extremeRelB_alt_name)),]
+
+
+int5b$alternative <- factor(int5b$alternative, levels=c("Testing Existing Population",
+                                                     # "Testing Extreme Releases A",
+                                                     "Testing Extreme Releases")) # reorder factor levels
+
+(persist_hypotheticals_graph1 <- graphResultsSummary(results_summary = int5b,
+                                                overlap = FALSE,
+                                                title = 'A)',
+                                                x_axis_lab = "Year",
+                                                y_axis_lab = "\n Probability of Persistence \n ")) # The extra lines push the title out to the same spot as in panel B)
+
+
+# Flying Bars
+
+int6b <- results_all_iter[c(which(results_all_iter$alternative == existingPop_alt_name),
+                            # which(results_all_iter$alternative == extremeRelA_alt_name),
+                            which(results_all_iter$alternative == extremeRelB_alt_name)),]
+# int6$alternative[which(int6$alternative == noBFM_alt_name)] <- "Try Hard but \n No Bullfrog Management" # put it on two lines
+
+
+int6b$alternative<- factor(int6b$alternative, levels=c("Testing Extreme Releases",
+                                                     # "Testing Extreme Releases A", 
+                                                     "Testing Existing Population")) # reorder factor levels
+
+
+(persistence_hypotheticals_flyingBars1 <- graphFlyingBars(results_summary_all_iterations = int6b,
+                                                     metric = "probability of persistence",
+                                                     year = yrs,
+                                                     credible_interval = 0.95,
+                                                     x_axis_lab = "Probability of Persistence in Year 50",
+                                                     y_axis_lab = "\n Management Alternative",
+                                                     # title = 'B)'))
+                                                     title = ''))
+
+# filename <- paste("ForReport/graph_panel_effort_persist", version,".tiff", sep="")
+# tiff(filename, width=12, height=8, units="in",
+#      pointsize=8, compression="lzw", bg="white", res=600,
+#      restoreConsole=TRUE)
+# grid.arrange(persist_effort_graph1, persistence_effort_flyingBars1,
+#              ncol = 1, nrow = 2)
+# dev.off()
+
+
+
+
+#---- Make graphs for the report - variations on Go Big, self-sustaining. ----
+# Get a fresh load of the results
+# Upload all of the results in the results folder and bind them together
+temp_iter <- list.files(pattern="*results_overall_")
+results_all_iter_list <- lapply(temp_iter, read.csv)
+results_all_iter <- do.call(rbind, results_all_iter_list)
+colnames(results_all_iter)[7:ncol(results_all_iter)] <- 1:50
+
+# Rename testing extreme releases B to just Extreme Releases
+results_all_iter$alternative[which(results_all_iter$alternative == "Testing Extreme Releases B")] <- "Testing Extreme Releases"
+
+
+# Graph over time
+# Pull out the results summary
+results_summary_prob_selfsustaining <- dapva::makeResultsSummaryMultipleAlt(results_summary_all_iterations  = results_all_iter,
+                                                                            metric = "probability of self-sustaining population",
+                                                                            initial_year = 1, credible_interval = 0.95)
+
+# PUll out the alternatives of interest
+existingPop_alt_name  <- "Testing Existing Population"
+# extremeRelA_alt_name  <- "Testing Extreme Releases A"
+extremeRelB_alt_name  <- "Testing Extreme Releases"
+
+int7b <- results_summary_prob_selfsustaining[c(which(results_summary_prob_selfsustaining$alternative == existingPop_alt_name),
+                                              # which(results_summary_prob_selfsustaining$alternative == extremeRelA_alt_name),
+                                              which(results_summary_prob_selfsustaining$alternative == extremeRelB_alt_name)),]
+
+int7b$alternative<- factor(int7b$alternative, levels=c("Testing Existing Population",
+                                                      # "Testing Extreme Releases A",
+                                                      "Testing Extreme Releases")) # reorder factor levels
+
+(selfsustain_hypotheticals_graph1 <- graphResultsSummary(results_summary = int7b,
+                                                    overlap = FALSE,
+                                                    # title = 'A)',
+                                                    title = 'B)',
+                                                    x_axis_lab = "Year",
+                                                    # y_axis_lab = "Probability of a Self-Sustaining Population \n \n ")) # The extra lines push the title out to the same spot as in panel B)
+                                                    y_axis_lab = "\n Probability of a Self-Sustaining Population \n")) # The extra lines push the title out to the same spot as in panel B)
+
+
+# Flying Bars
+
+int8b <- results_all_iter[c(which(results_all_iter$alternative == existingPop_alt_name),
+                           # which(results_all_iter$alternative == extremeRelA_alt_name),
+                           which(results_all_iter$alternative == extremeRelB_alt_name)),]
+
+int8b$alternative<- factor(int8b$alternative, levels=c("Testing Extreme Releases",
+                                                      # "Testing Extreme Releases A", 
+                                                      "Testing Existing Population")) # reorder factor levels
+
+(selfsustain_hypotheticals_flyingBars1 <- graphFlyingBars(results_summary_all_iterations = int8b,
+                                                     metric = "probability of self-sustaining population",
+                                                     year = yrs,
+                                                     credible_interval = 0.95,
+                                                     x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",
+                                                     y_axis_lab = "\n Management Alternative",
+                                                     # title = 'B)'))
+                                                     title = ''))
+
+# filename <- paste("ForReport/graph_panel_effort_selfsustain", version,".tiff", sep="")
+# tiff(filename, width=12, height=8, units="in",
+#      pointsize=8, compression="lzw", bg="white", res=600,
+#      restoreConsole=TRUE)
+# grid.arrange(selfsustain_effort_graph1, selfsustain_effort_flyingBars1,
+#              ncol = 1, nrow = 2)
+# dev.off()
+
+
+#---- Make graphs for the report -variations on Go Big, panel for export. ----
+
+filename <- paste("ForReport/graph_panel_hyptheticals", version,".tiff", sep="")
+tiff(filename, width=12, height=8, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600,
+     restoreConsole=TRUE)
+grid.arrange(persist_hypotheticals_graph1,  selfsustain_hypotheticals_graph1,
+             persistence_hypotheticals_flyingBars1, selfsustain_hypotheticals_flyingBars1,
+             ncol = 2, nrow = 2)
+dev.off()
+
+
 #---- Make graphs for the report -goBig tornados, panel for export. ----
 
 path_to_results_folder <- "C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results"# on my work PC
@@ -611,7 +764,6 @@ file_goBig <-  list.files(path = ".","*goBig_v1test12w2500it.RData", full.names=
 load(file_goBig)
 
 # Draw the associated tornado
-
 
 tornado_persist_top10 <- dapva::drawTornado(paramSens = paramSens_persist,
                                             metric = "Probability of persistence",
@@ -688,14 +840,16 @@ tornado_persist_all <- dapva::drawTornado(paramSens = paramSens_persist,
                                           metric = "Probability of persistence",
                                           year = 50,
                                           title = "A)", breaks = 0.05,
-                                          num_bars_to_show = 'all')
+                                          num_bars_to_show = 'all',
+                                          labels = "no")
 
 
 tornado_selfsustain_all <- dapva::drawTornado(paramSens = paramSens_selfsustain,
                                               metric = "Probability of a self-sustaining population",
                                               year = 50,
                                               title = "B)", breaks = 0.05,
-                                              num_bars_to_show = 'all')
+                                              num_bars_to_show = 'all',
+                                              labels = "no")
 
 
 # Export the tornado diagrams - all bars for Appendix

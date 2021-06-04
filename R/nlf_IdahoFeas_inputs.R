@@ -875,28 +875,28 @@ makeTornadoParameterLabels <- function(parameterByIterTracking) {
   tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_sd_adult_no_threats")] <- "adult survival - temporal variation (sd)"
   
   # Survival - pct reduced, bullfrogs
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_eggs_bullfrogs")] <- "egg survival reduction if bullfrogMgt not effective"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_tadpoles_bullfrogs")] <- "tadpoles survival reduction if bullfrogMgt not effective"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_yoy_bullfrogs")] <- "yoy survival reduction if bullfrogMgt not effective"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_juvenile_bullfrogs")] <- "juvenile survival reduction if bullfrogMgt not effective"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_adult_bullfrogs")] <- "adult survival reduction if bullfrogMgt not effective"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_eggs_bullfrogs")] <- "egg survival reduction (pct) if bullfrogMgt not effective"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_tadpoles_bullfrogs")] <- "tadpoles survival reduction (pct) if bullfrogMgt not effective"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_yoy_bullfrogs")] <- "yoy survival reduction (pct) if bullfrogMgt not effective"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_juvenile_bullfrogs")] <- "juvenile survival reduction (pct) if bullfrogMgt not effective"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_adult_bullfrogs")] <- "adult survival reduction (pct) if bullfrogMgt not effective"
   
   # Survival - pct reduced, roads
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_eggs_roads")] <- "egg survival reduction from roads"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_tadpoles_roads")] <- "tadpoles survival reduction from roads"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_yoy_roads")] <- "yoy survival reduction from roads"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_juvenile_roads")] <- "juvenile survival reduction from roads"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_adult_roads")] <- "adult survival reduction from roads"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_eggs_roads")] <- "egg survival reduction (pct) from roads"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_tadpoles_roads")] <- "tadpoles survival reduction (pct) from roads"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_yoy_roads")] <- "yoy survival reduction (pct) from roads"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_juvenile_roads")] <- "juvenile survival reduction (pct) from roads"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_adult_roads")] <- "adult survival reduction (pct) from roads"
   
   # Survival - pct reduced, chytrid
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_eggs_chytrid")] <- "egg survival reduction from chytrid"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_tadpoles_chytrid")] <- "tadpoles survival reduction from chytrid"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_yoy_chytrid")] <- "yoy survival reduction from chytrid"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_juvenile_adult_chytrid")] <- "juvenile/adult survival reduction from chytrid"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_eggs_chytrid")] <- "egg survival reduction (pct) from chytrid"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_tadpoles_chytrid")] <- "tadpoles survival reduction (pct) from chytrid"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_yoy_chytrid")] <- "yoy survival reduction (pct) from chytrid"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_juvenile_adult_chytrid")] <- "juvenile/adult survival reduction (pct) from chytrid"
   
   # Survival - pct reduced, drawdown
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_tadpoles_drawdownPartial")] <- "tadpoles survival reduction from partial drawdown"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_tadpoles_drawdownComplete")] <- "tadpoles survival reduction from complete drawdown"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_tadpoles_drawdownPartial")] <- "tadpoles survival reduction (pct) from partial drawdown"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_pct_reduced_tadpoles_drawdownComplete")] <- "tadpoles survival reduction (pct) from complete drawdown"
   
   # Other
   tornado_parameter_labels$label[which(tornado_parameter_labels$name == "drawdown_completeVSpartial_freq")] <- "frequency of complete vs. partial drawdowns"
