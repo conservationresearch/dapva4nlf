@@ -15,7 +15,7 @@ system.time({ # turn on the timer
 
 #---- Clear the workspace. ----
 rm(list = ls())
-version <- "_v1test13" # insert short description to append to results to help identify
+version <- "_v1test13_2Kit" # insert short description to append to results to help identify
 
 #---- Load libraries, and set the random seed.  -------------
 ## Import libraries
@@ -43,10 +43,10 @@ alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are p
 # rows_to_run <- c(6, 10, 11, 12) # run No bullfrog plus the three hypothetical scenarios
 rows_to_run <- c(2)
 #---- Specify number of iterations and number of runs per iterations.  -------------
-n_iter  <- 2500# 500
+n_iter  <- 2000# 500
 flexible_convergence_iteration_on <- "no" # 'yes' or 'no', generally choose yes unless you are running a tornado and want to specify a # of iter
 max_n_runs_per_iter <- 1000 # flexible convergence is always on at the run level
-
+flexible_convergence_run_on <- 'yes' # always yes unless doing a run test as below
 baseCase <- "no" # 'yes' or 'no'
 
 doingRunConvTest <- "no"  # 'yes' or 'no'
