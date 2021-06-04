@@ -484,9 +484,14 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                            levels = c("no", "yes"))
   parameterByIterTracking_this_alt_clean$dispersal_allowed_outside <- ordered(parameterByIterTracking_this_alt_clean$dispersal_allowed_outside, 
                                                                            levels = c("no", "yes"))
+  # Add a random dummy variable
+  parameterByIterTracking_this_alt_clean$dummy <- as.numeric(sample(1:100000, size = nrow(parameterByIterTracking_this_alt_clean), replace = TRUE))
   
   # Make tornado parameter labels
   tornado_parameter_labels <- dapva4nlf::makeTornadoParameterLabels(parameterByIterTracking = parameterByIterTracking_this_alt_clean)
+  
+
+  
   
   # Do the sensitivity analysis
   paramSens_persist <- dapva::makeParameterSens(parameterByIterTracking = parameterByIterTracking_this_alt_clean,
