@@ -763,6 +763,20 @@ setwd(path_to_results_folder) # on my mac
 file_goBig <-  list.files(path = ".","*goBig_v1test12w2500it.RData", full.names="TRUE")
 load(file_goBig)
 
+# Do the sensitivity analyis (this is also in the main script but adding here since running code simultaneously right now on mac and just added the dummy variable)
+paramSens_persist <- dapva::makeParameterSens(parameterByIterTracking = parameterByIterTracking_this_alt_clean,
+                                              results_all_this_alt = results_all_this_alt,
+                                              metric = "probability of persistence",
+                                              start_year = 1,
+                                              nyrs = 50,
+                                              parameter_labels = tornado_parameter_labels)
+
+paramSens_selfsustain <- dapva::makeParameterSens(parameterByIterTracking = parameterByIterTracking_this_alt_clean,
+                                                  results_all_this_alt = results_all_this_alt,
+                                                  metric = "probability of self-sustaining population",
+                                                  start_year = 1,
+                                                  nyrs = 50,
+                                                  parameter_labels = tornado_parameter_labels)
 # Draw the associated tornado
 
 tornado_persist_top10 <- dapva::drawTornado(paramSens = paramSens_persist,
