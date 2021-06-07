@@ -44,7 +44,7 @@ alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are p
 rows_to_run <- c(2)
 #---- Specify number of iterations and number of runs per iterations.  -------------
 n_iter  <- 2000# 500
-flexible_convergence_iteration_on <- "no" # 'yes' or 'no', generally choose yes unless you are running a tornado and want to specify a # of iter
+flexible_convergence_iteration_on <- "yes" # 'yes' or 'no', generally choose yes unless you are running a tornado and want to specify a # of iter
 max_n_runs_per_iter <- 1000 # flexible convergence is always on at the run level
 flexible_convergence_run_on <- 'yes' # always yes unless doing a run test as below
 baseCase <- "no" # 'yes' or 'no'
@@ -171,7 +171,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   convergence_band_length_n_batches <- 1 # number of batches
   convergence_band_length_n_iter <- 50 # number of batches
   
-  min_n_batches <- 2 # 
+  min_n_batches <- 4 # 2 for min of 200 iterations since batch size is 100; 4 for min of 400 iteration
   convergence_tracking_persis_iter <- c(vector(), rep(NA, convergence_band_length_n_iter)) # initalize
   convergence_tracking_selfsustain_iter <- c(vector(), rep(NA, convergence_band_length_n_iter)) # initalize
   converged_for_persist_iter <- "no"

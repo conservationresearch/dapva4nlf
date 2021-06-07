@@ -760,7 +760,7 @@ dev.off()
 path_to_results_folder <- "C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results"# on my work PC
 #path_to_results_folder <- "/Users/laurakeating/Documents/R/R_scripts/BTPD_PVA/Results/BTPD_baseline_results_march17"# on my mac
 setwd(path_to_results_folder) # on my mac
-file_goBig <-  list.files(path = ".","*goBig_v1test12w2500it.RData", full.names="TRUE")
+file_goBig <-  list.files(path = ".","*goBig_v1test13_2Kit.RData", full.names="TRUE")
 load(file_goBig)
 
 # Do the sensitivity analyis (this is also in the main script but adding here since running code simultaneously right now on mac and just added the dummy variable)
@@ -894,7 +894,7 @@ for(j in 1:yrs){
 
 #---- Appendix: convergence plots - number of runs per iteration. ----
 
-# Pick some iterations that will show a range of outcomes
+memory.limit(24000)# Pick some iterations that will show a range of outcomes
 # 1570 has prob of persistence 1
 # 1131 has prob of persistence of approx 0.97
 # 495 has prob of persistence of approx 0.5
@@ -906,7 +906,7 @@ for(j in 1:yrs){
 
 # Once run, load it back in and use going forward
 # memory.limit() # check current memory limit
-# memory.limit(24000) # increase memory limit if need be to load the file
+#  # increase memory limit if need be to load the file
 load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test12_runConvTestResult.RData")
 
 # Remove eggs and tadpoles as they are intermediate stages in the year and we just want the pop size at the fall census
@@ -961,7 +961,7 @@ dev.off()
 # Need to use a data set with more iterations than needed so can show convergence
 # For example, if using 500 iterations need to use a data set with e.g. 2500 iterations here
 # This one didn't have the min 300 runs per iteration so will need to be redone once rerun with that update
-load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test12w2500it.RData")
+load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test13_2Kit.RData")
 
 # Resample to visually inspect convergence
 convergence_test <- dapva::convergenceTestIterations(results_all_this_alt = results_summary_all_iterations_overall,
@@ -972,7 +972,7 @@ convergence_test <- dapva::convergenceTestIterations(results_all_this_alt = resu
 
 
 # Make graphs for visual inspection
-graphs <- dapva::graphCongvTestIter(convergence_test, x_location_vertical_line = 200,
+graphs <- dapva::graphCongvTestIter(convergence_test, x_location_vertical_line = 400,
                                     title = " ")
 
 (p_prob_persist_conv_iter_mean <- graphs[[2]])
@@ -990,7 +990,7 @@ p_prob_persist_conv_iter_mean
 dev.off()
 
 # Extract the range of prob of persistence from 500 iterations
-int <- convergence_test$prob_persist_mean[which(convergence_test$subset_size == 200)]
+int <- convergence_test$prob_persist_mean[which(convergence_test$subset_size == 400)]
 min(int) 
 max(int) 
 max(int) - min(int)
@@ -1301,7 +1301,7 @@ dev.off()
 #---- Appendix: relationship between persistence and self-sustaining. ----
 
 # Load in GoBig alternative with lots of iterations
-load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test12w2500it.RData")
+load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test13_2Kit.RData")
 
 # Plot abundance vs persistence
 
@@ -1390,7 +1390,11 @@ results_summary_prob_persist_basecase <- dapva::makeResultsSummaryMultipleAlt(re
 
 # Now pretend parametric and process uncertainty together
 # Using the 'Go Big or Go Home' alternative
-load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test12w2500it.RData")
+
+# Once run, load it back in and use going forward
+# memory.limit() # check current memory limit
+#  # increase memory limit if need be to load the file
+load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test13_2Kit.RData")
 
 # Remove eggs and tadpoles as they are intermediate stages in the year and we just want the pop size at the fall census
 results_all_iterations_fall <- results_all_iterations # initalize
@@ -1437,7 +1441,7 @@ results_summary_prob_persist_unct_comb <- dapva::makeResultsSummaryMultipleAlt(r
 # Using the 'Go Big or Go Home' alternative
 # memory.limit() # check current memory limit
 # memory.limit(24000) # increase memory limit if need be to load the file
-load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test12w2500it.RData")
+load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test13_2Kit.RData")
 
 # Summarize the 'by population' results into 'overall' results and export that
 write.csv(results_summary_all_iterations_overall, file = paste0("results_overall_", name, version,".csv"), row.names = FALSE)
@@ -1447,8 +1451,8 @@ write.csv(results_summary_all_iterations_overall, file = paste0("results_overall
 # Load each of the results csvs in
 
 results_summary_basecase <- read.csv("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/results_summary_basecase_goBig_v1test12_basecase.csv")
-results_summary_for_all_iter_and_runs_unct_comb <- read.csv("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/results_summary_for_all_iter_and_runs_unct_combgoBig_v1test12w2500it.csv")
-results_summary_for_all_iter_and_runs_unct_tgth <- read.csv("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/results_overall_goBig_v1test12w2500it.csv")
+results_summary_for_all_iter_and_runs_unct_comb <- read.csv("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/results_summary_for_all_iter_and_runs_unct_combgoBig_v1test13_2Kit.csv")
+results_summary_for_all_iter_and_runs_unct_tgth <- read.csv("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/results_overall_goBig_v1test13_2Kit.csv")
 
 colnames(results_summary_basecase)[7:56] <- 1:50
 colnames(results_summary_for_all_iter_and_runs_unct_comb)[7:56] <- 1:50
