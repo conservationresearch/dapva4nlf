@@ -1391,10 +1391,16 @@ results_summary_prob_persist_basecase <- dapva::makeResultsSummaryMultipleAlt(re
 # Now pretend parametric and process uncertainty together
 # Using the 'Go Big or Go Home' alternative
 
+#path_to_results_folder <- "/Users/laurakeating/Documents/R/R_scripts/BTPD_PVA/Results/BTPD_baseline_results_march17"# on my mac
+setwd(path_to_results_folder) # on my mac
+
 # Once run, load it back in and use going forward
 # memory.limit() # check current memory limit
 #  # increase memory limit if need be to load the file
-load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test13_2Kit.RData")
+#load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test13_2Kit.RData")
+
+# on mac
+load("/Users/laurakeating/Documents/R/R_scripts/NLF_PVA/Results/goBig_v1test13_2Kit.RData")
 
 # Remove eggs and tadpoles as they are intermediate stages in the year and we just want the pop size at the fall census
 results_all_iterations_fall <- results_all_iterations # initalize
@@ -1441,7 +1447,9 @@ results_summary_prob_persist_unct_comb <- dapva::makeResultsSummaryMultipleAlt(r
 # Using the 'Go Big or Go Home' alternative
 # memory.limit() # check current memory limit
 # memory.limit(24000) # increase memory limit if need be to load the file
-load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test13_2Kit.RData")
+#load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test13_2Kit.RData")
+# on mac
+load("/Users/laurakeating/Documents/R/R_scripts/NLF_PVA/Results/goBig_v1test13_2Kit.RData")
 
 # Summarize the 'by population' results into 'overall' results and export that
 write.csv(results_summary_all_iterations_overall, file = paste0("results_overall_", name, version,".csv"), row.names = FALSE)
