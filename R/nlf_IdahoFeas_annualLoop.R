@@ -52,13 +52,42 @@
 #' @export
 runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
                                      wetland_distances_km,
-                                     initial_year, wetlands,stage_classes,
+                                     initial_year, wetlands, stage_classes,
                                      percentilesEV_survival_eggs_tad,
                                      percentilesEV_survival_yoy_adult,
                                      percentilesEV_reproduction,
                                      alternative_details, 
                                      exisiting_pop = FALSE, 
                                      dispersal_allowed_outside = 'no') {
+
+  ######### Determine if the ephemeral wetlands are suitable habitat in this iteration or not. #########
+  # First, is the decision to try and restore them
+  # Then check to see if the restoration was effective
+  # Update the list of wetlands that are NLF habitat accordingly
+  eph_Wet_restore_happening <- alternative_details$restore_ephemeralWetlands
+  
+  if(eph_Wet_restore_happening == "no"){ # this should already be the case in parameterByIter tracking as now also updated there
+    # can't be effective if not happening in this alternative
+    ephWetRest_effective <- "no" 
+  }
+  
+  if(eph_Wet_restore_happening == "yes"){
+    # effectiveness has been decided at the iteration level
+    ephWetRest_effective <- parameterByIterTracking[i, paste0("ephWetRest_effective")]  
+  }
+  
+  if(ephWetRest_effective == "no"){
+    # If it is not effective, remove the ephemeral wetlands from the suite of available wetlands
+    wetlands <- wetlands[which(wetlands != "ephemeral_wetlands")]
+  }
+  
+  if(ephWetRest_effective == "yes"){
+    # If it is effective, then these wetlands are available for frogs to live in
+    # leave the suite of wetlands as it is
+  }
+  
+  ######### Collect some info and set up the results tracking dataframe. #########
+  
   # Collect some info
   n_wetlands <- length(wetlands)
   wetlands_without_outside <- wetlands[which(wetlands != "outside")]
@@ -73,6 +102,8 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
   
   resultsTracking_popSize_females$run <- q # this isn't included in the original makeResultsTracking function, could update later
 
+  ######### Run the annual loop of the model. #########
+  
   for (j in 1:yrs) { # start the annual loop
     print(paste("iteration", i, "run", q, "year", j))
     
@@ -143,11 +174,11 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
     survival_rates_noThreats <- as.data.frame(cbind(s_eggs, s_tadpoles, s_yoy, s_juv, s_adult, s_adult, s_adult))
     rownames(survival_rates_noThreats) <- wetlands_without_outside
     colnames(survival_rates_noThreats) <- stage_classes
-    
+
     ######### Identify if bullfrogs are a threat for this iteration. #########
     bullfrog_management_happening <- alternative_details$bullfrog_management
     
-    if(bullfrog_management_happening == "no"){
+    if(bullfrog_management_happening == "no"){  # this should already be the case in parameterByIter tracking as now also updated there
       # can't be effective if not happening in this alternative
       bullfrogMgmt_effective <- "no" 
     }
@@ -221,8 +252,16 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
     }
     
     ######### Identify if the ephemeral wetland goes dry this year. #########
-    ephemeral_freq_dry <- parameterByIterTracking[i, paste0("ephemeral_freq_dry")] 
-    ephemeral_wetlands_dry <- sample(c("yes", "no"), size = 1, prob = (c(ephemeral_freq_dry, 1-ephemeral_freq_dry)))
+    
+    if(parameterByIterTracking$ephWetRest_effective[i] == "no"){ # if not effective, always dry
+      ephemeral_wetlands_dry <- "yes"
+    }
+    
+    if(parameterByIterTracking$ephWetRest_effective[i] == "yes"){ # if it is effective, then dries up with specified frequency
+      ephemeral_freq_dry <- parameterByIterTracking[i, paste0("ephemeral_freq_dry")] 
+      ephemeral_wetlands_dry <- sample(c("yes", "no"), size = 1, prob = (c(ephemeral_freq_dry, 1-ephemeral_freq_dry)))
+    }
+
 
     if(ephemeral_wetlands_dry == "no"){ s_pct_reduced_tadpoles_epehemeral_dry <- 0}
     if(ephemeral_wetlands_dry == "yes"){

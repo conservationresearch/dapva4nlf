@@ -103,12 +103,22 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   #parameterByIterTracking <-  parameterByIterTracking_baseCase
   
   
+  # Add in fix for when the alternative does not include ephemeral wetland habitat rest. Then the parameter for ephWetRest_effective should always also be no.
+  if(alternative_details$restore_ephemeralWetlands == "no"){
+    parameterByIterTracking$ephWetRest_effective <- "no"
+  }
+  
   # Add in fix for when bullfrog management is no. Then the parameter for bullfrog management effective should always also be no.
   if(alternative_details$bullfrog_management == "no"){
     parameterByIterTracking$bullfrogMgmt_effective <- "no"
   }
   
-  
+  #---- Update  parameters with the condition of ephemeral wetland restoration being effective. ----
+  # Replace any iterations where habitat restoration is not effective to NA for the freq of dry events
+  # This allows sensitivity to be calculated properly for the tornado
+  rows_ephWetRest_notEffective <- which(parameterByIterTracking$ephWetRest_effective == "no")
+  parameterByIterTracking$ephemeral_freq_dry[rows_ephWetRest_notEffective] <- NA
+
   #---- Update  parameters with the condition of bullfrog management being effective. ----
   # Replace any iterations where bullfrog management is effective to NA for all the bullfrog threat related survival inputs.
   # This allows sensitivity to be calculated properly for the tornado

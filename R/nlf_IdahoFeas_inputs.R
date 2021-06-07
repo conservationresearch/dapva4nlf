@@ -287,6 +287,14 @@ getNLFIdahoFeasinputs <- function() {
       source = "Lea and Rebecca, April 26, 2021", comments = "Reasons for low: for the deeper wetlands, wouldn't need to do a complete drawdown for the cattail controls; Trying for the complete every year so that is more likely (80/20)")
     
     )
+  #---- Human management: probability that ephemeral wetland restoration is effective.  -------------
+  
+  prob_ephWetRest_effective <- list(
+    c(input = "ephWetRest_effective", type = "human_management", 
+      best_guess = 0.3, 
+      best_guess_type = "probability", management_alternative = "status_quo", 
+      source = "Casey, June 7 2021", comments = "Efforts thus far have shown that it difficult to dig deep enough to the water table to make these ephemeral. Additional data is being collected this year to get a better sense of how much deeper they would need to go. If they are deep enough to hold water until mid-July there is still no guarantee they will be quality habitat.")
+  )
   
   #---- Human management: probability that bullfrog management will be effective.  -------------
   
@@ -457,6 +465,7 @@ getNLFIdahoFeasinputs <- function() {
     survival_pctReduction_roads,
     survival_pctReduction_chytrid,
     survival_pctReduction_drawdowns,
+    prob_ephWetRest_effective,
     prob_bullfrog_mgmt_effective,
     prob_drawdown_beforeMidJuly,
     ephemeral_freq_dry,
@@ -688,6 +697,27 @@ selectNLFIdahoParameterByIterTracking <- function(inputs, base_case = FALSE) {
     
   }
   
+  
+  
+  ######### Select the human management parameters for this iteration - ephemeral wetland restoration effective or not. #########
+  if(base_case == FALSE){
+    
+    parameterByIterTracking[i, "ephWetRest_effective"] <- sample(c("yes", "no"),
+                                                                   size = 1,
+                                                                   prob = c(as.numeric(inputs$best_guess[which(inputs$input == "ephWetRest_effective")]),
+                                                                            (1-as.numeric(inputs$best_guess[which(inputs$input == "ephWetRest_effective")]))
+                                                                   ), replace = T)
+  }
+  
+  if(base_case == TRUE){
+    
+    if(as.numeric(inputs$best_guess[which(inputs$input == "ephWetRest_effective")]) < 0.5)
+    {parameterByIterTracking[i, "ephWetRest_effective"] <- "no"}
+    if(as.numeric(inputs$best_guess[which(inputs$input == "ephWetRest_effective")]) >= 0.5)
+    {parameterByIterTracking[i, "ephWetRest_effective"] <- "yes"}
+    
+  }
+  
   ######### Select the human management parameters for this iteration - bullfrog management effective or not. #########
   if(base_case == FALSE){
     
@@ -900,6 +930,7 @@ makeTornadoParameterLabels <- function(parameterByIterTracking) {
   
   # Other
   tornado_parameter_labels$label[which(tornado_parameter_labels$name == "drawdown_completeVSpartial_freq")] <- "frequency of complete vs. partial drawdowns"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "ephWetRest_effective")] <- "eph. wetland restore effective (yes = high, no = low)"
   tornado_parameter_labels$label[which(tornado_parameter_labels$name == "bullfrogMgmt_effective")] <- "bullfrog mgmt. effective (yes = high, no = low)"
   tornado_parameter_labels$label[which(tornado_parameter_labels$name == "drawdown_beforeMidJuly")] <- "drawdowns before mid-July (yes = high, no = low)"
   tornado_parameter_labels$label[which(tornado_parameter_labels$name == "ephemeral_freq_dry")] <- "frequency of ephemeral wetland dry years"
