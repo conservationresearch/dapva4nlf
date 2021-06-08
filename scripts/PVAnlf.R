@@ -490,6 +490,8 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                            levels = c("no","yes"))
   parameterByIterTracking_this_alt_clean$dispersal_CSF_vs_MoreGoShort <- ordered(parameterByIterTracking_this_alt_clean$dispersal_CSF_vs_MoreGoShort, 
                                                                                  levels = c("CSF", "MoreGoShort"))
+  parameterByIterTracking_this_alt_clean$ephWetRest_effective <- ordered(parameterByIterTracking_this_alt_clean$ephWetRest_effective, 
+                                                                           levels = c("no", "yes"))
   parameterByIterTracking_this_alt_clean$bullfrogMgmt_effective <- ordered(parameterByIterTracking_this_alt_clean$bullfrogMgmt_effective, 
                                                                            levels = c("no", "yes"))
   parameterByIterTracking_this_alt_clean$dispersal_allowed_outside <- ordered(parameterByIterTracking_this_alt_clean$dispersal_allowed_outside, 
