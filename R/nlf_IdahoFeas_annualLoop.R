@@ -441,7 +441,6 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       
       if(exisiting_pop == TRUE){
         # Add in existing population sizes
-        # Assume starting out at carrying capacity some proportion of the carrying capacity
         total_n_terr_fem <- as.numeric(parameterByIterTracking[i, paste0("starting_pop_terr_fem")])
 
         # Age distribution from Rebecca's email: 
