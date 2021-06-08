@@ -408,10 +408,6 @@ grid.arrange(persist_effort_graph1,  selfsustain_effort_graph1,
              ncol = 2, nrow = 2)
 dev.off()
 
-
-
-
-
 #---- Make graphs for the report - variations on Go Big, persistence. ----
 
 # Get a fresh load of the results
@@ -593,14 +589,6 @@ grid.arrange(persist_goBigVar_graph1,  selfsustain_goBigVar_graph1,
              persistence_goBigVar_flyingBars1, selfsustain_goBigVar_flyingBars1,
              ncol = 2, nrow = 2)
 dev.off()
-
-
-
-
-
-
-
-
 
 #---- Make graphs for the report - hypothetical scenarios, persistence. ----
 # Now move in the hypothetical scenarios results and move out the others
@@ -845,7 +833,144 @@ ggplot2::ggplot(data = test, ggplot2::aes(x=survival, y = prob_persist)) +
     legend.position = "none" # density plot, light blue is the highest density, darker is lower density, white is lowest density
   )
 
+#---- Explore yoy and tadpole survival vs prob of persistence. ----
+# Uses the same results RData file that was loaded above for the tornado
+# Confirmed can get simular insights to tornado, tornado is easier and clearer in my opinion :)
 
+test2 <- cbind(parameterByIterTracking_this_alt_clean[,c("s_mean_tadpoles_no_threats", "s_mean_yoy_no_threats")],
+              results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])
+# colnames(test2) <- c("s_tadpoles_mean", "prob_persist")
+colnames(test2) <- c("survival_tadpoles","survival_yoy", "prob_persist")
+
+best_guess_input_tad <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_mean_tadpoles_no_threats")]))
+min_tad <- as.numeric(as.character(min(test2$survival_tadpoles)))
+max_tad <- as.numeric(as.character(max(test2$survival_tadpoles)))
+P10_input_tad <- as.numeric(as.character(quantile(test2$survival_tadpoles, 0.1)))
+P90_input_tad <- as.numeric(as.character(quantile(test2$survival_tadpoles, 0.9)))
+
+best_guess_input_yoy <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_mean_yoy_no_threats")]))
+min_yoy <- as.numeric(as.character(min(test2$survival_yoy)))
+max_yoy <- as.numeric(as.character(max(test2$survival_yoy)))
+P10_input_yoy <- as.numeric(as.character(quantile(test2$survival_yoy, 0.1)))
+P90_input_yoy <- as.numeric(as.character(quantile(test2$survival_yoy, 0.9)))
+
+p_sens_tad_yoy_surv_persist <- ggplot2::ggplot(data = test2, ggplot2::aes(x=survival_tadpoles, y = survival_yoy)) +
+  ggplot2::geom_point(aes(fill = prob_persist, size = prob_persist), shape = 21, alpha = 0.7) +
+  scale_fill_viridis_c(guide = "legend", name="Probability of persistence") + # https://community.rstudio.com/t/ggplot2-is-it-possible-to-combine-color-fill-and-size-legends/17072/2
+  scale_size_continuous(range = c(1, 5), name="Probability of persistence") +
+  # ggplot2::xlim(P10_input_tad, P90_input_tad) +
+  # ggplot2::ylim(P10_input_yoy, P90_input_yoy) +
+  ggplot2::xlim(min_tad, max_tad) +
+  ggplot2::ylim(min_yoy, max_yoy) +
+  ggplot2::geom_hline(yintercept = best_guess_input_yoy, linetype = "dashed", color = "red") +
+  # ggplot2::geom_hline(yintercept = P10_input_yoy, linetype = "dashed", color = "black") +
+  # ggplot2::geom_hline(yintercept = P90_input_yoy, linetype = "dashed", color = "black") +
+  ggplot2::geom_vline(xintercept = best_guess_input_tad, linetype = "dashed", color = "red") +
+  # ggplot2::geom_vline(xintercept = P10_input_tad, linetype = "dashed", color = "black") +
+  # ggplot2::geom_vline(xintercept = P90_input_tad, linetype = "dashed", color = "black") +
+  xlab("Mean tadpole survival\n (no threats)") +
+  ylab( "Mean young of year survival\n (no threats)") + 
+  ggtitle( "A)") + 
+  ggplot2::theme_bw() +
+  ggplot2::theme(
+    panel.grid.major = ggplot2::element_blank(),
+    panel.grid.minor = ggplot2::element_blank(),
+    strip.background = ggplot2::element_blank(),
+    panel.border = ggplot2::element_rect(colour = "black"),
+    text = ggplot2::element_text(size = 12),
+    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+    legend.position = "bottom"
+  )
+
+p_sens_tad_yoy_surv_persist
+
+filename <- paste("ForReport/graph_sens_tad_yoy_surv_persist", version,".tiff", sep="")
+tiff(filename, width=12, height=8, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600,
+     restoreConsole=TRUE)
+p_sens_tad_yoy_surv_persist
+dev.off()
+
+#---- Explore prob of persistence. ----
+
+prob_persist <- cbind(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])
+colnames(prob_persist) <- c("prob_persist")
+
+p_hist_prob_persist <- ggplot2::ggplot(prob_persist, ggplot2::aes(x = prob_persist)) +
+  ggplot2::geom_histogram(color="black", fill="grey", binwidth = 0.05) +
+  xlab("Probability of persistence") +
+  ylab("Number of Iterations") + 
+  geom_vline(aes(xintercept=mean(prob_persist)),
+             color="red", linetype="dashed", size=1) + 
+  ggplot2::theme_bw() +
+  ggplot2::theme(
+    panel.grid.major = ggplot2::element_blank(),
+    panel.grid.minor = ggplot2::element_blank(),
+    strip.background = ggplot2::element_blank(),
+    panel.border = ggplot2::element_rect(colour = "black"),
+    text = ggplot2::element_text(size = 12),
+    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+    legend.position = "bottom" 
+  )
+p_hist_prob_persist
+
+filename <- paste("ForReport/graph_hist_prob_persist", version,".tiff", sep="")
+tiff(filename, width=12, height=8, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600,
+     restoreConsole=TRUE)
+p_hist_prob_persist
+dev.off()
+
+rows_yoy_tad_surv_above_P50 <- which(test2$survival_tadpoles >= best_guess_input_tad & 
+                  test2$survival_yoy >= best_guess_input_yoy)
+test2$group <- "Tadpole or YOY survival below P50"# initalize
+test2$group[rows_yoy_tad_surv_above_P50] <- "Tadpole and YOY survival above P50"
+test2$group <- as.factor(test2$group)
+library(plyr)
+mu <- plyr::ddply(test2, "group", summarise, grp.mean=mean(prob_persist))
+
+
+# prob_persist_yoy_tad_surv_above_P50 <- as.data.frame(test2$prob_persist[rows_yoy_tad_surv_above_P50])
+# colnames(prob_persist_yoy_tad_surv_above_P50) <- c("prob_persist")
+
+p_hist_prob_persist_groups <- ggplot2::ggplot(test2 , ggplot2::aes(x = prob_persist, fill=group)) +
+  ggplot2::geom_histogram(position="dodge", binwidth = 0.05, alpha=0.5) + # http://www.sthda.com/english/wiki/ggplot2-histogram-plot-quick-start-guide-r-software-and-data-visualization
+  scale_color_brewer(palette="Dark2") + 
+  scale_fill_brewer(palette="Dark2") + 
+  xlab("Probability of persistence") +
+  ylab("Number of Iterations") + 
+  ggtitle( "B)") + 
+  labs(color = "", fill = "") + 
+  geom_vline(data=mu, aes(xintercept=grp.mean, color=group),
+             linetype= "dashed") + 
+  ggplot2::theme_bw() +
+  ggplot2::theme(
+    panel.grid.major = ggplot2::element_blank(),
+    panel.grid.minor = ggplot2::element_blank(),
+    strip.background = ggplot2::element_blank(),
+    panel.border = ggplot2::element_rect(colour = "black"),
+    text = ggplot2::element_text(size = 12),
+    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+    legend.position = "bottom" 
+  )
+p_hist_prob_persist_groups
+
+
+filename <- paste("ForReport/graph_hist_prob_persist_sensSurv", version,".tiff", sep="")
+tiff(filename, width=12, height=8, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600,
+     restoreConsole=TRUE)
+grid.arrange(p_hist_prob_persist,  p_hist_prob_persist_groups ,
+             ncol = 1, nrow = 2)
+dev.off()
+
+filename <- paste("ForReport/graph_compare_yoyTadsurv_persist", version,".tiff", sep="")
+tiff(filename, width=12, height=8, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600,
+     restoreConsole=TRUE)
+grid.arrange(p_sens_tad_yoy_surv_persist,  p_hist_prob_persist_groups ,
+             ncol = 1, nrow = 2)
+dev.off()
 
 #---- Appendix: full tornado diagrams. ----
 
