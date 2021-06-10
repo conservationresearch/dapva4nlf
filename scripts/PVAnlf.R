@@ -47,7 +47,7 @@ n_iter  <- 2000# 500
 flexible_convergence_iteration_on <- "yes" # 'yes' or 'no', generally choose yes unless you are running a tornado and want to specify a # of iter
 max_n_runs_per_iter <- 1000 # flexible convergence is always on at the run level
 flexible_convergence_run_on <- 'yes' # always yes unless doing a run test as below
-baseCase <- "no" # 'yes' or 'no'
+baseCase <- "yes" # 'yes' or 'no'
 
 doingRunConvTest <- "no"  # 'yes' or 'no'
 
@@ -101,6 +101,11 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   #parameterByIterTracking_baseCase$wetland_eggTadSurv_TempCor_noEph <- 0.01 # prob of persist is 0.6117, self sustain is 0.3529; new random seed - prob of persist is 0.60927 , self sustain is 0.3311258
   # parameterByIterTracking_baseCase$wetland_eggTadSurv_TempCor_noEph[1] <- 1 # prob of persist 50 is 0.5125, self sustain is 0.2750
   #parameterByIterTracking <-  parameterByIterTracking_baseCase
+  
+  # Trying to better understand temporal correlations
+  # parameterByIterTracking_baseCase$s_sd_tadpoles_no_threats <- 0.01 # LOW - prob of persist is 0.25, prob of self sustain i 0.12
+  # parameterByIterTracking_baseCase$s_sd_tadpoles_no_threats <- 0.08 # High - prob of persist is 0.26, prob of self sustain i 0.13
+  
   
   
   # Add in fix for when the alternative does not include ephemeral wetland habitat rest. Then the parameter for ephWetRest_effective should always also be no.

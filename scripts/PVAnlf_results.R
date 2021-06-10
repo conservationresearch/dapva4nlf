@@ -891,6 +891,98 @@ tiff(filename, width=12, height=8, units="in",
 p_sens_tad_yoy_surv_persist
 dev.off()
 
+
+#---- Explore tadpole survival mean and vs prob of persistence. ----
+# Uses the same results RData file that was loaded above for the tornado
+# Confirmed can get simular insights to tornado, tornado is easier and clearer in my opinion :)
+
+
+# First filter out so only looking at data where yoy mean is high enough to not be the main problem
+rows_yoybigenough <- which(parameterByIterTracking_this_alt_clean$s_mean_yoy_no_threats >= best_guess_input_yoy)
+rows_tadsmallenough <- which(parameterByIterTracking_this_alt_clean$s_mean_tadpoles_no_threats < best_guess_input_tad)
+# rows <- intersect(rows_yoybigenough , rows_tadsmallenough )
+
+rows <- rows_yoybigenough 
+# rows <- 1:nrow(parameterByIterTracking_this_alt_clean)
+
+test3 <- cbind(parameterByIterTracking_this_alt_clean[rows, c("s_mean_tadpoles_no_threats", "s_sd_tadpoles_no_threats")],
+               as.data.frame(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])[rows,])
+# colnames(test3) <- c("s_tadpoles_mean", "prob_persist")
+colnames(test3) <- c("survival_tadpoles_mean","survival_tadpoles_sd", "prob_persist")
+
+
+ggplot(test3, aes(x = survival_tadpoles_sd, y = prob_persist)) +
+  geom_point() + geom_smooth()
+
+
+# change names later if stick, going fast
+best_guess_input_mean <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_mean_tadpoles_no_threats")]))
+min_mean <- as.numeric(as.character(min(test3$survival_tadpoles_mean)))
+max_mean <- as.numeric(as.character(max(test3$survival_tadpoles_mean)))
+P10_input_mean <- as.numeric(as.character(quantile(test3$survival_tadpoles_mean, 0.1)))
+P90_input_mean <- as.numeric(as.character(quantile(test3$survival_tadpoles_mean, 0.9)))
+
+best_guess_input_sd <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_sd_tadpoles_no_threats")]))
+min_sd <- as.numeric(as.character(min(test3$survival_tadpoles_sd)))
+max_sd <- as.numeric(as.character(max(test3$survival_tadpoles_sd)))
+P10_input_sd <- as.numeric(as.character(quantile(test3$survival_tadpoles_sd, 0.1)))
+P90_input_sd <- as.numeric(as.character(quantile(test3$survival_tadpoles_sd, 0.9)))
+
+p_sens_tad_surv_mean_sd_persist <- ggplot2::ggplot(data = test3, ggplot2::aes(x=survival_tadpoles_mean, y = survival_tadpoles_sd)) +
+  ggplot2::geom_point(aes(fill = prob_persist, size = prob_persist), shape = 21, alpha = 0.7) +
+  scale_fill_viridis_c(guide = "legend", name="Probability of persistence") + # https://community.rstudio.com/t/ggplot2-is-it-possible-to-combine-color-fill-and-size-legends/17072/2
+  scale_size_continuous(range = c(1, 5), name="Probability of persistence") +
+  # ggplot2::xlim(P10_input_mean, P90_input_mean) +
+  # ggplot2::ylim(P10_input_sd, P90_input_sd) +
+  # ggplot2::xlim(min_tad, best_guess_input_mean) +
+   ggplot2::xlim(min_tad, max_tad) +
+  ggplot2::ylim(min_sd, max_sd) +
+  ggplot2::geom_hline(yintercept = best_guess_input_sd, linetype = "dashed", color = "red") +
+  # ggplot2::geom_hline(yintercept = P10_input_sd, linetype = "dashed", color = "black") +
+  # ggplot2::geom_hline(yintercept = P90_input_sd, linetype = "dashed", color = "black") +
+  ggplot2::geom_vline(xintercept = best_guess_input_mean, linetype = "dashed", color = "red") +
+  # ggplot2::geom_vline(xintercept = P10_input_mean, linetype = "dashed", color = "black") +
+  # ggplot2::geom_vline(xintercept = P90_input_mean, linetype = "dashed", color = "black") +
+  xlab("Mean tadpole survival\n (no threats)") +
+  ylab( "SD tadpole survival\n (no threats)") + 
+  ggtitle( "A)") + 
+  ggplot2::theme_bw() +
+  ggplot2::theme(
+    panel.grid.major = ggplot2::element_blank(),
+    panel.grid.minor = ggplot2::element_blank(),
+    strip.background = ggplot2::element_blank(),
+    panel.border = ggplot2::element_rect(colour = "black"),
+    text = ggplot2::element_text(size = 12),
+    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+    legend.position = "bottom"
+  )
+
+p_sens_tad_surv_mean_sd_persist
+
+filename <- paste("ForReport/graph_sens_tad_surv_mean_sd_persist", version,".tiff", sep="")
+tiff(filename, width=12, height=8, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600,
+     restoreConsole=TRUE)
+p_sens_tad_surv_mean_sd_persist
+dev.off()
+
+
+
+testglm <- glm(prob_persist ~ survival_tadpoles_mean + survival_tadpoles_sd + survival_tadpoles_mean*survival_tadpoles_sd, 
+               # family = binomial, data =  test3) # warning is ok, try quasibinomial instead to be sure
+               family = quasibinomial, data =  test3)
+
+summary(testglm)
+library(visreg)
+
+# interaction is only significant when limit rows also to tadpole means below the P50
+# but even with all the tadpole mean data the trends look similar when we look at the grah
+# for large mean survival, sd doesn't matter
+# for small mean survival, larger standard deviation is worse for prob of persistence
+
+visreg(testglm , "survival_tadpoles_sd", by="survival_tadpoles_mean")
+visreg(testglm , "survival_tadpoles_mean", by="survival_tadpoles_sd")
+
 #---- Explore prob of persistence. ----
 
 prob_persist <- cbind(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])
@@ -2268,5 +2360,20 @@ results_all_for_this_iteration_fall[which(results_all_for_this_iteration_fall$cl
   
   
   
+  ############ Other investigation  ################
+  
+  
+  # iteration 75 has the highest temporal variation for tadpole survival
+  which(parameterByIterTracking$s_sd_tadpoles_no_threats == max(parameterByIterTracking$s_sd_tadpoles_no_threats))
+  
+  test_max <- results_all_iterations[which(results_all_iterations$iteration == 75), ]
+  test_max2 <- results_summary_all_iterations_overall[which(results_summary_all_iterations_overall$iteration == 75), ]
+  test_max3 <- parameterByIterTracking[75,]
 
+  which(parameterByIterTracking$s_sd_tadpoles_no_threats == min(parameterByIterTracking$s_sd_tadpoles_no_threats))
+  which(parameterByIterTracking$s_sd_tadpoles_no_threats <= 0.012) # 320
+  
+  test_min <- results_all_iterations[which(results_all_iterations$iteration == 302), ]
+  test_min2 <- results_summary_all_iterations_overall[which(results_summary_all_iterations_overall$iteration == 302), ]
+  test_min3 <- parameterByIterTracking[320,]
   
