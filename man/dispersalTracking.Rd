@@ -11,6 +11,7 @@ dispersalTracking(
   i,
   j,
   wetlands,
+  wetlands_not_dry,
   wetland_distances_km,
   parameterByIterTracking,
   allow_outside,
@@ -27,6 +28,8 @@ dispersalTracking(
 \item{j}{Year}
 
 \item{wetlands}{A vector of the wetland names that are available in the WMA.}
+
+\item{wetlands_not_dry}{A vector of the wetland names that are available as dipersal destinations this year becasue they are not dry.}
 
 \item{wetland_distances_km}{A matrix of distance between the wetlands.}
 
@@ -65,6 +68,7 @@ parameterByIterTracking_baseCase <- dapva4nlf::selectNLFIdahoParameterByIterTrac
 dispersal_results <- dispersalTracking(resultsTracking_popSize_females, 
                                       yoy_rows, i = 1, j = 1,
                                       wetlands = c("cell3", "cell4", "cell7"),
+                                      wetlands_not_dry = c("cell3", "cell4", "cell7"),
                                       wetland_distances_km,
                                       parameterByIterTracking = parameterByIterTracking_baseCase,
                                       allow_outside = 'no', 

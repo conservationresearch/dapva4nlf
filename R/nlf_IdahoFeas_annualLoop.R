@@ -438,7 +438,8 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
 
       # And now those yoy disperse
       dispersal_results <- dapva4nlf::dispersalTracking(resultsTracking_popSize_females, yoy_rows, i, j,
-                                             wetlands = wetlands_not_dry,
+                                             wetlands,
+                                             wetlands_not_dry,
                                              wetland_distances_km,
                                              parameterByIterTracking,
                                              allow_outside = dispersal_allowed_outside)

@@ -19,6 +19,7 @@
 #' @param i Iteration #
 #' @param j Year
 #' @param wetlands A vector of the wetland names that are available in the WMA.
+#' @param wetlands_not_dry A vector of the wetland names that are available as dipersal destinations this year becasue they are not dry.
 #' @param wetland_distances_km A matrix of distance between the wetlands.
 #' @param parameterByIterTracking A dataframe of the form parameterByIterTracking()
 #'  that contains the following dispersal related inputs: dispersal_CSF_vs_MoreGoShort,
@@ -50,6 +51,7 @@
 #'dispersal_results <- dispersalTracking(resultsTracking_popSize_females, 
 #'                                       yoy_rows, i = 1, j = 1,
 #'                                       wetlands = c("cell3", "cell4", "cell7"),
+#'                                       wetlands_not_dry = c("cell3", "cell4", "cell7"),
 #'                                       wetland_distances_km,
 #'                                       parameterByIterTracking = parameterByIterTracking_baseCase,
 #'                                       allow_outside = 'no', 

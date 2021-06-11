@@ -68,7 +68,9 @@ existing population there. Defaults to FALSE. Turn to TRUE only when
 exploring the implications of having an established population from the
 start.}
 
-\item{dispersal_allowed_outside}{'yes' or 'no, defaults to 'no'}
+\item{dispersal_allowed_outside}{'yes' or 'no, defaults to 'no'. Note: this was 
+after most of this had been developed since we later decided not to allow dispersal
+outside. Left with this switch in case we want to change it again in the future.}
 }
 \description{
 This functions contains the annual loop of the Idaho Feasability 
