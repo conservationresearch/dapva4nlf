@@ -119,22 +119,51 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
     ######### Apply environmental stochasticity (EV) to select survival rates in the absence of threats. #########
     # Note that the wetlands have different rates for each life stage
     s_eggs_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_eggs_no_threats")])
+    s_eggs_mean_ephWetlands <- as.numeric(parameterByIterTracking[i, paste0("s_mean_ephWetlands_eggs_no_threats")])
     s_eggs_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_eggs_no_threats")])
     s_eggs <- unlist(lapply(1:length(wetlands_without_outside), function(x) {
-      dapva::selectPercentileBetaDistribution(
-        mean = s_eggs_mean,
-        sd = s_eggs_sd,
-        EV_percentile = percentilesEV_survival_eggs_tad[j, paste(wetlands_without_outside[x])]
-      )}))
+      
+      if(wetlands_without_outside[x] != "ephemeral_wetlands"){
+        s_eggs_this_wetland <- dapva::selectPercentileBetaDistribution(
+          mean = s_eggs_mean,
+          sd = s_eggs_sd,
+          EV_percentile = percentilesEV_survival_eggs_tad[j, paste(wetlands_without_outside[x])]
+        )
+      }
+      
+      if(wetlands_without_outside[x] == "ephemeral_wetlands"){
+        s_eggs_this_wetland <- dapva::selectPercentileBetaDistribution(
+          mean = s_eggs_mean_ephWetlands,
+          sd = s_eggs_sd,
+          EV_percentile = percentilesEV_survival_eggs_tad[j, paste(wetlands_without_outside[x])]
+        )
+      }
+      return(s_eggs_this_wetland)
+      }))
 
     s_tadpoles_mean <- as.numeric(parameterByIterTracking[i, paste0("s_mean_tadpoles_no_threats")])
+    s_tadpoles_mean_ephWetlands <- as.numeric(parameterByIterTracking[i, paste0("s_mean_ephWetlands_tadpoles_no_threats")])
     s_tadpoles_sd <- as.numeric(parameterByIterTracking[i, paste0("s_sd_tadpoles_no_threats")])
     s_tadpoles <- unlist(lapply(1:length(wetlands_without_outside), function(x) {
-      dapva::selectPercentileBetaDistribution(
-        mean = s_tadpoles_mean,
-        sd = s_tadpoles_sd,
-        EV_percentile = percentilesEV_survival_eggs_tad[j, paste(wetlands_without_outside[x])]
-      )}))    
+      
+      if(wetlands_without_outside[x] != "ephemeral_wetlands"){
+        s_tadpoles_this_wetland <- dapva::selectPercentileBetaDistribution(
+          mean = s_tadpoles_mean,
+          sd = s_tadpoles_sd,
+          EV_percentile = percentilesEV_survival_eggs_tad[j, paste(wetlands_without_outside[x])]
+        )
+      }
+      
+      if(wetlands_without_outside[x] == "ephemeral_wetlands"){
+        s_tadpoles_this_wetland <- dapva::selectPercentileBetaDistribution(
+          mean = s_tadpoles_mean_ephWetlands,
+          sd = s_tadpoles_sd,
+          EV_percentile = percentilesEV_survival_eggs_tad[j, paste(wetlands_without_outside[x])]
+        )
+      }
+      
+      return(s_tadpoles_this_wetland)
+      }))    
     
     # Lea's insight is that in every translocation experience so far, there are always some tadpoles that become metamorphs
     # So doesn't make sense for there to ever be none that survive

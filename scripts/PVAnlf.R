@@ -43,11 +43,12 @@ alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are p
 # rows_to_run <- c(6, 10, 11, 12) # run No bullfrog plus the three hypothetical scenarios
 rows_to_run <- c(2)
 #---- Specify number of iterations and number of runs per iterations.  -------------
-n_iter  <- 2000# 500
-flexible_convergence_iteration_on <- "yes" # 'yes' or 'no', generally choose yes unless you are running a tornado and want to specify a # of iter
+n_iter  <- 1500 #2000# 500
+flexible_convergence_iteration_on <- "no" # 'yes' or 'no', generally choose yes unless you are running a tornado and want to specify a # of iter
 max_n_runs_per_iter <- 1000 # flexible convergence is always on at the run level
 flexible_convergence_run_on <- 'yes' # always yes unless doing a run test as below
-baseCase <- "yes" # 'yes' or 'no'
+baseCase <- "no" # 'yes' or 'no'
+testing_eph_wetlands <- "yes" # testing to see if really good or really bad makes a difference, do because if include prob not successful need many more iteraitons to check on this, turn off when done
 
 doingRunConvTest <- "no"  # 'yes' or 'no'
 
@@ -95,6 +96,10 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
     flexible_convergence_iteration_on <- "no"
   }
   
+  if(testing_eph_wetlands == "yes"){
+    parameterByIterTracking$ephWetRest_effective <- "yes"
+  }
+  
   # Trying to better understand wetland correlations
   # using alternative 10 - testing existing pop
   # This is going the way I expected so appears to be working - less correlated is better
@@ -118,21 +123,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
     parameterByIterTracking$bullfrogMgmt_effective <- "no"
   }
   
-  #---- Update  parameters with the condition of ephemeral wetland restoration being effective. ----
-  # Replace any iterations where habitat restoration is not effective to NA for the freq of dry events
-  # This allows sensitivity to be calculated properly for the tornado
-  rows_ephWetRest_notEffective <- which(parameterByIterTracking$ephWetRest_effective == "no")
-  parameterByIterTracking$ephemeral_freq_dry[rows_ephWetRest_notEffective] <- NA
 
-  #---- Update  parameters with the condition of bullfrog management being effective. ----
-  # Replace any iterations where bullfrog management is effective to NA for all the bullfrog threat related survival inputs.
-  # This allows sensitivity to be calculated properly for the tornado
-  rows_bullfrogMgt_effective <- which(parameterByIterTracking$bullfrogMgmt_effective == "yes")
-  parameterByIterTracking$s_pct_reduced_eggs_bullfrogs[rows_bullfrogMgt_effective] <- NA
-  parameterByIterTracking$s_pct_reduced_tadpoles_bullfrogs[rows_bullfrogMgt_effective] <- NA
-  parameterByIterTracking$s_pct_reduced_yoy_bullfrogs[rows_bullfrogMgt_effective] <- NA
-  parameterByIterTracking$s_pct_reduced_juvenile_bullfrogs[rows_bullfrogMgt_effective] <- NA
-  parameterByIterTracking$s_pct_reduced_adult_bullfrogs[rows_bullfrogMgt_effective] <- NA
   
   #---- Update reproduction and survival parameters that don't have valid beta distribution shape parameters. ----
   
@@ -157,6 +148,14 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   parameterByIterTracking <- dapva::parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
                                                                                      mean = "s_mean_tadpoles_no_threats",
                                                                                      sd = "s_sd_tadpoles_no_threats")
+  
+  parameterByIterTracking <- dapva::parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
+                                                                                            mean = "s_mean_ephWetlands_eggs_no_threats",
+                                                                                            sd = "s_sd_eggs_no_threats")
+  
+  parameterByIterTracking <- dapva::parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
+                                                                                            mean = "s_mean_ephWetlands_tadpoles_no_threats",
+                                                                                            sd = "s_sd_tadpoles_no_threats")
 
   parameterByIterTracking <- dapva::parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
                                                                                      mean = "s_mean_yoy_no_threats",
@@ -169,6 +168,25 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   parameterByIterTracking <- dapva::parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
                                                                                      mean = "s_mean_adult_no_threats",
                                                                                      sd = "s_sd_adult_no_threats")
+  
+  #---- Update  parameters with the condition of ephemeral wetland restoration being effective. ----
+  # Replace any iterations where habitat restoration is not effective to NA for the freq of dry events
+  # This allows sensitivity to be calculated properly for the tornado
+  rows_ephWetRest_notEffective <- which(parameterByIterTracking$ephWetRest_effective == "no")
+  parameterByIterTracking$ephemeral_freq_dry[rows_ephWetRest_notEffective] <- NA
+  parameterByIterTracking$s_mean_ephWetlands_eggs_no_threats[rows_ephWetRest_notEffective] <- NA
+  parameterByIterTracking$s_mean_ephWetlands_tadpoles_no_threats[rows_ephWetRest_notEffective] <- NA
+  
+  #---- Update  parameters with the condition of bullfrog management being effective. ----
+  # Replace any iterations where bullfrog management is effective to NA for all the bullfrog threat related survival inputs.
+  # This allows sensitivity to be calculated properly for the tornado
+  rows_bullfrogMgt_effective <- which(parameterByIterTracking$bullfrogMgmt_effective == "yes")
+  parameterByIterTracking$s_pct_reduced_eggs_bullfrogs[rows_bullfrogMgt_effective] <- NA
+  parameterByIterTracking$s_pct_reduced_tadpoles_bullfrogs[rows_bullfrogMgt_effective] <- NA
+  parameterByIterTracking$s_pct_reduced_yoy_bullfrogs[rows_bullfrogMgt_effective] <- NA
+  parameterByIterTracking$s_pct_reduced_juvenile_bullfrogs[rows_bullfrogMgt_effective] <- NA
+  parameterByIterTracking$s_pct_reduced_adult_bullfrogs[rows_bullfrogMgt_effective] <- NA
+  
   #---- Run the PVA. ----
   # set it up to run in batches of 100 so we can monitor progress, frustrated by the lack of ability to have a progress bar
   

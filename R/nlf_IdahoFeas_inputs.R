@@ -93,9 +93,9 @@ getNLFIdahoFeasinputs <- function() {
       best_guess_type = "median", management_alternative = "status_quo", source = "Lea and Rebecca on April 26, 2021", comments = "Reading off the graph in Corn and Liveo 1989 - study from Colorado and Wyoming")
   )
   
-  #---- Survival: mean, no threats.  -------------
+  #---- Survival: mean, no threats, existing/main wetlands.  -------------
   
-  survival_rate_mean_no_threats <- list(
+  survival_rate_mean_no_threats_existing_wetlands <- list(
     c(input = "s_mean_eggs_no_threats", type = "survival", 
       lcl = 0.12, best_guess = 0.75, ucl = 0.9, confidence = 95,
       lower_bound = 0.05, upper_bound = 0.95,
@@ -126,6 +126,27 @@ getNLFIdahoFeasinputs <- function() {
       best_guess_type = "median", management_alternative = "status_quo", 
       source = "Lea and Rebecca, April 23, 2021", comments = "annual survival for adults (age 2 and older), includes overwinter survival")
     
+  )
+  
+  #---- Survival: mean, no threats, ephemeral wetlands.  -------------
+  
+  # Same distribution as main/existing wetlands but will do a seperate paramater draw since don't know how they will relate to the existing wetlands and
+  # want to be able to test it
+  
+  # Only affects eggs and tadpoles, all the rest will be the same as the other wetlands since terrestrial life stages
+  
+  survival_rate_mean_no_threats_ephemeral_wetlands <- list(
+    c(input = "s_mean_ephWetlands_eggs_no_threats", type = "survival", 
+      lcl = 0.12, best_guess = 0.75, ucl = 0.9, confidence = 95,
+      lower_bound = 0.05, upper_bound = 0.95,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 23, 2021", comments = "survival from eggs to tadpoles"),
+    
+    c(input = "s_mean_ephWetlands_tadpoles_no_threats", type = "survival", 
+      lcl = 0.02, best_guess = 0.04, ucl = 0.1, confidence = 80,
+      lower_bound = 0.01, upper_bound = 0.25,
+      best_guess_type = "median", management_alternative = "status_quo", 
+      source = "Lea and Rebecca, April 23, 2021", comments = "survival from tadpoles to yoy")
   )
   
   #---- Survival: standard deviation (temporal variation), no threats.  -------------
@@ -459,7 +480,8 @@ getNLFIdahoFeasinputs <- function() {
     repro_prop_active_mean,
     repro_prop_active_sd,
     repro_clutch_size,
-    survival_rate_mean_no_threats,
+    survival_rate_mean_no_threats_existing_wetlands,
+    survival_rate_mean_no_threats_ephemeral_wetlands,
     survival_rate_sd_no_threats,
     survival_pctReduction_bullfrogs,
     survival_pctReduction_roads,
@@ -583,7 +605,7 @@ selectNLFIdahoParameterByIterTracking <- function(inputs, base_case = FALSE) {
     parameterByIterTracking[i, "num_eggs_per_active_female_mean_A3"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "num_eggs_per_active_female_mean_A3")]))
     parameterByIterTracking[i, "num_eggs_per_active_female_mean_A4plus"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "num_eggs_per_active_female_mean_A4plus")]))
   }
-  ######### Select the survival parameters for this iteration - mean survival rates no threats. #########
+  ######### Select the survival parameters for this iteration - mean survival rates no threats, existing wetlands. #########
   if(base_case == FALSE){
     parameterByIterTracking[i, "s_mean_eggs_no_threats"] <- dapva::selectParamMetalogDistribution(input_name = "s_mean_eggs_no_threats", inputsDF = inputs)
     parameterByIterTracking[i, "s_mean_tadpoles_no_threats"] <- dapva::selectParamMetalogDistribution(input_name = "s_mean_tadpoles_no_threats", inputsDF = inputs)
@@ -599,6 +621,18 @@ selectNLFIdahoParameterByIterTracking <- function(inputs, base_case = FALSE) {
     parameterByIterTracking[i, "s_mean_juv_no_threats"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_mean_juv_no_threats")]))
     parameterByIterTracking[i, "s_mean_adult_no_threats"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_mean_adult_no_threats")]))
   }
+  
+  ######### Select the survival parameters for this iteration - mean survival rates no threats, ephemeral wetlands. #########
+  if(base_case == FALSE){
+    parameterByIterTracking[i, "s_mean_ephWetlands_eggs_no_threats"] <- dapva::selectParamMetalogDistribution(input_name = "s_mean_ephWetlands_eggs_no_threats", inputsDF = inputs)
+    parameterByIterTracking[i, "s_mean_ephWetlands_tadpoles_no_threats"] <- dapva::selectParamMetalogDistribution(input_name = "s_mean_ephWetlands_tadpoles_no_threats", inputsDF = inputs)
+ }
+  
+  if(base_case == TRUE){
+    parameterByIterTracking[i, "s_mean_ephWetlands_eggs_no_threats"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_mean_ephWetlands_eggs_no_threats")]))
+    parameterByIterTracking[i, "s_mean_ephWetlands_tadpoles_no_threats"] <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_mean_ephWetlands_tadpoles_no_threats")]))
+ }
+  
   
   ######### Select the survival parameters for this iteration - temporal variance in survival rates no threats. #########
   if(base_case == FALSE){
@@ -892,11 +926,14 @@ makeTornadoParameterLabels <- function(parameterByIterTracking) {
   tornado_parameter_labels$label[which(tornado_parameter_labels$name == "num_eggs_per_active_female_mean_A4plus")] <- "number of eggs per A4plus if lay eggs  - mean"
   
   # Survival
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_mean_eggs_no_threats")] <- "egg survival - mean"
-  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_mean_tadpoles_no_threats")] <- "tadpole survival - mean"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_mean_eggs_no_threats")] <- "egg survival in existing wetlands - mean"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_mean_tadpoles_no_threats")] <- "tadpole survival in existing wetlands - mean"
   tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_mean_yoy_no_threats")] <- "yoy survival - mean"
   tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_mean_juv_no_threats")] <- "juv survival - mean"
   tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_mean_adult_no_threats")] <- "adult survival - mean"
+  
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_mean_ephWetlands_eggs_no_threats")] <- "egg survival in ephemeral wetlands - mean"
+  tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_mean_ephWetlands_tadpoles_no_threats")] <- "tadpole survival in ephemeral wetlands - mean"
   
   tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_sd_eggs_no_threats")] <- "egg survival - temporal variation (sd)"
   tornado_parameter_labels$label[which(tornado_parameter_labels$name == "s_sd_tadpoles_no_threats")] <- "tadpole survival - temporal variation (sd)"
