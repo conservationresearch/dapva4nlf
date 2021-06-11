@@ -58,7 +58,8 @@
 #' @export
 # unit test in place, needs more testing
 dispersalTracking <- function(resultsTracking_popSize_females, yoy_rows, i, j,
-                               wetlands,
+                              wetlands,
+                              wetlands_not_dry,
                               wetland_distances_km,
                               parameterByIterTracking,
                               allow_outside, 
@@ -78,6 +79,7 @@ dispersalTracking <- function(resultsTracking_popSize_females, yoy_rows, i, j,
   
   if(allow_outside == 'no'){
     wetlands <- wetlands[which(wetlands != "outside")]
+    wetlands_not_dry <- wetlands_not_dry[which(wetlands_not_dry != "outside")]
   }
   
   wetland_distances_km_relevant <- wetland_distances_km[paste(wetlands), paste(wetlands)]
@@ -150,26 +152,29 @@ dispersalTracking <- function(resultsTracking_popSize_females, yoy_rows, i, j,
       wetlands_greater1lessEqual2km <- colnames(wetland_distances_km_relevant)[which(wetland_distances > 1 & wetland_distances <= 2)]
       wetlands_greater2km <- colnames(wetland_distances_km_relevant)[which(wetland_distances > 2)]
       
+      # Only allow dispersal destinations that are not dry
+      
+      wetlands_lessEqual_1km <- intersect(wetlands_lessEqual_1km, wetlands_not_dry)
+      wetlands_greater1lessEqual2km <- intersect(wetlands_greater1lessEqual2km, wetlands_not_dry)
+      wetlands_greater2km <- intersect(wetlands_greater2km, wetlands_not_dry)
+      
+      # If frogs are allowed outside, since all wetlands are less than 1km from the outside, add the outside bucket as an option to all distance buckets
       if(allow_outside == "yes"){
-        # Since all wetlands are less than 1km from the outside, add the outside bucket as an option to all distance buckets
         wetlands_greater1lessEqual2km <- unique(c(wetlands_greater1lessEqual2km, "outside"))
         wetlands_greater2km <- unique(c(wetlands_greater2km, "outside"))
       }
 
-      
       # If frogs are not allowed outside, then remove the outside option 
       if(allow_outside == "no"){
         wetlands_lessEqual_1km <- wetlands_lessEqual_1km[which(wetlands_lessEqual_1km != 'outside')]
         wetlands_greater1lessEqual2km <- wetlands_greater1lessEqual2km[which(wetlands_greater1lessEqual2km != 'outside')]
         wetlands_greater2km <- wetlands_greater2km[which(wetlands_greater2km != 'outside')]
-        
-        # If any of the distance categories are now empty, then have them return to their original wetland
-        if(length(wetlands_lessEqual_1km) == 0){wetlands_lessEqual_1km <- paste(wetland)}
-        if(length(wetlands_greater1lessEqual2km) == 0){wetlands_greater1lessEqual2km <- paste(wetland)}
-        if(length(wetlands_greater2km) == 0){wetlands_greater2km <- paste(wetland)}
-        
       }
       
+      # If any of the distance categories are now empty, then have them return to their original wetland
+      if(length(wetlands_lessEqual_1km) == 0){wetlands_lessEqual_1km <- paste(wetland)}
+      if(length(wetlands_greater1lessEqual2km) == 0){wetlands_greater1lessEqual2km <- paste(wetland)}
+      if(length(wetlands_greater2km) == 0){wetlands_greater2km <- paste(wetland)}
       
       # Which wetland do each go to
       destinations <- c(sample(wetlands_lessEqual_1km, n_lessEqual_1km, replace = TRUE),
@@ -184,10 +189,7 @@ dispersalTracking <- function(resultsTracking_popSize_females, yoy_rows, i, j,
       }
       if(allow_outside == 'yes'){
         dispersal_tracking[paste(wetland),"outside"] <- length(which(destinations == "outside"))
-        
       }
-      
-
     }
     
     if(n_dispersing == 0){ # then none to disperse

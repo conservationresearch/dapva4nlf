@@ -267,7 +267,19 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
     if(ephemeral_wetlands_dry == "yes"){
       s_pct_reduced_tadpoles_epehemeral_dry <- parameterByIterTracking[i, paste0("s_pct_reduced_tadpoles_drawdownComplete")] 
     }
-      
+    
+    #########  Update the wetland list for dispersal destinations based on if any of the wetlands are dry this year ######### 
+    
+    wetlands_not_dry <- wetlands # initalize
+    
+    if(ephemeral_wetlands_dry == "yes"){
+      wetlands_not_dry <- wetlands_not_dry[which(wetlands_not_dry!= "ephemeral_wetlands")]
+    }
+    
+    if(drawdown_relevant == "yes" && drawdown_status_this_year == "complete"){
+      wetlands_not_dry <- wetlands_not_dry[which(wetlands_not_dry!= drawdown_location_this_year)]
+    }
+  
     ######### Apply threat reductions to survival rates. #########
     # treat multiple threats multiplicitively
     # we know roads, are all present all the time
@@ -426,7 +438,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
 
       # And now those yoy disperse
       dispersal_results <- dapva4nlf::dispersalTracking(resultsTracking_popSize_females, yoy_rows, i, j,
-                                             wetlands,
+                                             wetlands = wetlands_not_dry,
                                              wetland_distances_km,
                                              parameterByIterTracking,
                                              allow_outside = dispersal_allowed_outside)
@@ -545,6 +557,7 @@ runAnnualLoopNLFIdahoPVA <- function(parameterByIterTracking, yrs, i, q,
       ######### And now those yoy disperse  #########
       dispersal_results <- dapva4nlf::dispersalTracking(resultsTracking_popSize_females, yoy_rows, i, j,
                                              wetlands,
+                                             wetlands_not_dry,
                                              wetland_distances_km,
                                              parameterByIterTracking,
                                              allow_outside = dispersal_allowed_outside)

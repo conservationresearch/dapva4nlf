@@ -476,10 +476,17 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
              "initial_year",#no uncertainty here; 
              "dispersal_CSFmodel_lessEqual1km", #no uncertainty here; part of larger model uncertainty
              "dispersal_CSFmodel_greater1kmlessequal2km", #no uncertainty here; part of larger model uncertainty
-             "dispersal_CSFmodel_greater1kmlessequal2km", #no uncertainty here; part of larger model uncertainty
+             "dispersal_CSFmodel_greater2km", #no uncertainty here; part of larger model uncertainty
              "dispersal_MoreGoShortmodel_lessEqual1km", #no uncertainty here; part of larger model uncertainty
              "dispersal_MoreGoShortmodel_greater1kmlessequal2km", #no uncertainty here; part of larger model uncertainty
-             "dispersal_MoreGoShortmodel_greater1kmlessequal2km"#no uncertainty here; part of larger model uncertainty
+             "dispersal_MoreGoShortmodel_greater2km",#no uncertainty here; part of larger model uncertainty
+             "dispersal_allowed_outside",#no uncertainty here; part of larger model uncertainty
+             "s_pct_reduced_tadpoles_drawdownComplete", #no uncertainty here;
+             "s_pct_reduced_tadpoles_roads", #no uncertainty here;  
+             "s_pct_reduced_tadpoles_chytrid", #no uncertainty here;
+             "quasi_extinction_threshold", #no uncertainty here;
+             "s_pct_reduced_eggs_roads", #no uncertainty here; 
+             "s_pct_reduced_eggs_chytrid" #no uncertainty here;
              )
   
   # Do the sensitivity analysis and make a tornado for each alternative
@@ -499,8 +506,9 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                            levels = c("no", "yes"))
   parameterByIterTracking_this_alt_clean$bullfrogMgmt_effective <- ordered(parameterByIterTracking_this_alt_clean$bullfrogMgmt_effective, 
                                                                            levels = c("no", "yes"))
-  parameterByIterTracking_this_alt_clean$dispersal_allowed_outside <- ordered(parameterByIterTracking_this_alt_clean$dispersal_allowed_outside, 
-                                                                           levels = c("no", "yes"))
+  # parameterByIterTracking_this_alt_clean$dispersal_allowed_outside <- ordered(parameterByIterTracking_this_alt_clean$dispersal_allowed_outside, 
+  #                                                                          levels = c("no", "yes"))
+  
   # Make tornado parameter labels
   tornado_parameter_labels <- dapva4nlf::makeTornadoParameterLabels(parameterByIterTracking = parameterByIterTracking_this_alt_clean)
   
