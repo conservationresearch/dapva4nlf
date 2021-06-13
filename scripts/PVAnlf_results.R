@@ -2377,3 +2377,372 @@ results_all_for_this_iteration_fall[which(results_all_for_this_iteration_fall$cl
   test_min2 <- results_summary_all_iterations_overall[which(results_summary_all_iterations_overall$iteration == 302), ]
   test_min3 <- parameterByIterTracking[320,]
   
+
+  
+  
+  # Here was using the RData file goBig_v1test14testephWet
+  
+  # If use a different one, first subset the data to include only those iterations where the epehemeral wetland restoration was effective (ephWetRest_effective == 'yes)
+  
+## What is going on with the ephemeral wetlands?
+  # Takeaways:
+  #1) It better to have good conditions in the ephemeral wetlands than poor conditions, regardless of drying frequency.
+  # This is good from a model debugging perspective – consistent with what we expect. 
+  #2) If tadpole survival is worse than in the main wetlands (right side of panel below) OR drying frequency is high (top of panel below),
+  # the ephemeral wetlands have sink-like qualities (i.e. eggs that are laid there are likely to not survive due to a drying event). Therefore, 
+  # in these cases, more drying frequency is better because then yoy don’t disperse there. But if the epehemeral wetlands are better than the main 
+  # wetlands for tadpole survival AND the wetlands do not dry up as often as the best guess, then a smaller drying frequency is better.
+  
+  # Visual for 1:
+  test5 <- cbind(parameterByIterTracking_this_alt_clean[, c("ephemeral_freq_dry", "s_mean_ephWetlands_tadpoles_no_threats")],
+                 as.data.frame(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])[,])
+  colnames(test5) <- c("ephemeral_freq_dry","s_mean_ephWetlands_tadpoles_no_threats", "prob_persist")
+  
+  testglm3 <- glm(prob_persist ~ ephemeral_freq_dry + s_mean_ephWetlands_tadpoles_no_threats + ephemeral_freq_dry*s_mean_ephWetlands_tadpoles_no_threats, 
+                  # family = binomial, data =  test3) # warning is ok, try quasibinomial instead to be sure
+                  family = quasibinomial, data =  test5)
+  
+  summary(testglm3)
+  library(visreg)
+  visreg(testglm3 , "s_mean_ephWetlands_tadpoles_no_threats", by="ephemeral_freq_dry")
+  
+  
+  # Helpful visual for 2:
+
+  test6 <- cbind(parameterByIterTracking_this_alt_clean[, c("ephemeral_freq_dry", "s_mean_ephWetlands_tadpoles_no_threats", "s_mean_tadpoles_no_threats")],
+                 as.data.frame(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])[,])
+
+  colnames(test6) <- c("ephemeral_freq_dry","s_mean_ephWetlands_tadpoles_no_threats", "s_mean_tadpoles_no_threats", "prob_persist")
+  test6$ephSurvBetterThanMain <- NA # initialize
+  test6$ephSurvBetterThanMain[which(test6$s_mean_ephWetlands_tadpoles_no_threats > test6$s_mean_tadpoles_no_threats)] <- 'eph wetlands better than main for tadpoles'
+  test6$ephSurvBetterThanMain[which(test6$s_mean_ephWetlands_tadpoles_no_threats < test6$s_mean_tadpoles_no_threats)] <- 'eph wetlands worse than main for tadpoles'
+  test6$ephSurvBetterThanMain <- as.factor(test6$ephSurvBetterThanMain)
+  
+  test6$main_surv_better_P50 <- 'no' # initialize
+  test6$main_surv_better_P50[which(test6$s_mean_tadpoles_no_threats > quantile(test6$s_mean_tadpoles_no_threats, 0.5))] <- 'yes - main better than P50'
+  test6$main_surv_better_P50 <- as.factor(test6$main_surv_better_P50)
+  
+  test6$ephemeral_freq_dry_cat <- 'eph wetland less often than P50' # initialize
+  test6$ephemeral_freq_dry_cat [which(test6$ephemeral_freq_dry > quantile(test6$ephemeral_freq_dry, 0.5))] <- 'eph wetland dry more often than P50'
+  test6$ephemeral_freq_dry_cat <- as.factor(test6$ephemeral_freq_dry_cat)
+
+  ggplot(test6, aes(x = ephemeral_freq_dry, prob_persist)) +
+    geom_point() + 
+    geom_smooth(method = "glm") + 
+    facet_grid(ephemeral_freq_dry_cat~ephSurvBetterThanMain)
+  
+  # Of all of the iterations, how many are in the bottom left quadrant (i.e. where the less frequent dry events are better because it is not a sink)
+  num_in_bottom_left_quad <- length(intersect(which(test6$ephemeral_freq_dry_cat == 'eph wetland less often than P50'),
+            which(test6$ephSurvBetterThanMain == 'eph wetlands better than main for tadpoles')))
+  
+  num_total <- dim(test6)[1]
+  
+  (proportion_in_bottom_left_quad <- num_in_bottom_left_quad/num_total)
+  
+  # # Other old exploratio nof this
+  # # For ephemeral wetlands test, why is freq of drying better? But also having 
+  # # better survival in the epehemral wetalnds is also better?
+  # 
+  # test <- results_summary_all_iterations_by_pop
+  # 
+  # parameterByIterTracking_this_alt_clean
+  # 
+  # rows <- 1:dim(parameterByIterTracking_this_alt_clean)[1]
+  # 
+  # test4 <- cbind(parameterByIterTracking_this_alt_clean[rows, c("ephemeral_freq_dry", "s_mean_ephWetlands_tadpoles_no_threats")],
+  #                as.data.frame(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])[rows,])
+  # # colnames(test3) <- c("s_tadpoles_mean", "prob_persist")
+  # colnames(test4) <- c("ephemeral_freq_dry","s_mean_ephWetlands_tadpoles_no_threats", "prob_persist")
+  # 
+  # 
+  # 
+  # testglm2 <- glm(prob_persist ~ ephemeral_freq_dry + s_mean_ephWetlands_tadpoles_no_threats + ephemeral_freq_dry*s_mean_ephWetlands_tadpoles_no_threats, 
+  #                 # family = binomial, data =  test3) # warning is ok, try quasibinomial instead to be sure
+  #                 family = quasibinomial, data =  test4)
+  # 
+  # summary(testglm2)
+  # library(visreg)
+  # 
+  # # interaction is only significant when limit rows also to tadpole means below the P50
+  # # but even with all the tadpole mean data the trends look similar when we look at the grah
+  # # for large mean survival, sd doesn't matter
+  # # for small mean survival, larger standard deviation is worse for prob of persistence
+  # 
+  # visreg(testglm2 , "ephemeral_freq_dry", by="s_mean_ephWetlands_tadpoles_no_threats")
+  # visreg(testglm2 , "s_mean_ephWetlands_tadpoles_no_threats", by="ephemeral_freq_dry")
+  # 
+  # 
+  # 
+  # test5 <- cbind(parameterByIterTracking_this_alt_clean[rows, c("s_mean_tadpoles_no_threats", "s_mean_ephWetlands_tadpoles_no_threats")],
+  #                as.data.frame(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])[rows,])
+  # # colnames(test3) <- c("s_tadpoles_mean", "prob_persist")
+  # colnames(test5) <- c("s_mean_tadpoles_no_threats","s_mean_ephWetlands_tadpoles_no_threats", "prob_persist")
+  # 
+  # 
+  # 
+  # testglm3 <- glm(prob_persist ~ s_mean_tadpoles_no_threats + s_mean_ephWetlands_tadpoles_no_threats + s_mean_tadpoles_no_threats*s_mean_ephWetlands_tadpoles_no_threats, 
+  #                 # family = binomial, data =  test3) # warning is ok, try quasibinomial instead to be sure
+  #                 family = quasibinomial, data =  test5)
+  # 
+  # summary(testglm3)
+  # library(visreg)
+  # 
+  # # interaction is only significant when limit rows also to tadpole means below the P50
+  # # but even with all the tadpole mean data the trends look similar when we look at the grah
+  # # for large mean survival, sd doesn't matter
+  # # for small mean survival, larger standard deviation is worse for prob of persistence
+  # 
+  # visreg(testglm3 , "s_mean_tadpoles_no_threats", by="s_mean_ephWetlands_tadpoles_no_threats")
+  # visreg(testglm3 , "s_mean_ephWetlands_tadpoles_no_threats", by="s_mean_tadpoles_no_threats")
+  # # Interp: when tadpole survival is high in the main wetlands, it helps to also have good tadpole survival 
+  # # in the ephemeral wetlands. But if survival is low in the main wetlands then the ephemeral wetlands don't really have an effect on persistence at all.
+  # 
+  # 
+  # 
+  # # Try filtering out only situations where they go dry alot
+  # rows_ephDryAlot <- which(parameterByIterTracking_this_alt_clean$ephemeral_freq_dry >= quantile(parameterByIterTracking_this_alt_clean$ephemeral_freq_dry, 0.9))
+  # rows_ephDryRarely <- which(parameterByIterTracking_this_alt_clean$ephemeral_freq_dry < quantile(parameterByIterTracking_this_alt_clean$ephemeral_freq_dry, 0.1))
+  # # rows <- intersect(rows_yoybigenough , rows_tadsmallenough )
+  # 
+  # rows <- rows_ephDryRarely# rows_ephDryAlot 
+  # 
+  # test5 <- cbind(parameterByIterTracking_this_alt_clean[rows, c("s_mean_tadpoles_no_threats", "s_mean_ephWetlands_tadpoles_no_threats")],
+  #                as.data.frame(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])[rows,])
+  # # colnames(test3) <- c("s_tadpoles_mean", "prob_persist")
+  # colnames(test5) <- c("s_mean_tadpoles_no_threats","s_mean_ephWetlands_tadpoles_no_threats", "prob_persist")
+  # 
+  # 
+  # 
+  # testglm3 <- glm(prob_persist ~ s_mean_tadpoles_no_threats + s_mean_ephWetlands_tadpoles_no_threats + s_mean_tadpoles_no_threats*s_mean_ephWetlands_tadpoles_no_threats, 
+  #                 # family = binomial, data =  test3) # warning is ok, try quasibinomial instead to be sure
+  #                 family = quasibinomial, data =  test5)
+  # 
+  # summary(testglm3)
+  # library(visreg)
+  # 
+  # # interaction is only significant when limit rows also to tadpole means below the P50
+  # # but even with all the tadpole mean data the trends look similar when we look at the grah
+  # # for large mean survival, sd doesn't matter
+  # # for small mean survival, larger standard deviation is worse for prob of persistence
+  # 
+  # visreg(testglm3 , "s_mean_tadpoles_no_threats", by="s_mean_ephWetlands_tadpoles_no_threats")
+  # visreg(testglm3 , "s_mean_ephWetlands_tadpoles_no_threats", by="s_mean_tadpoles_no_threats")
+  # 
+  # # When the epehemeral wetlands are rarely dry, it is more helpful to have high tadpole survival in the epehemeral wetlands
+  # 
+  # # Try looking specificually at the situation where the main wetlands have low tadpole survival
+  # rows_mainTadSurvLow <- which(parameterByIterTracking_this_alt_clean$s_mean_tadpoles_no_threats < quantile(parameterByIterTracking_this_alt_clean$s_mean_tadpoles_no_threats, 0.5))
+  # 
+  # rows <- rows_mainTadSurvLow 
+  # 
+  # test4 <- cbind(parameterByIterTracking_this_alt_clean[rows, c("ephemeral_freq_dry", "s_mean_ephWetlands_tadpoles_no_threats")],
+  #                as.data.frame(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])[rows,])
+  # # colnames(test3) <- c("s_tadpoles_mean", "prob_persist")
+  # colnames(test4) <- c("ephemeral_freq_dry","s_mean_ephWetlands_tadpoles_no_threats", "prob_persist")
+  # 
+  # 
+  # 
+  # testglm2 <- glm(prob_persist ~ ephemeral_freq_dry + s_mean_ephWetlands_tadpoles_no_threats + ephemeral_freq_dry*s_mean_ephWetlands_tadpoles_no_threats, 
+  #                 # family = binomial, data =  test3) # warning is ok, try quasibinomial instead to be sure
+  #                 family = quasibinomial, data =  test4)
+  # 
+  # summary(testglm2)
+  # library(visreg)
+  # 
+  # # interaction is only significant when limit rows also to tadpole means below the P50
+  # # but even with all the tadpole mean data the trends look similar when we look at the grah
+  # # for large mean survival, sd doesn't matter
+  # # for small mean survival, larger standard deviation is worse for prob of persistence
+  # 
+  # visreg(testglm2 , "ephemeral_freq_dry", by="s_mean_ephWetlands_tadpoles_no_threats")
+  # visreg(testglm2 , "s_mean_ephWetlands_tadpoles_no_threats", by="ephemeral_freq_dry")
+  # 
+  # 
+  # # Interpretation: when survival in the main wetlands is poor, it is helpful to have good survival in
+  # # the ephemeral ewtlands when they are going dry a lot but doesn't really matter if their frequency of going dry is low
+  # 
+  # 
+  # intersect(which(parameterByIterTracking$ephemeral_freq_dry > quantile(parameterByIterTracking$ephemeral_freq_dry, 0.9)), 
+  #           which(parameterByIterTracking$s_mean_tadpoles_no_threats > quantile(parameterByIterTracking$s_mean_tadpoles_no_threats, 0.9)))
+  # 
+  # test2 <- results_all_iterations[which(results_all_iterations$iteration == 13), ]
+  # # when dry alot and the mainwetlands are doing poor, the epehemeral wetland rarely get any tadpoles since they don't have anyone dispersing there most of the time, only a few if they do, and then high change of dry again if they do have tadpoles
+  # # when dry alot and the mainwetlands are doing well, there are no yoy in the eph wetlands that year (from either tadpoles or dispersal) so they loose a cohort of breeders. Here it is a bit of a sink
+  # 
+  # intersect(which(parameterByIterTracking$ephemeral_freq_dry < quantile(parameterByIterTracking$ephemeral_freq_dry, 0.1)), 
+  #           which(parameterByIterTracking$s_mean_tadpoles_no_threats > quantile(parameterByIterTracking$s_mean_tadpoles_no_threats, 0.9)))
+  # 
+  # test2 <- results_all_iterations[which(results_all_iterations$iteration == 156), ]
+  # # When not dry alot but the main wetlands are doing well, they are still a sink when it goes dry but doesn't really matter
+  # 
+  # intersect(which(parameterByIterTracking$ephemeral_freq_dry < quantile(parameterByIterTracking$ephemeral_freq_dry, 0.1)), 
+  #           which(parameterByIterTracking$s_mean_tadpoles_no_threats < quantile(parameterByIterTracking$s_mean_tadpoles_no_threats, 0.1)))
+  # 
+  # test2 <- results_all_iterations[which(results_all_iterations$iteration == 54), ]
+  # # When not dry alot and main wetlands are doing poorly, then they can be helpful in the short term but by 50 years out doesn't matter
+  # # Might be different if we tried releases directly into the ephemeral wetlands to get a pop established in this case
+  # 
+  # 
+  # 
+  # 
+  # ## Now look at it for results in year 20 - if main wetlands are poor, can the eph wetlands help if they don't dry up often?
+  # 
+  # rows_mainTadSurvLow <- which(parameterByIterTracking_this_alt_clean$s_mean_tadpoles_no_threats < quantile(parameterByIterTracking_this_alt_clean$s_mean_tadpoles_no_threats, 0.5))
+  # 
+  # rows <- rows_mainTadSurvLow 
+  # 
+  # test4 <- cbind(parameterByIterTracking_this_alt_clean[rows, c("ephemeral_freq_dry", "s_mean_ephWetlands_tadpoles_no_threats")],
+  #                as.data.frame(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "20"])[rows,])
+  # # colnames(test3) <- c("s_tadpoles_mean", "prob_persist")
+  # colnames(test4) <- c("ephemeral_freq_dry","s_mean_ephWetlands_tadpoles_no_threats", "prob_persist")
+  # 
+  # 
+  # 
+  # testglm2 <- glm(prob_persist ~ ephemeral_freq_dry + s_mean_ephWetlands_tadpoles_no_threats + ephemeral_freq_dry*s_mean_ephWetlands_tadpoles_no_threats, 
+  #                 # family = binomial, data =  test3) # warning is ok, try quasibinomial instead to be sure
+  #                 family = quasibinomial, data =  test4)
+  # 
+  # summary(testglm2)
+  # library(visreg)
+  # 
+  # # interaction is only significant when limit rows also to tadpole means below the P50
+  # # but even with all the tadpole mean data the trends look similar when we look at the grah
+  # # for large mean survival, sd doesn't matter
+  # # for small mean survival, larger standard deviation is worse for prob of persistence
+  # 
+  # visreg(testglm2 , "ephemeral_freq_dry", by="s_mean_ephWetlands_tadpoles_no_threats")
+  # visreg(testglm2 , "s_mean_ephWetlands_tadpoles_no_threats", by="ephemeral_freq_dry")
+  # 
+  # 
+  # # Even when tadpole survival in the ephemeral wetlands is good, it is better for the ephemeral wetlands 
+  # # to be dry more often because then no one disperses there and is less of a sink?
+  # 
+  # rows_ephTadSurvHigh <- which(parameterByIterTracking_this_alt_clean$s_mean_ephWetlands_tadpoles_no_threats > quantile(parameterByIterTracking_this_alt_clean$s_mean_ephWetlands_tadpoles_no_threats, 0.5))
+  # 
+  # rows <- rows_ephTadSurvHigh
+  # 
+  # test4 <- cbind(parameterByIterTracking_this_alt_clean[rows, c("ephemeral_freq_dry","s_mean_tadpoles_no_threats")],
+  #                as.data.frame(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "20"])[rows,])
+  # # colnames(test3) <- c("s_tadpoles_mean", "prob_persist")
+  # colnames(test4) <- c("ephemeral_freq_dry","s_mean_tadpoles_no_threats", "prob_persist")
+  # 
+  # 
+  # 
+  # testglm2 <- glm(prob_persist ~ ephemeral_freq_dry + s_mean_tadpoles_no_threats + ephemeral_freq_dry*s_mean_tadpoles_no_threats, 
+  #                 # family = binomial, data =  test3) # warning is ok, try quasibinomial instead to be sure
+  #                 family = quasibinomial, data =  test4)
+  # 
+  # summary(testglm2)
+  # library(visreg)
+  # 
+  # # interaction is only significant when limit rows also to tadpole means below the P50
+  # # but even with all the tadpole mean data the trends look similar when we look at the grah
+  # # for large mean survival, sd doesn't matter
+  # # for small mean survival, larger standard deviation is worse for prob of persistence
+  # 
+  # visreg(testglm2 , "ephemeral_freq_dry", by="s_mean_tadpoles_no_threats")
+  # visreg(testglm2 , "s_mean_tadpoles_no_threats", by="ephemeral_freq_dry")
+  # 
+  # 
+  # # Even when tadpole survival in the ephemeral wetlands is good, it is better for the ephemeral wetlands 
+  # # to be dry more often because then no one disperses there and is less of a sink?
+  # 
+  # 
+  # # Test the two survivals to see if there is an interaction
+  # 
+  # rows_ephDryAlot <- which(parameterByIterTracking_this_alt_clean$ephemeral_freq_dry >= quantile(parameterByIterTracking_this_alt_clean$ephemeral_freq_dry, 0.9))
+  # rows_ephDryRarely <- which(parameterByIterTracking_this_alt_clean$ephemeral_freq_dry < quantile(parameterByIterTracking_this_alt_clean$ephemeral_freq_dry, 0.1))
+  # rows_ephDrymiddle <- intersect(which(parameterByIterTracking_this_alt_clean$ephemeral_freq_dry > quantile(parameterByIterTracking_this_alt_clean$ephemeral_freq_dry, 0.4)),
+  #                                which(parameterByIterTracking_this_alt_clean$ephemeral_freq_dry < quantile(parameterByIterTracking_this_alt_clean$ephemeral_freq_dry, 0.6)))
+  # 
+  # rows <- rows_ephDrymiddle 
+  # 
+  # test4 <- cbind(parameterByIterTracking_this_alt_clean[rows, c("s_mean_ephWetlands_tadpoles_no_threats","s_mean_tadpoles_no_threats")],
+  #                as.data.frame(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "20"])[rows,])
+  # # colnames(test3) <- c("s_tadpoles_mean", "prob_persist")
+  # colnames(test4) <- c("s_mean_ephWetlands_tadpoles_no_threats","s_mean_tadpoles_no_threats", "prob_persist")
+  # 
+  # 
+  # 
+  # testglm2 <- glm(prob_persist ~ s_mean_ephWetlands_tadpoles_no_threats + s_mean_tadpoles_no_threats + s_mean_ephWetlands_tadpoles_no_threats*s_mean_tadpoles_no_threats, 
+  #                 # family = binomial, data =  test3) # warning is ok, try quasibinomial instead to be sure
+  #                 family = quasibinomial, data =  test4)
+  # 
+  # summary(testglm2)
+  # library(visreg)
+  # 
+  # visreg(testglm2 , "s_mean_ephWetlands_tadpoles_no_threats", by="s_mean_tadpoles_no_threats")
+  # # visreg(testglm2 , "s_mean_tadpoles_no_threats", by="s_mean_ephWetlands_tadpoles_no_threats")
+  # 
+  # # When rarely dry, helpful for tadpole survival to be higher in epehemeral wetlands
+  # # When dry alot (or middle amount of), only helpful for tadpole survival to be higher in epehemeral wetlands when things are good in the main wetlands too
+  # 
+  # 
+  # # So when things are good in the main wetlands, expect there to be a reslationshp between tadpole survival in the epehemeral wetlands and freq of drying
+  # # where as freq of drying increases higher tadpole survival is helpful
+  # 
+  # rows_mainTadSurvHigh <- which(parameterByIterTracking_this_alt_clean$s_mean_tadpoles_no_threats > quantile(parameterByIterTracking_this_alt_clean$s_mean_tadpoles_no_threats, 0.8))
+  # 
+  # rows <- rows_mainTadSurvHigh
+  # 
+  # test4 <- cbind(parameterByIterTracking_this_alt_clean[rows, c("ephemeral_freq_dry", "s_mean_ephWetlands_tadpoles_no_threats")],
+  #                as.data.frame(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "20"])[rows,])
+  # # colnames(test3) <- c("s_tadpoles_mean", "prob_persist")
+  # colnames(test4) <- c("ephemeral_freq_dry","s_mean_ephWetlands_tadpoles_no_threats", "prob_persist")
+  # 
+  # 
+  # 
+  # testglm2 <- glm(prob_persist ~ ephemeral_freq_dry + s_mean_ephWetlands_tadpoles_no_threats + ephemeral_freq_dry*s_mean_ephWetlands_tadpoles_no_threats, 
+  #                 # family = binomial, data =  test3) # warning is ok, try quasibinomial instead to be sure
+  #                 family = quasibinomial, data =  test4)
+  # 
+  # summary(testglm2)
+  # library(visreg)
+  # 
+  # visreg(testglm2 , "ephemeral_freq_dry", by="s_mean_ephWetlands_tadpoles_no_threats")
+  # # visreg(testglm2 , "s_mean_ephWetlands_tadpoles_no_threats", by="ephemeral_freq_dry")
+  # 
+  # # If things are good in the main wetlands and good in the ephemeral wetlands, then worse if dry more often
+  # # If things are good in the main wetlands and not as good in the epehemeral wetlands, doesn't really matter.
+  # 
+  # # And when things are not good in the main wetlands, same thing - worse if dry more and things are good in that wetland but doesn't matter if things are bad.
+  # 
+  # rows_mainTadSurvLow<- which(parameterByIterTracking_this_alt_clean$s_mean_tadpoles_no_threats <= quantile(parameterByIterTracking_this_alt_clean$s_mean_tadpoles_no_threats, 0.2))
+  # 
+  # rows2 <- rows_mainTadSurvLow
+  # 
+  # test4 <- cbind(parameterByIterTracking_this_alt_clean[rows2, c("ephemeral_freq_dry", "s_mean_ephWetlands_tadpoles_no_threats")],
+  #                as.data.frame(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "20"])[rows2,])
+  # # colnames(test3) <- c("s_tadpoles_mean", "prob_persist")
+  # colnames(test4) <- c("ephemeral_freq_dry","s_mean_ephWetlands_tadpoles_no_threats", "prob_persist")
+  # 
+  # 
+  # 
+  # testglm2 <- glm(prob_persist ~ ephemeral_freq_dry + s_mean_ephWetlands_tadpoles_no_threats + ephemeral_freq_dry*s_mean_ephWetlands_tadpoles_no_threats, 
+  #                 # family = binomial, data =  test3) # warning is ok, try quasibinomial instead to be sure
+  #                 family = quasibinomial, data =  test4)
+  # 
+  # summary(testglm2)
+  # library(visreg)
+  # 
+  # visreg(testglm2 , "ephemeral_freq_dry", by="s_mean_ephWetlands_tadpoles_no_threats")
+  # # visreg(testglm2 , "s_mean_ephWetlands_tadpoles_no_threats", by="ephemeral_freq_dry")
+  # 
+  # # Now for all rows
+  # 
+  # test4 <- cbind(parameterByIterTracking_this_alt_clean[, c("ephemeral_freq_dry", "s_mean_ephWetlands_tadpoles_no_threats")],
+  #                as.data.frame(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "20"])[,])
+  # # colnames(test3) <- c("s_tadpoles_mean", "prob_persist")
+  # colnames(test4) <- c("ephemeral_freq_dry","s_mean_ephWetlands_tadpoles_no_threats", "prob_persist")
+  # 
+  # 
+  # 
+  # testglm2 <- glm(prob_persist ~ ephemeral_freq_dry + s_mean_ephWetlands_tadpoles_no_threats + ephemeral_freq_dry*s_mean_ephWetlands_tadpoles_no_threats, 
+  #                 # family = binomial, data =  test3) # warning is ok, try quasibinomial instead to be sure
+  #                 family = quasibinomial, data =  test4)
+  # 
+  # summary(testglm2)
+  # library(visreg)
+  # 
+  # visreg(testglm2 , "ephemeral_freq_dry", by="s_mean_ephWetlands_tadpoles_no_threats")
+  # # visreg(testglm2 , "s_mean_ephWetlands_tadpoles_no_threats", by="ephemeral_freq_dry")
