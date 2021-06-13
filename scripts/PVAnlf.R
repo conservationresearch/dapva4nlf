@@ -15,7 +15,7 @@ system.time({ # turn on the timer
 
 #---- Clear the workspace. ----
 rm(list = ls())
-version <- "_v1test14testephWet" # insert short description to append to results to help identify
+version <- "_vFinalJune2021" # insert short description to append to results to help identify what it is
 
 #---- Load libraries, and set the random seed.  -------------
 ## Import libraries
@@ -38,19 +38,33 @@ clusterSetRNGStream(cl, iseed = 30) # without parallel computing can just do set
 #---- Specify the alternatives to run.  -------------
 alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are preloaded in for easy calling
 
-#rows_to_run <- c(10) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
-# rows_to_run <- c(2:9) # note that can't call 1 but just 0s anyways; all the rest seem to run fine; 3 got stuck in batches of 2 but works with more batches
-# rows_to_run <- c(6, 10, 11, 12) # run No bullfrog plus the three hypothetical scenarios
+# For Travis on IBEST - do 10000 iterations of the GoBig or Go Home for sensitivity analysis
 rows_to_run <- c(2)
+
+# For Laura, remember to change to flexible # of iterations
+# Effort-based
+# rows_to_run <- c(2:5)
+
+# Variations on Go-Big
+# rows_to_run <- c(6:9)
+
+# Hypothetical scenarios
+# rows_to_run <- c(10, 12) # run No bullfrog plus the three hypothetical scenarios
+
 #---- Specify number of iterations and number of runs per iterations.  -------------
-n_iter  <- 1500 #2000# 500
+
+# Set the number of iterations. If using flexible conv below, this is the max # of iterations. 
+n_iter  <- 10000 #1500 #2000# 500
+
+# Specify if you want to allow it to stop early or not using the flexible iteration criteria
 flexible_convergence_iteration_on <- "no" # 'yes' or 'no', generally choose yes unless you are running a tornado and want to specify a # of iter
 max_n_runs_per_iter <- 1000 # flexible convergence is always on at the run level
-flexible_convergence_run_on <- 'yes' # always yes unless doing a run test as below
-baseCase <- "no" # 'yes' or 'no'
-testing_eph_wetlands <- "yes" # testing to see if really good or really bad makes a difference, do because if include prob not successful need many more iteraitons to check on this, turn off when done
 
+# Tweak other things if doing specific testing or convergence graphs, etc.
+flexible_convergence_run_on <- 'yes' # always yes unless doing a run test as below
 doingRunConvTest <- "no"  # 'yes' or 'no'
+testing_eph_wetlands <- "no" # testing to see if really good or really bad makes a difference, do because if include prob not successful need many more iteraitons to check on this, turn off when done
+baseCase <- "no" # 'yes' or 'no'
 
 if(baseCase == 'yes'){
   print(paste("Using one iteration of basecase parameters"))
@@ -100,19 +114,6 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
     parameterByIterTracking$ephWetRest_effective <- "yes"
   }
   
-  # Trying to better understand wetland correlations
-  # using alternative 10 - testing existing pop
-  # This is going the way I expected so appears to be working - less correlated is better
-  #parameterByIterTracking_baseCase$wetland_eggTadSurv_TempCor_noEph <- 0.01 # prob of persist is 0.6117, self sustain is 0.3529; new random seed - prob of persist is 0.60927 , self sustain is 0.3311258
-  # parameterByIterTracking_baseCase$wetland_eggTadSurv_TempCor_noEph[1] <- 1 # prob of persist 50 is 0.5125, self sustain is 0.2750
-  #parameterByIterTracking <-  parameterByIterTracking_baseCase
-  
-  # Trying to better understand temporal correlations
-  # parameterByIterTracking_baseCase$s_sd_tadpoles_no_threats <- 0.01 # LOW - prob of persist is 0.25, prob of self sustain i 0.12
-  # parameterByIterTracking_baseCase$s_sd_tadpoles_no_threats <- 0.08 # High - prob of persist is 0.26, prob of self sustain i 0.13
-  
-  
-  
   # Add in fix for when the alternative does not include ephemeral wetland habitat rest. Then the parameter for ephWetRest_effective should always also be no.
   if(alternative_details$restore_ephemeralWetlands == "no"){
     parameterByIterTracking$ephWetRest_effective <- "no"
@@ -122,8 +123,6 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   if(alternative_details$bullfrog_management == "no"){
     parameterByIterTracking$bullfrogMgmt_effective <- "no"
   }
-  
-
   
   #---- Update reproduction and survival parameters that don't have valid beta distribution shape parameters. ----
   
