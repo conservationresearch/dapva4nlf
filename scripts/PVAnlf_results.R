@@ -515,7 +515,7 @@ oneWetland_alt_name  <- "Try Hard at One Wetland"
 fewTadpoles_alt_name  <- "Try Hard but Few Tadpoles"
 noBFM_alt_name  <- "Try Hard but No Bullfrog Management"
 short_alt_name  <- "Try Hard but Short"
-noHabRest_alt_name  <- "Try Hard but No Habitat Restoration" # still missing this one
+noHabRest_alt_name  <- "Try Hard but No Habitat Restoration" 
 
 int7 <- results_summary_prob_selfsustaining[c(which(results_summary_prob_selfsustaining$alternative == goBig_alt_name),
                                               which(results_summary_prob_selfsustaining$alternative == oneWetland_alt_name),
@@ -663,7 +663,7 @@ int6b$alternative<- factor(int6b$alternative, levels=c("Testing Extreme Releases
 
 
 
-#---- Make graphs for the report - variations on Go Big, self-sustaining. ----
+#---- Make graphs for the report - hypothetical scenarios, self-sustaining. ----
 # Get a fresh load of the results
 # Upload all of the results in the results folder and bind them together
 temp_iter <- list.files(pattern="*results_overall_")
@@ -731,7 +731,7 @@ int8b$alternative<- factor(int8b$alternative, levels=c("Testing Extreme Releases
 # dev.off()
 
 
-#---- Make graphs for the report -variations on Go Big, panel for export. ----
+#---- Make graphs for the report - hypothetical scenarios, panel for export. ----
 
 filename <- paste("ForReport/graph_panel_hyptheticals", version,".tiff", sep="")
 tiff(filename, width=12, height=8, units="in",
@@ -2357,6 +2357,150 @@ results_all_for_this_iteration_fall[which(results_all_for_this_iteration_fall$cl
   # The key seems to be having at least one? good year for yoy survival, this sets the age structure up for success
   # Actually, really depends on the overall parameters. I don't think there is one rule of thumb like this necesarily
   # Maybe could look at it as if the parameters for frogs are good overall, what is the age structure?
+  
+  
+  
+  
+  
+  ###### Exploring why one wetland now comes out better than regular GoBig ####
+  
+  # No epehemeral wetlands is better than GoBig because overall the ephemeral wetlands aren't helpful
+  # Compare with noEphWetlands
+  
+  # Flying Bars
+  
+  # goBig_alt_name  <- "Go Big or Go Home "
+  oneWetland_alt_name  <- "Try Hard at One Wetland"
+  noHabRest_alt_name  <- "Try Hard but No Habitat Restoration" 
+  
+  int9 <- results_all_iter[c(which(results_all_iter$alternative == oneWetland_alt_name),
+                             which(results_all_iter$alternative == noHabRest_alt_name)),]
+  # int9$alternative[which(int6$alternative == goBig_alt_name)] <- "Go Big or Go Home" # get rid of the extra space
+  int9$alternative[which(int9$alternative == noHabRest_alt_name)] <- "Try Hard but \n No Habitat Restoration" # put it on two lines
+  
+  
+  int9$alternative <- factor(int9$alternative, levels=c("Try Hard but \n No Habitat Restoration",
+                                                       "Try Hard at One Wetland")) # reorder factor levels
+  
+  
+  (persistence_oneWetInv_flyingBars1 <- graphFlyingBars(results_summary_all_iterations = int9,
+                                                       metric = "probability of persistence",
+                                                       year = 50,
+                                                       credible_interval = 0.95,
+                                                       x_axis_lab = "Probability of Persistence in Year 50",
+                                                       y_axis_lab = "\n Management Alternative",
+                                                       # title = 'B)'))
+                                                       title = ''))
+  
+  
+  # Look at compared with wetland correlation/similarity
+  path_to_results_folder <- "C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results"# on my work PC
+  #path_to_results_folder <- "/Users/laurakeating/Documents/R/R_scripts/BTPD_PVA/Results/BTPD_baseline_results_march17"# on my mac
+  setwd(path_to_results_folder) # on my mac
+  file_oneWet <-  list.files(path = ".","*goBigOneWetland_vFinalJune2021.RData", full.names="TRUE")
+  load(file_oneWet)
+   # file_goBig <-  list.files(path = ".","*goBig_vFinalJune2021.RData", full.names="TRUE")
+   # load(file_goBig)
+  
+  n_iter <- nrow(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])
+  
+  # Look at with just effective epehemeral wetlands
+  test9 <- as.data.frame(cbind(parameterByIterTracking_this_alt_clean[1:n_iter, c("wetland_eggTadSurv_TempCor_noEph", "ephWetRest_effective", 
+                                                                                  "s_mean_tadpoles_no_threats", "s_mean_yoy_no_threats",
+                                                                                  "s_mean_ephWetlands_tadpoles_no_threats")],
+                 as.data.frame(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])[,]))
+  colnames(test9) <- c("wetland_eggTadSurv_TempCor_noEph", "ephWetRest_effective", 
+                       "s_mean_tadpoles_no_threats", "s_mean_yoy_no_threats",
+                       "s_mean_ephWetlands_tadpoles_no_threats",
+                       "prob_persist")
+  
+  plot(test9$wetland_eggTadSurv_TempCor_noEph, test9$prob_persist)
+  
+  test9$wetland_eggTadSurv_TempCor_noEph_cat <- 'wetland_eggTadSurv_TempCor_noEph less than P50' # initialize
+  test9$wetland_eggTadSurv_TempCor_noEph_cat [which(test9$wetland_eggTadSurv_TempCor_noEph > quantile(test9$wetland_eggTadSurv_TempCor_noEph, 0.5))] <- '> P50'
+  test9$wetland_eggTadSurv_TempCor_noEph_cat <- as.factor(test9$wetland_eggTadSurv_TempCor_noEph_cat)
+  
+  test9$s_mean_tadpoles_no_threats_cat <- 's_mean_tadpoles_no_threats less than P50' # initialize
+  test9$s_mean_tadpoles_no_threats_cat [which(test9$s_mean_tadpoles_no_threats > quantile(test9$s_mean_tadpoles_no_threats, 0.5))] <- 'tad surv > P50'
+  test9$s_mean_tadpoles_no_threats_cat <- as.factor(test9$s_mean_tadpoles_no_threats_cat)
+  
+  test9$s_mean_yoy_no_threats_cat <- 's_mean_yoy_no_threats less than P50' # initialize
+  test9$s_mean_yoy_no_threats_cat [which(test9$s_mean_yoy_no_threats > quantile(test9$s_mean_yoy_no_threats, 0.5))] <- 'yoy surv > P50'
+  test9$s_mean_yoy_no_threats_cat <- as.factor(test9$s_mean_yoy_no_threats_cat)
+  
+  test9$s_mean_ephWetlands_tadpoles_no_threats_cat <- 's_mean_ephWetlands_tadpoles_no_threats less than P50' # initialize
+  test9$s_mean_ephWetlands_tadpoles_no_threats_cat [which(test9$s_mean_ephWetlands_tadpoles_no_threats > quantile(test9$s_mean_ephWetlands_tadpoles_no_threats, 0.5, na.rm = TRUE))] <- 's_mean_ephWetlands_tadpoles_no_threats > P50'
+  test9$s_mean_ephWetlands_tadpoles_no_threats_cat <- as.factor(test9$s_mean_ephWetlands_tadpoles_no_threats_cat)
+  
+  ggplot2::ggplot(test9, ggplot2::aes(x = wetland_eggTadSurv_TempCor_noEph, prob_persist)) +
+    ggplot2::geom_point() + 
+    ggplot2::geom_smooth(method = "glm")+ 
+    # ggplot2::facet_grid(s_mean_tadpoles_no_threats_cat~wetland_eggTadSurv_TempCor_noEph_cat) 
+     # ggplot2::facet_wrap(~s_mean_tadpoles_no_threats_cat)
+   ggplot2::facet_grid(s_mean_tadpoles_no_threats_cat~s_mean_yoy_no_threats_cat) 
+  
+  test10 <- test9 # initalize
+  test10$s_mean_tad_yoy_cat <- "s mean tad and yoy - one or both less than P50"
+  test10$s_mean_tad_yoy_cat[intersect(which(test10$s_mean_yoy_no_threats > quantile(test10$s_mean_yoy_no_threats, 0.5)),
+                                    which(test10$s_mean_tadpoles_no_threats > quantile(test10$s_mean_tadpoles_no_threats, 0.5)))] <- "s mean tad and yoy - both > than P50"
+  
+  
+  ggplot2::ggplot(test10[which(test10$ephWetRest_effective == "yes"),], ggplot2::aes(x = wetland_eggTadSurv_TempCor_noEph, prob_persist)) +
+    ggplot2::geom_point() + 
+    ggplot2::geom_smooth(method = "glm")+ 
+    # ggplot2::facet_grid(s_mean_tadpoles_no_threats_cat~wetland_eggTadSurv_TempCor_noEph_cat) 
+    # ggplot2::facet_wrap(~s_mean_tadpoles_no_threats_cat)
+    ggplot2::facet_grid(s_mean_ephWetlands_tadpoles_no_threats_cat~s_mean_tad_yoy_cat) 
+  
+  
+  
+  rows_sim <- which(test9$wetland_eggTadSurv_TempCor_noEph > quantile(test9$wetland_eggTadSurv_TempCor_noEph, 0.8))
+  rows_notSim <-  which(test9$wetland_eggTadSurv_TempCor_noEph < quantile(test9$wetland_eggTadSurv_TempCor_noEph, 0.2))
+  
+  # Flying Bars
+  (persistence_oneWet_flyingBars1 <- graphFlyingBars(results_summary_all_iterations = results_all_this_alt[rows_notSim,],
+                                                     metric = "probability of persistence",
+                                                     year = 50,
+                                                     credible_interval = 0.95,
+                                                     x_axis_lab = "Probability of Persistence in Year 50",
+                                                     y_axis_lab = "\n Management Alternative",
+                                                     # title = 'B)'))
+                                                     title = ''))
+  
+  
+  
+  
+  
+  ## OLD
+  
+  path_to_results_folder <- "C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results"# on my work PC
+  #path_to_results_folder <- "/Users/laurakeating/Documents/R/R_scripts/BTPD_PVA/Results/BTPD_baseline_results_march17"# on my mac
+  setwd(path_to_results_folder) # on my mac
+  file_oneWet <-  list.files(path = ".","*goBigOneWetland_vFinalJune2021.RData", full.names="TRUE")
+  file_oneWet <-  list.files(path = ".","*goBig_vFinalJune2021.RData", full.names="TRUE")
+  load(file_oneWet)
+  
+  n_iter <- nrow(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])
+
+  # Look at with just effective epehemeral wetlands
+  test9 <- cbind(parameterByIterTracking_this_alt_clean[1:n_iter, c("ephWetRest_effective", "ephemeral_freq_dry", "s_mean_ephWetlands_tadpoles_no_threats")],
+                 as.data.frame(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])[,])
+  colnames(test9) <- c("ephWetRest_effective","ephemeral_freq_dry","s_mean_ephWetlands_tadpoles_no_threats", "prob_persist")
+  
+  
+  rows_eff <- which(test9$ephWetRest_effective == "yes")
+  rows_notEff <- which(test9$ephWetRest_effective == "no")
+  
+  # Flying Bars
+  (persistence_oneWet_flyingBars1 <- graphFlyingBars(results_summary_all_iterations = results_all_this_alt[rows_notEff,],
+                                                       metric = "probability of persistence",
+                                                       year = 50,
+                                                       credible_interval = 0.95,
+                                                       x_axis_lab = "Probability of Persistence in Year 50",
+                                                       y_axis_lab = "\n Management Alternative",
+                                                       # title = 'B)'))
+                                                       title = ''))
+  
   
   
   
