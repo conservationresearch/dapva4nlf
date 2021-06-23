@@ -847,6 +847,16 @@ grid.arrange(tornado_persist_top10,  tornado_selfsustain_top10,
 dev.off()
 
 
+
+#---- Check on number of runs per iteration and number of iterations. ----
+
+# Of runs per iteration
+min(results_all_iter$n_runs_per_iter) #300
+max(results_all_iter$n_runs_per_iter) #363
+
+# of iterations
+max(results_all_iter$iteration)
+
 #---- Explore more traditional sensitivity analysis graphs. ----
 # Uses the same results RData file that was loaded above for the tornado
 # Confirmed can get simular insights to tornado, tornado is easier and clearer in my opinion :)
