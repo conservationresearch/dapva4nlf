@@ -288,7 +288,12 @@ int2$alternative<- factor(int2$alternative, levels=c("Go Big or Go Home", "Middl
                                                     "Minimum Funding /\n Low Effort",
                                                     "Do Nothing" )) # reorder factor levels
 
-(persistence_effort_flyingBars1 <- graphFlyingBars(results_summary_all_iterations = int2,
+# int2 <- int2[which(int2$alternative != "Do Nothing"),]
+# int2 <- int2
+# Tried the above and confirmed that the violin plots look better without these, with all four
+# are in it must be doing a scaling thing for all of them
+
+(persistence_effort_flyingBars1 <- dapva::graphBoxandViolinPlot(results_summary_all_iterations = int2,
                                             metric = "probability of persistence",
                                             year = yrs,
                                             credible_interval = 0.95,
@@ -296,6 +301,21 @@ int2$alternative<- factor(int2$alternative, levels=c("Go Big or Go Home", "Middl
                                             y_axis_lab = "\n Management Alternative",
                                             # title = 'B)'))
                                             title = ''))
+
+
+# cumulative distribution function - to look at stochastic dominance
+
+(persistence_effort_CDF1 <- graphCDF(results_summary_all_iterations = int2,
+         metric = "probability of persistence",
+         year = yrs,
+         x_axis_lab = "Probability of Persistence in Year 50",
+         y_axis_lab = "Cumulative Probability",
+         title = ''))
+
+
+
+
+
 
 # filename <- paste("ForReport/graph_panel_effort_persist", version,".tiff", sep="")
 # tiff(filename, width=12, height=8, units="in",
@@ -379,7 +399,7 @@ int4$alternative <- factor(int4$alternative, levels=c("Go Big or Go Home", "Midd
                                                      "Minimum Funding /\n Low Effort",
                                                      "Do Nothing" )) # reorder factor levels
 
-(selfsustain_effort_flyingBars1 <- graphFlyingBars(results_summary_all_iterations = int4,
+(selfsustain_effort_flyingBars1 <- dapva::graphBoxandViolinPlot(results_summary_all_iterations = int4,
                                                    metric = "probability of self-sustaining population",
                                                    year = yrs,
                                                    credible_interval = 0.95,
@@ -396,6 +416,14 @@ int4$alternative <- factor(int4$alternative, levels=c("Go Big or Go Home", "Midd
 #              ncol = 1, nrow = 2)
 # dev.off()
 
+(selfsustain_effort_CDF1 <- graphCDF(results_summary_all_iterations = int4,
+                                     metric = "probability of self-sustaining population",
+                                     year = yrs,
+                                     x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",
+                                     y_axis_lab = "Cumulative Probability",
+                                     title = ''))
+
+
 
 #---- Make graphs for the report - level of effort, panel for export. ----
 
@@ -405,7 +433,8 @@ tiff(filename, width=12, height=8, units="in",
      restoreConsole=TRUE)
 grid.arrange(persist_effort_graph1,  selfsustain_effort_graph1,
              persistence_effort_flyingBars1, selfsustain_effort_flyingBars1,
-             ncol = 2, nrow = 2)
+             persistence_effort_CDF1, selfsustain_effort_CDF1,
+             ncol = 2, nrow = 3)
 dev.off()
 
 #---- Make graphs for the report - variations on Go Big, persistence. ----
@@ -475,7 +504,7 @@ int6$alternative<- factor(int6$alternative, levels=c("Try Hard but \n No Bullfro
                                                      "Go Big or Go Home")) # reorder factor levels
 
 
-(persistence_goBigVar_flyingBars1 <- graphFlyingBars(results_summary_all_iterations = int6,
+(persistence_goBigVar_flyingBars1 <- dapva::graphBoxandViolinPlot(results_summary_all_iterations = int6,
                                                    metric = "probability of persistence",
                                                    year = yrs,
                                                    credible_interval = 0.95,
@@ -561,7 +590,7 @@ int8$alternative<- factor(int8$alternative, levels=c("Try Hard but \n No Bullfro
                                                      "Try Hard at One Wetland",
                                                      "Go Big or Go Home")) # reorder factor levels
 
-(selfsustain_goBigVar_flyingBars1 <- graphFlyingBars(results_summary_all_iterations = int8,
+(selfsustain_goBigVar_flyingBars1 <- dapva::graphBoxandViolinPlot(results_summary_all_iterations = int8,
                                                    metric = "probability of self-sustaining population",
                                                    year = yrs,
                                                    credible_interval = 0.95,
@@ -582,7 +611,7 @@ int8$alternative<- factor(int8$alternative, levels=c("Try Hard but \n No Bullfro
 #---- Make graphs for the report -variations on Go Big, panel for export. ----
 
 filename <- paste("ForReport/graph_panel_goBigVar", version,".tiff", sep="")
-tiff(filename, width=12, height=8, units="in",
+tiff(filename, width=12, height=12, units="in",
      pointsize=8, compression="lzw", bg="white", res=600,
      restoreConsole=TRUE)
 grid.arrange(persist_goBigVar_graph1,  selfsustain_goBigVar_graph1,
@@ -643,7 +672,7 @@ int6b$alternative<- factor(int6b$alternative, levels=c("Testing Extreme Releases
                                                      "Testing Existing Population")) # reorder factor levels
 
 
-(persistence_hypotheticals_flyingBars1 <- graphFlyingBars(results_summary_all_iterations = int6b,
+(persistence_hypotheticals_flyingBars1 <- dapva::graphBoxandViolinPlot(results_summary_all_iterations = int6b,
                                                      metric = "probability of persistence",
                                                      year = yrs,
                                                      credible_interval = 0.95,
@@ -713,7 +742,7 @@ int8b$alternative<- factor(int8b$alternative, levels=c("Testing Extreme Releases
                                                       # "Testing Extreme Releases A", 
                                                       "Testing Existing Population")) # reorder factor levels
 
-(selfsustain_hypotheticals_flyingBars1 <- graphFlyingBars(results_summary_all_iterations = int8b,
+(selfsustain_hypotheticals_flyingBars1 <- dapva::graphBoxandViolinPlot(results_summary_all_iterations = int8b,
                                                      metric = "probability of self-sustaining population",
                                                      year = yrs,
                                                      credible_interval = 0.95,
@@ -742,6 +771,81 @@ grid.arrange(persist_hypotheticals_graph1,  selfsustain_hypotheticals_graph1,
              ncol = 2, nrow = 2)
 dev.off()
 
+
+
+
+
+#---- Make graphs for the report - cumulative distribution function for stochastic dominance. ----
+
+
+# IN PROGRESS - THIS FUNCTION IS NOW IN DAPVA. NEED TO MOVE UP AND ADD TO PANNEL GRAPHS FOR REPORT
+graphCDF(results_summary_all_iterations = int2,
+         metric = "probability of persistence",
+         year = yrs,
+         x_axis_lab = "Probability of Persistence in Year 50",
+         y_axis_lab = "Cumulative Probability",
+         title = 'C)')
+
+
+# 
+# 
+# test <- int2[which(int2$metric == "probability of persistence"),c("alternative", "50")]
+# colnames(test) <- c("alternative", "probability_persist")
+# 
+# # To get a smooth curve rather than steps following the data
+# # From https://stackoverflow.com/questions/48100458/how-to-smooth-ecdf-plots-in-r
+# 
+# dat <- test
+# colnames(dat) <- c("group", "x")
+# library(tidyverse)
+# 
+# ggplot2::ggplot(test, ggplot2::aes(x = probability_persist, color = alternative)) +
+#   # ggplot2::stat_ecdf(geom = "step", pad = FALSE) +  # https://ggplot2.tidyverse.org/reference/stat_ecdf.html
+#   ggplot2::stat_ecdf(data=test, aes(probability_persist, color = alternative)) + 
+#   ggplot2::theme_bw() +
+#   ggplot2::theme(
+#     panel.grid.major = ggplot2::element_blank(),
+#     panel.grid.minor = ggplot2::element_blank(),
+#     strip.background = ggplot2::element_blank(),
+#     panel.border = ggplot2::element_rect(colour = "black"),
+#     text = ggplot2::element_text(size = 12),
+#     axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+#     legend.position = "bottom"
+#   )
+# 
+# 
+# # Split the data by group and calculate the smoothed cumulative density for each group
+# # From https://stackoverflow.com/questions/48100458/how-to-smooth-ecdf-plots-in-r
+# dens = split(dat, dat$group) %>% 
+#   map_df(function(d) {
+#     dens = density(dat$x, adjust=0.1, from=min(dat$x) - 0.05*diff(range(dat$x)), 
+#                    to=max(dat$x) + 0.05*diff(range(dat$x)))
+#     data.frame(x=dens$x, y=dens$y, cd=cumsum(dens$y)/sum(dens$y), group=d$group[1])
+#   })
+# 
+# 
+# dat <- test
+# colnames(dat) <- c("variable", "value")
+# 
+# dens = split(dat, dat$variable) %>% 
+#   map_df(function(dat) {
+#     # dens = density(dat$value, adjust=0.1, from=min(dat$value) - 0.05*diff(range(dat$value)), 
+#     #                to=max(dat$value) + 0.05*diff(range(dat$value)))
+#     dens = density(dat$value, adjust=0.1, from=min(dat$value), to=max(dat$value))
+#     data.frame(x=dens$x, y=dens$y, cd=cumsum(dens$y)/sum(dens$y), group=dat$variable[1])
+#   })
+# 
+# ggplot() +
+#   # stat_ecdf(data=dat, aes(value, colour=variable), alpha=0.8, lty="11") +
+#   geom_line(data=dens, aes(x, cd, colour=group)) +
+#   theme_classic()
+# 
+# # ggplot() +
+# #   stat_ecdf(data=dat, aes(x, colour=group), alpha=0.8, lty="11") +
+# #   geom_line(data=dens, aes(x, cd, colour=group)) +
+# #   theme_classic()
+# 
+# 
 
 #---- Make graphs for the report -goBig tornados, panel for export. ----
 
