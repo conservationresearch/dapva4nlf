@@ -300,7 +300,7 @@ int2$alternative<- factor(int2$alternative, levels=c("Go Big or Go Home", "Middl
                                             x_axis_lab = "Probability of Persistence in Year 50",
                                             y_axis_lab = "\n Management Alternative",
                                             # title = 'B)'))
-                                            title = ''))
+                                            title = 'A)'))
 
 
 # cumulative distribution function - to look at stochastic dominance
@@ -309,8 +309,8 @@ int2$alternative<- factor(int2$alternative, levels=c("Go Big or Go Home", "Middl
          metric = "probability of persistence",
          year = yrs,
          x_axis_lab = "Probability of Persistence in Year 50",
-         y_axis_lab = "\n Cumulative Probability \n",
-         title = ''))
+         y_axis_lab = "\n \n \n \n \n Cumulative Probability \n",
+         title = 'C)'))
 
 
 
@@ -406,7 +406,7 @@ int4$alternative <- factor(int4$alternative, levels=c("Go Big or Go Home", "Midd
                                                    x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",
                                                    y_axis_lab = "\n Management Alternative",
                                                    # title = 'B)'))
-                                                   title = ''))
+                                                   title = 'B)'))
 
 # filename <- paste("ForReport/graph_panel_effort_selfsustain", version,".tiff", sep="")
 # tiff(filename, width=12, height=8, units="in",
@@ -420,22 +420,55 @@ int4$alternative <- factor(int4$alternative, levels=c("Go Big or Go Home", "Midd
                                      metric = "probability of self-sustaining population",
                                      year = yrs,
                                      x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",
-                                     y_axis_lab = "\n Cumulative Probability \n",
-                                     title = ''))
+                                     y_axis_lab = "\n \n \n \n \n Cumulative Probability \n",
+                                     title = 'D)'))
 
 
 
-#---- Make graphs for the report - level of effort, panel for export. ----
+#---- Make graphs for the report - level of effort, graphs for export. ----
 
-filename <- paste("ForReport/graph_panel_effort", version,".tiff", sep="")
-tiff(filename, width=12, height=12, units="in",
+# filename <- paste("ForReport/graph_panel_effort", version,".tiff", sep="")
+# tiff(filename, width=12, height=12, units="in",
+#      pointsize=8, compression="lzw", bg="white", res=600,
+#      restoreConsole=TRUE)
+# grid.arrange(persist_effort_graph1,  selfsustain_effort_graph1,
+#              persistence_effort_flyingBars1, selfsustain_effort_flyingBars1,
+#              persistence_effort_CDF1, selfsustain_effort_CDF1,
+#              ncol = 2, nrow = 3)
+# dev.off()
+
+filename <- paste("ForReport/graph_effort_time", version,".tiff", sep="")
+tiff(filename, width=12, height=4, units="in",
      pointsize=8, compression="lzw", bg="white", res=600,
      restoreConsole=TRUE)
 grid.arrange(persist_effort_graph1,  selfsustain_effort_graph1,
-             persistence_effort_flyingBars1, selfsustain_effort_flyingBars1,
-             persistence_effort_CDF1, selfsustain_effort_CDF1,
-             ncol = 2, nrow = 3)
+             ncol = 2, nrow = 1)
 dev.off()
+
+filename <- paste("ForReport/graph_effort_year50", version,".tiff", sep="")
+tiff(filename, width=12, height=8, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600,
+     restoreConsole=TRUE)
+grid.arrange(persistence_effort_flyingBars1, selfsustain_effort_flyingBars1,
+             persistence_effort_CDF1, selfsustain_effort_CDF1,
+             ncol = 2, nrow = 2)
+dev.off()
+
+# filename <- paste("ForReport/graph_effort_year50violin", version,".tiff", sep="")
+# tiff(filename, width=12, height=4, units="in",
+#      pointsize=8, compression="lzw", bg="white", res=600,
+#      restoreConsole=TRUE)
+# grid.arrange(persistence_effort_flyingBars1, selfsustain_effort_flyingBars1,
+#              ncol = 2, nrow = 1)
+# dev.off()
+# 
+# filename <- paste("ForReport/graph_effort_year50CDF", version,".tiff", sep="")
+# tiff(filename, width=12, height=4, units="in",
+#      pointsize=8, compression="lzw", bg="white", res=600,
+#      restoreConsole=TRUE)
+# grid.arrange(persistence_effort_CDF1, selfsustain_effort_CDF1,
+#              ncol = 2, nrow = 1)
+# dev.off()
 
 #---- Make graphs for the report - variations on Go Big, persistence. ----
 
@@ -511,7 +544,7 @@ int6$alternative<- factor(int6$alternative, levels=c("Try Hard but No \n Bullfro
                                                    x_axis_lab = "Probability of Persistence in Year 50",
                                                    y_axis_lab = "\n Management Alternative",
                                                    # title = 'B)'))
-                                                   title = ''))
+                                                   title = 'A)'))
 
 # filename <- paste("ForReport/graph_panel_effort_persist", version,".tiff", sep="")
 # tiff(filename, width=12, height=8, units="in",
@@ -527,8 +560,8 @@ int6$alternative<- factor(int6$alternative, levels=c("Try Hard but No \n Bullfro
                                      metric = "probability of persistence",
                                      year = yrs,
                                      x_axis_lab = "Probability of Persistence in Year 50",
-                                     y_axis_lab = "\n Cumulative Probability \n",
-                                     title = ''))
+                                     y_axis_lab = "\n \n \n \n \n Cumulative Probability \n",
+                                     title = 'C)'))
 
 
 
@@ -606,7 +639,7 @@ int8$alternative<- factor(int8$alternative, levels=c("Try Hard but No \n Bullfro
                                                    x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",
                                                    y_axis_lab = "\n Management Alternative",
                                                    # title = 'B)'))
-                                                   title = ''))
+                                                   title = 'B)'))
 
 # filename <- paste("ForReport/graph_panel_effort_selfsustain", version,".tiff", sep="")
 # tiff(filename, width=12, height=8, units="in",
@@ -620,21 +653,42 @@ int8$alternative<- factor(int8$alternative, levels=c("Try Hard but No \n Bullfro
                                      metric = "probability of self-sustaining population",
                                      year = yrs,
                                      x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",
-                                     y_axis_lab = "\n Cumulative Probability \n",
-                                     title = ''))
+                                     y_axis_lab = "\n \n \n \n \n Cumulative Probability \n",
+                                     title = 'D)'))
 
 
 #---- Make graphs for the report -variations on Go Big, panel for export. ----
 
-filename <- paste("ForReport/graph_panel_goBigVar", version,".tiff", sep="")
-tiff(filename, width=12, height=14, units="in",
+# filename <- paste("ForReport/graph_panel_goBigVar", version,".tiff", sep="")
+# tiff(filename, width=12, height=14, units="in",
+#      pointsize=8, compression="lzw", bg="white", res=600,
+#      restoreConsole=TRUE)
+# grid.arrange(persist_goBigVar_graph1,  selfsustain_goBigVar_graph1,
+#              persistence_goBigVar_flyingBars1, selfsustain_goBigVar_flyingBars1,
+#              persistence_goBigVar_CDF1, selfsustain_goBigVar_CDF1,
+#              ncol = 2, nrow = 3)
+# dev.off()
+
+filename <- paste("ForReport/graph_goBigVar_time", version,".tiff", sep="")
+tiff(filename, width=12, height=6, units="in",
      pointsize=8, compression="lzw", bg="white", res=600,
      restoreConsole=TRUE)
 grid.arrange(persist_goBigVar_graph1,  selfsustain_goBigVar_graph1,
-             persistence_goBigVar_flyingBars1, selfsustain_goBigVar_flyingBars1,
-             persistence_goBigVar_CDF1, selfsustain_goBigVar_CDF1,
-             ncol = 2, nrow = 3)
+             ncol = 2, nrow = 1)
 dev.off()
+
+
+filename <- paste("ForReport/graph_goBigVar_year50", version,".tiff", sep="")
+tiff(filename, width=12, height=8, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600,
+     restoreConsole=TRUE)
+grid.arrange(persistence_goBigVar_flyingBars1, selfsustain_goBigVar_flyingBars1,
+             persistence_goBigVar_CDF1, selfsustain_goBigVar_CDF1,
+             ncol = 2, nrow = 2)
+dev.off()
+
+
+
 
 #---- Make graphs for the report - hypothetical scenarios, persistence. ----
 # Now move in the hypothetical scenarios results and move out the others
@@ -696,7 +750,7 @@ int6b$alternative<- factor(int6b$alternative, levels=c("Testing Extreme Releases
                                                      x_axis_lab = "Probability of Persistence in Year 50",
                                                      y_axis_lab = "\n Management Alternative",
                                                      # title = 'B)'))
-                                                     title = ''))
+                                                     title = 'A)'))
 
 # filename <- paste("ForReport/graph_panel_effort_persist", version,".tiff", sep="")
 # tiff(filename, width=12, height=8, units="in",
@@ -710,8 +764,8 @@ int6b$alternative<- factor(int6b$alternative, levels=c("Testing Extreme Releases
                                        metric = "probability of persistence",
                                        year = yrs,
                                        x_axis_lab = "Probability of Persistence in Year 50",
-                                       y_axis_lab = "\n Cumulative Probability \n",
-                                       title = ''))
+                                       y_axis_lab = "\n \n \n \n \n Cumulative Probability \n",
+                                       title = 'C)'))
 
 
 #---- Make graphs for the report - hypothetical scenarios, self-sustaining. ----
@@ -771,7 +825,7 @@ int8b$alternative<- factor(int8b$alternative, levels=c("Testing Extreme Releases
                                                      x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",
                                                      y_axis_lab = "\n Management Alternative",
                                                      # title = 'B)'))
-                                                     title = ''))
+                                                     title = 'B)'))
 
 # filename <- paste("ForReport/graph_panel_effort_selfsustain", version,".tiff", sep="")
 # tiff(filename, width=12, height=8, units="in",
@@ -785,20 +839,41 @@ int8b$alternative<- factor(int8b$alternative, levels=c("Testing Extreme Releases
                                        metric = "probability of self-sustaining population",
                                        year = yrs,
                                        x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",
-                                       y_axis_lab = "\n Cumulative Probability \n",
-                                       title = ''))
+                                       y_axis_lab = "\n \n \n \n \n Cumulative Probability \n",
+                                       title = 'D)'))
 
 #---- Make graphs for the report - hypothetical scenarios, panel for export. ----
 
-filename <- paste("ForReport/graph_panel_hyptheticals", version,".tiff", sep="")
-tiff(filename, width=12, height=10, units="in",
+# filename <- paste("ForReport/graph_panel_hyptheticals", version,".tiff", sep="")
+# tiff(filename, width=12, height=10, units="in",
+#      pointsize=8, compression="lzw", bg="white", res=600,
+#      restoreConsole=TRUE)
+# grid.arrange(persist_hypotheticals_graph1,  selfsustain_hypotheticals_graph1,
+#              persistence_hypotheticals_flyingBars1, selfsustain_hypotheticals_flyingBars1,
+#              persistence_hypotheticals_CDF1, selfsustain_hypotheticals_CDF1,
+#              ncol = 2, nrow = 3)
+# dev.off()
+
+filename <- paste("ForReport/graph_hypotheticals_time", version,".tiff", sep="")
+tiff(filename, width=12, height=4, units="in",
      pointsize=8, compression="lzw", bg="white", res=600,
      restoreConsole=TRUE)
 grid.arrange(persist_hypotheticals_graph1,  selfsustain_hypotheticals_graph1,
-             persistence_hypotheticals_flyingBars1, selfsustain_hypotheticals_flyingBars1,
-             persistence_hypotheticals_CDF1, selfsustain_hypotheticals_CDF1,
-             ncol = 2, nrow = 3)
+             ncol = 2, nrow = 1)
 dev.off()
+
+
+filename <- paste("ForReport/graph_hypotheticals_year50", version,".tiff", sep="")
+tiff(filename, width=12, height=6, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600,
+     restoreConsole=TRUE)
+grid.arrange(persistence_hypotheticals_flyingBars1, selfsustain_hypotheticals_flyingBars1,
+             persistence_hypotheticals_CDF1, selfsustain_hypotheticals_CDF1,
+             ncol = 2, nrow = 2)
+dev.off()
+
+
+
 
 #---- Make graphs for the report -goBig tornados, panel for export. ----
 
