@@ -9,7 +9,7 @@ library(gridExtra) # for grid.arrange
 
 #---- Specify the location where you saved the Rdata files. ----
 # Add a folder in there  called 'ForReport' to help organize the outputs.
-
+memory.limit(24000)
 path_to_results_folder <- "C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results"# on my work PC
 #path_to_results_folder <- "/Users/laurakeating/Documents/R/R_scripts/BTPD_PVA/Results/BTPD_baseline_results_march17"# on my mac
 setwd(path_to_results_folder) # on my mac
@@ -875,12 +875,21 @@ dev.off()
 
 
 
+#---- Check on number of runs per iteration and number of iterations. ----
+
+# Of runs per iteration
+min(results_all_iter$n_runs_per_iter) #300
+max(results_all_iter$n_runs_per_iter) #363
+
+# of iterations
+max(results_all_iter$iteration)
+
 #---- Make graphs for the report -goBig tornados, panel for export. ----
 
 path_to_results_folder <- "C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results"# on my work PC
 #path_to_results_folder <- "/Users/laurakeating/Documents/R/R_scripts/BTPD_PVA/Results/BTPD_baseline_results_march17"# on my mac
 setwd(path_to_results_folder) # on my mac
-file_goBig <-  list.files(path = ".","*goBig_v1test13_2Kit.RData", full.names="TRUE")
+file_goBig <-  list.files(path = ".","*goBig_vFinalJune2021_5K.RData", full.names="TRUE")
 load(file_goBig)
 
 # Do the sensitivity analyis (this is also in the main script but adding here since running code simultaneously right now on mac and just added the dummy variable)
@@ -923,66 +932,26 @@ dev.off()
 
 
 
-#---- Check on number of runs per iteration and number of iterations. ----
-
-# Of runs per iteration
-min(results_all_iter$n_runs_per_iter) #300
-max(results_all_iter$n_runs_per_iter) #363
-
-# of iterations
-max(results_all_iter$iteration)
-
-#---- Explore more traditional sensitivity analysis graphs. ----
-# Uses the same results RData file that was loaded above for the tornado
-# Confirmed can get simular insights to tornado, tornado is easier and clearer in my opinion :)
-
-int <- "s_mean_yoy_no_threats"
-test <- cbind(parameterByIterTracking_this_alt_clean[,paste(int)],
-              results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])
-# colnames(test) <- c("s_tadpoles_mean", "prob_persist")
-colnames(test) <- c("survival", "prob_persist")
-
-best_guess_input <- as.numeric(as.character(inputs$best_guess[which(inputs$input == paste(int))]))
-min <- as.numeric(as.character(min(test$survival)))
-max <- as.numeric(as.character(max(test$survival)))
-P10_input <- as.numeric(as.character(quantile(test$survival, 0.1)))
-P90_input <- as.numeric(as.character(quantile(test$survival, 0.9)))
-
-ggplot2::ggplot(data = test, ggplot2::aes(x=survival, y = prob_persist)) +
-  ggplot2::geom_point() +
-   # ggplot2::geom_bin2d(bins = 50) + # from https://www.r-graph-gallery.com/2d-density-plot-with-ggplot2.html
-   # ggplot2::scale_fill_continuous(type = "viridis") +
-   ggplot2::stat_density_2d(ggplot2::aes(fill = ..level..), geom = "polygon", colour="white", alpha = 0.5) + 
-  # ggplot2::stat_density_2d(aes(fill = factor(stat(level))), geom = "polygon") +  # https://stackoverflow.com/questions/53172200/stat-density2d-what-does-the-legend-mean
-  # ggplot2::geom_density_2d_filled(alpha = 0.5) +
-  # ggplot2::geom_density_2d(size = 0.25, colour = "black") + 
-  # ggplot2:: stat_density2d(aes(alpha = ..density..), geom = "tile", contour = FALSE) + 
-  ggplot2::geom_tile() + 
-  ggplot2::geom_smooth(method = "lm") +
-  ggplot2::xlim(min, max) +
-  ggplot2::ylim(0,1) +
-  ggplot2::geom_vline(xintercept = best_guess_input, linetype = "dashed", color = "red") +
-  ggplot2::geom_vline(xintercept = P10_input, linetype = "dashed", color = "black") +
-  ggplot2::geom_vline(xintercept = P90_input, linetype = "dashed", color = "black") +
-  ggplot2::theme_bw() +
-  ggplot2::theme(
-    panel.grid.major = ggplot2::element_blank(),
-    panel.grid.minor = ggplot2::element_blank(),
-    strip.background = ggplot2::element_blank(),
-    panel.border = ggplot2::element_rect(colour = "black"),
-    text = ggplot2::element_text(size = 12),
-    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
-    legend.position = "none" # density plot, light blue is the highest density, darker is lower density, white is lowest density
-  )
 
 #---- Explore yoy and tadpole survival vs prob of persistence. ----
 # Uses the same results RData file that was loaded above for the tornado
 # Confirmed can get simular insights to tornado, tornado is easier and clearer in my opinion :)
+iteration_numbers <- unique(results_all_this_alt$iteration) # a small number might have been discarded due to an error in the parallal processing
 
-test2 <- cbind(parameterByIterTracking_this_alt_clean[,c("s_mean_tadpoles_no_threats", "s_mean_yoy_no_threats")],
+test2 <- cbind(parameterByIterTracking_this_alt_clean[iteration_numbers, c("s_mean_eggs_no_threats",
+                                                                           "s_mean_tadpoles_no_threats",
+                                                                           "s_mean_yoy_no_threats",
+                                                                           "s_mean_juv_no_threats",
+                                                                           "bullfrogMgmt_effective")],
               results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])
 # colnames(test2) <- c("s_tadpoles_mean", "prob_persist")
-colnames(test2) <- c("survival_tadpoles","survival_yoy", "prob_persist")
+colnames(test2) <- c("survival_eggs", "survival_tadpoles","survival_yoy", "survival_juv", "bullfrogMgmt_effective", "prob_persist")
+
+best_guess_input_eggs <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_mean_eggs_no_threats")]))
+min_eggs <- as.numeric(as.character(min(test2$survival_eggs)))
+max_eggs <- as.numeric(as.character(max(test2$survival_eggs)))
+P10_input_eggs <- as.numeric(as.character(quantile(test2$survival_eggs, 0.1)))
+P90_input_eggs <- as.numeric(as.character(quantile(test2$survival_eggs, 0.9)))
 
 best_guess_input_tad <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_mean_tadpoles_no_threats")]))
 min_tad <- as.numeric(as.character(min(test2$survival_tadpoles)))
@@ -996,23 +965,32 @@ max_yoy <- as.numeric(as.character(max(test2$survival_yoy)))
 P10_input_yoy <- as.numeric(as.character(quantile(test2$survival_yoy, 0.1)))
 P90_input_yoy <- as.numeric(as.character(quantile(test2$survival_yoy, 0.9)))
 
+best_guess_input_juv <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_mean_juv_no_threats")]))
+min_juv <- as.numeric(as.character(min(test2$survival_juv)))
+max_juv <- as.numeric(as.character(max(test2$survival_juv)))
+P10_input_juv <- as.numeric(as.character(quantile(test2$survival_juv, 0.1)))
+P90_input_juv <- as.numeric(as.character(quantile(test2$survival_juv, 0.9)))
+
 p_sens_tad_yoy_surv_persist <- ggplot2::ggplot(data = test2, ggplot2::aes(x=survival_tadpoles, y = survival_yoy)) +
-  ggplot2::geom_point(aes(fill = prob_persist, size = prob_persist), shape = 21, alpha = 0.7) +
-  scale_fill_viridis_c(guide = "legend", name="Probability of persistence") + # https://community.rstudio.com/t/ggplot2-is-it-possible-to-combine-color-fill-and-size-legends/17072/2
-  scale_size_continuous(range = c(1, 5), name="Probability of persistence") +
+  ggplot2::geom_point(ggplot2::aes(fill = prob_persist, size = prob_persist), shape = 21, alpha = 0.5) +
+  ggplot2::scale_fill_continuous(type = "viridis") +
+  ggplot2::guides(fill = ggplot2::guide_colourbar(barwidth = 10, barheight = 0.5)) +  #https://ggplot2.tidyverse.org/reference/guide_colourbar.html
+  # ggplot2::scale_fill_viridis_c(guide = "legend", name="Probability of persistence") + # https://community.rstudio.com/t/ggplot2-is-it-possible-to-combine-color-fill-and-size-legends/17072/2
+  # ggplot2::scale_size_continuous(range = c(1, 5), name="Probability of persistence") +
   # ggplot2::xlim(P10_input_tad, P90_input_tad) +
   # ggplot2::ylim(P10_input_yoy, P90_input_yoy) +
-  ggplot2::xlim(min_tad, max_tad) +
-  ggplot2::ylim(min_yoy, max_yoy) +
+  # ggplot2::xlim(min_tad, max_tad) +
+  # ggplot2::ylim(min_yoy, max_yoy) +
   ggplot2::geom_hline(yintercept = best_guess_input_yoy, linetype = "dashed", color = "red") +
   # ggplot2::geom_hline(yintercept = P10_input_yoy, linetype = "dashed", color = "black") +
   # ggplot2::geom_hline(yintercept = P90_input_yoy, linetype = "dashed", color = "black") +
   ggplot2::geom_vline(xintercept = best_guess_input_tad, linetype = "dashed", color = "red") +
   # ggplot2::geom_vline(xintercept = P10_input_tad, linetype = "dashed", color = "black") +
   # ggplot2::geom_vline(xintercept = P90_input_tad, linetype = "dashed", color = "black") +
-  xlab("Mean tadpole survival\n (no threats)") +
-  ylab( "Mean young of year survival\n (no threats)") + 
-  ggtitle( "A)") + 
+  ggplot2::xlab("Mean tadpole survival\n (no threats)") +
+  ggplot2::ylab( "Mean young of year survival\n (no threats)") + 
+  ggplot2::ggtitle( "A)") + 
+  ggplot2::labs(size='', fill='Probability of persistence    ')  +
   ggplot2::theme_bw() +
   ggplot2::theme(
     panel.grid.major = ggplot2::element_blank(),
@@ -1025,12 +1003,295 @@ p_sens_tad_yoy_surv_persist <- ggplot2::ggplot(data = test2, ggplot2::aes(x=surv
   )
 
 p_sens_tad_yoy_surv_persist
+# 
+# filename <- paste("ForReport/graph_sens_tad_yoy_surv_persist", version,".tiff", sep="")
+# tiff(filename, width=12, height=4, units="in",
+#      pointsize=8, compression="lzw", bg="white", res=600,
+#      restoreConsole=TRUE)
+# p_sens_tad_yoy_surv_persist
+# dev.off()
 
-filename <- paste("ForReport/graph_sens_tad_yoy_surv_persist", version,".tiff", sep="")
+
+#---- Explore prob of persistence. ----
+
+prob_persist <- cbind(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])
+colnames(prob_persist) <- c("prob_persist")
+
+p_hist_prob_persist <- ggplot2::ggplot(prob_persist, ggplot2::aes(x = prob_persist)) +
+  ggplot2::geom_histogram(color="black", fill="grey", binwidth = 0.05) +
+  ggplot2::xlab("Probability of persistence") +
+  ggplot2::ylab("Number of iterations") + 
+  ggplot2::geom_vline(ggplot2::aes(xintercept=mean(prob_persist)),
+                      color="red", linetype="dashed", size=1) + 
+  ggplot2::theme_bw() +
+  ggplot2::theme(
+    panel.grid.major = ggplot2::element_blank(),
+    panel.grid.minor = ggplot2::element_blank(),
+    strip.background = ggplot2::element_blank(),
+    panel.border = ggplot2::element_rect(colour = "black"),
+    text = ggplot2::element_text(size = 12),
+    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+    legend.position = "bottom" 
+  )
+p_hist_prob_persist
+
+# filename <- paste("ForReport/graph_hist_prob_persist", version,".tiff", sep="")
+# tiff(filename, width=12, height=8, units="in",
+#      pointsize=8, compression="lzw", bg="white", res=600,
+#      restoreConsole=TRUE)
+# p_hist_prob_persist
+# dev.off()
+
+rows_yoy_tad_surv_above_P50 <- which(test2$survival_tadpoles >= best_guess_input_tad & 
+                                       test2$survival_yoy >= best_guess_input_yoy)
+test2$group <- "Tadpole or YOY survival below P50"# initalize
+test2$group[rows_yoy_tad_surv_above_P50] <- "Tadpole and YOY survival above P50"
+test2$group <- as.factor(test2$group)
+library(plyr)
+mu <- plyr::ddply(test2, "group", summarise, grp.mean=mean(prob_persist))
+
+
+# prob_persist_yoy_tad_surv_above_P50 <- as.data.frame(test2$prob_persist[rows_yoy_tad_surv_above_P50])
+# colnames(prob_persist_yoy_tad_surv_above_P50) <- c("prob_persist")
+
+p_hist_prob_persist_groups <- ggplot2::ggplot(test2 , ggplot2::aes(x = prob_persist, fill=group)) +
+  ggplot2::geom_histogram(position="dodge", binwidth = 0.05, alpha=0.5) + # http://www.sthda.com/english/wiki/ggplot2-histogram-plot-quick-start-guide-r-software-and-data-visualization
+  ggplot2::scale_color_brewer(palette="Dark2") + 
+  ggplot2::scale_fill_brewer(palette="Dark2") + 
+  ggplot2::xlab("Probability of persistence") +
+  ggplot2::ylab("Number of iterations") + 
+  ggplot2::ggtitle( "B)") + 
+  ggplot2::labs(color = "", fill = "") + 
+  ggplot2::geom_vline(data=mu, ggplot2::aes(xintercept=grp.mean, color=group),
+                      linetype= "dashed") + 
+  ggplot2::theme_bw() +
+  ggplot2::theme(
+    panel.grid.major = ggplot2::element_blank(),
+    panel.grid.minor = ggplot2::element_blank(),
+    strip.background = ggplot2::element_blank(),
+    panel.border = ggplot2::element_rect(colour = "black"),
+    text = ggplot2::element_text(size = 12),
+    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+    legend.position = "bottom" 
+  )
+p_hist_prob_persist_groups
+
+# 
+# filename <- paste("ForReport/graph_hist_prob_persist_sensSurv", version,".tiff", sep="")
+# tiff(filename, width=12, height=8, units="in",
+#      pointsize=8, compression="lzw", bg="white", res=600,
+#      restoreConsole=TRUE)
+# grid.arrange(p_hist_prob_persist,  p_hist_prob_persist_groups ,
+#              ncol = 1, nrow = 2)
+# dev.off()
+
+filename <- paste("ForReport/graph_compare_yoyTadsurv_persist", version,".tiff", sep="")
 tiff(filename, width=12, height=8, units="in",
      pointsize=8, compression="lzw", bg="white", res=600,
      restoreConsole=TRUE)
-p_sens_tad_yoy_surv_persist
+grid.arrange(p_sens_tad_yoy_surv_persist,  p_hist_prob_persist_groups ,
+             ncol = 1, nrow = 2)
+dev.off()
+
+
+
+#---- Relationship between bullfrog management and tadpole survival. ----
+test2b <- cbind(parameterByIterTracking_this_alt_clean[iteration_numbers, c("s_mean_eggs_no_threats",
+                                                           "s_mean_tadpoles_no_threats",
+                                                            "s_mean_yoy_no_threats",
+                                                            "bullfrogMgmt_effective")],
+               as.data.frame(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])[,])
+colnames(test2b) <- c("s_mean_eggs_no_threats",
+                      "s_mean_tadpoles_no_threats",
+                      "s_mean_yoy_no_threats",
+                      "bullfrogMgmt_effective", "prob_persist")
+
+testglm2b <- glm(prob_persist ~ s_mean_tadpoles_no_threats + s_mean_yoy_no_threats + 
+                    s_mean_tadpoles_no_threats*bullfrogMgmt_effective + s_mean_yoy_no_threats*bullfrogMgmt_effective, 
+                # family = binomial, data =  test3) # warning is ok, try quasibinomial instead to be sure
+                family = quasibinomial, data =  test2b)
+
+summary(testglm2b)
+library(visreg)
+visreg(testglm2b , "s_mean_tadpoles_no_threats", by="bullfrogMgmt_effective")
+visreg(testglm2b , "bullfrogMgmt_effective", by="s_mean_tadpoles_no_threats")
+
+visreg(testglm2b , "s_mean_yoy_no_threats", by="bullfrogMgmt_effective")
+visreg(testglm2b , "bullfrogMgmt_effective", by="s_mean_yoy_no_threats")
+###
+
+p_sens_eggs_surv_bullfrogMgmt <- ggplot2::ggplot(data = test2, ggplot2::aes(x=survival_eggs, 
+                                                                           y = prob_persist, 
+                                                                           fill = bullfrogMgmt_effective)) +
+  ggplot2::geom_point(ggplot2::aes(fill = bullfrogMgmt_effective), shape = 21, alpha = 0.5) +
+  ggplot2::geom_smooth(ggplot2::aes(group=bullfrogMgmt_effective), color = "black", size=0.5) + 
+  ggplot2::scale_fill_discrete(type = "viridis") +
+  ggplot2::geom_vline(xintercept = best_guess_input_eggs, linetype = "dashed", color = "red") +
+  ggplot2::xlab("Mean egg survival\n (no threats)") +
+  ggplot2::ylab( "Probability of persistence") + 
+  ggplot2::ggtitle( "") + 
+  ggplot2::labs(size='', fill='Bullfrog management effective    ')  +
+  ggplot2::theme_bw() +
+  ggplot2::theme(
+    panel.grid.major = ggplot2::element_blank(),
+    panel.grid.minor = ggplot2::element_blank(),
+    strip.background = ggplot2::element_blank(),
+    panel.border = ggplot2::element_rect(colour = "black"),
+    text = ggplot2::element_text(size = 12),
+    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+    legend.position = "none"
+  )
+p_sens_eggs_surv_bullfrogMgmt 
+
+p_sens_tad_surv_bullfrogMgmt <- ggplot2::ggplot(data = test2, ggplot2::aes(x=survival_tadpoles, 
+                                                                          y = prob_persist, 
+                                                                          fill = bullfrogMgmt_effective)) +
+  ggplot2::geom_point(ggplot2::aes(fill = bullfrogMgmt_effective), shape = 21, alpha = 0.5) +
+  ggplot2::geom_smooth(ggplot2::aes(group=bullfrogMgmt_effective), color = "black", size=0.5) + 
+  ggplot2::scale_fill_discrete(type = "viridis") +
+   ggplot2::geom_vline(xintercept = best_guess_input_tad, linetype = "dashed", color = "red") +
+  ggplot2::xlab("Mean tadpole survival\n (no threats)") +
+  ggplot2::ylab( "Probability of persistence") + 
+  ggplot2::ggtitle( "") + 
+  ggplot2::labs(size='', fill='Bullfrog management effective    ')  +
+  ggplot2::theme_bw() +
+  ggplot2::theme(
+    panel.grid.major = ggplot2::element_blank(),
+    panel.grid.minor = ggplot2::element_blank(),
+    strip.background = ggplot2::element_blank(),
+    panel.border = ggplot2::element_rect(colour = "black"),
+    text = ggplot2::element_text(size = 12),
+    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+    legend.position = "none"
+  )
+
+p_sens_tad_surv_bullfrogMgmt
+
+p_sens_yoy_surv_bullfrogMgmt <- ggplot2::ggplot(data = test2, ggplot2::aes(x=survival_yoy, 
+                                                                           y = prob_persist, 
+                                                                           fill = bullfrogMgmt_effective)) +
+  ggplot2::geom_point(ggplot2::aes(fill = bullfrogMgmt_effective), shape = 21, alpha = 0.5) +
+  ggplot2::geom_smooth(ggplot2::aes(group=bullfrogMgmt_effective), color = "black", size=0.5) + 
+  ggplot2::scale_fill_discrete(type = "viridis") +
+  ggplot2::geom_vline(xintercept = best_guess_input_yoy, linetype = "dashed", color = "red") +
+  ggplot2::xlab("Mean young-of-year survival\n (no threats)") +
+  ggplot2::ylab( "Probability of persistence") + 
+  ggplot2::ggtitle( "") + 
+  ggplot2::labs(size='', fill='Bullfrog management effective    ')  +
+  ggplot2::theme_bw() +
+  ggplot2::theme(
+    panel.grid.major = ggplot2::element_blank(),
+    panel.grid.minor = ggplot2::element_blank(),
+    strip.background = ggplot2::element_blank(),
+    panel.border = ggplot2::element_rect(colour = "black"),
+    text = ggplot2::element_text(size = 12),
+    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+    legend.position = "bottom"
+  )
+
+p_sens_yoy_surv_bullfrogMgmt
+
+p_sens_juv_surv_bullfrogMgmt <- ggplot2::ggplot(data = test2, ggplot2::aes(x=survival_juv, 
+                                                                           y = prob_persist, 
+                                                                           fill = bullfrogMgmt_effective)) +
+  ggplot2::geom_point(ggplot2::aes(fill = bullfrogMgmt_effective), shape = 21, alpha = 0.5) +
+  ggplot2::geom_smooth(ggplot2::aes(group=bullfrogMgmt_effective), color = "black", size=0.5) + 
+  ggplot2::scale_fill_discrete(type = "viridis") +
+  ggplot2::geom_vline(xintercept = best_guess_input_juv, linetype = "dashed", color = "red") +
+  ggplot2::xlab("Mean juvenile survival\n (no threats)") +
+  ggplot2::ylab( "Probability of persistence") + 
+  ggplot2::ggtitle( "") + 
+  ggplot2::labs(size='', fill='Bullfrog management effective    ')  +
+  ggplot2::theme_bw() +
+  ggplot2::theme(
+    panel.grid.major = ggplot2::element_blank(),
+    panel.grid.minor = ggplot2::element_blank(),
+    strip.background = ggplot2::element_blank(),
+    panel.border = ggplot2::element_rect(colour = "black"),
+    text = ggplot2::element_text(size = 12),
+    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+    legend.position = "bottom"
+  )
+
+p_sens_juv_surv_bullfrogMgmt
+
+
+
+filename <- paste("ForReport/graph_bullfrogMgt_vs_survival", version,".tiff", sep="")
+tiff(filename, width=12, height=8, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600,
+     restoreConsole=TRUE)
+grid.arrange(p_sens_eggs_surv_bullfrogMgmt, 
+             p_sens_tad_surv_bullfrogMgmt,
+             p_sens_yoy_surv_bullfrogMgmt,
+             p_sens_juv_surv_bullfrogMgmt,
+             ncol = 2, nrow = 2)
+dev.off()
+
+
+
+
+
+#---- Relationship between persistence and self-sustaining. ----
+
+# Load in GoBig alternative with lots of iterations
+load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_vFinalJune2021_5K.RData")
+
+# Plot abundance vs persistence
+
+results_all_this_alt_yr50 <- as.data.frame(results_all_this_alt[,c( "iteration", "metric", "50")])
+colnames(results_all_this_alt_yr50) <- c( "iteration", "metric", "value")
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+iteration_numbers <- unique(results_all_this_alt$iteration) # a small number might have been discarded due to an error in the parallal processing
+
+results_all_this_alt_yr50_wide1 <- results_all_this_alt_yr50 %>% 
+  pivot_wider(names_from = metric, values_from = value)
+colnames(results_all_this_alt_yr50_wide1) <- c("iteration", "mean_abundance", "prob_of_persis", "prob_of_selfsustain")
+results_all_this_alt_yr50_wide <- cbind(results_all_this_alt_yr50_wide1, parameterByIterTracking$carrying_capacity_BSCWMA[iteration_numbers])
+colnames(results_all_this_alt_yr50_wide) <- c("iteration", "mean_abundance", "prob_of_persis", "prob_of_selfsustain", "carrying_capacity_BSCWMA")
+
+results_all_this_alt_yr50_wide$mean_prop_K <- results_all_this_alt_yr50_wide$mean_abundance/results_all_this_alt_yr50_wide$carrying_capacity_BSCWMA
+
+ggplot2::ggplot(results_all_this_alt_yr50_wide, ggplot2::aes(x = mean_prop_K, y = prob_of_persis)) +
+  ggplot2::geom_point(ggplot2::aes(fill = prob_of_selfsustain, size = prob_of_selfsustain), shape = 21, alpha = 0.5) +
+  ggplot2::scale_fill_continuous(type = "viridis")
+
+ggplot2::ggplot(results_all_this_alt_yr50_wide, ggplot2::aes(x = mean_prop_K, y = prob_of_selfsustain)) +
+  ggplot2::geom_point(ggplot2::aes(fill = prob_of_persis, size = prob_of_persis), shape = 21, alpha = 0.5) +
+  ggplot2::scale_fill_continuous(type = "viridis")
+
+
+p_persis_vs_selfsustain <- ggplot2::ggplot(results_all_this_alt_yr50_wide, ggplot2::aes(x = prob_of_persis, 
+                                                                                        y = prob_of_selfsustain)) +
+  ggplot2::geom_point(ggplot2::aes(fill = mean_prop_K, size = mean_prop_K), shape = 21, alpha = 0.5) +
+  ggplot2::scale_fill_continuous(type = "viridis") +
+  ggplot2::guides(fill = ggplot2::guide_colourbar(barwidth = 10, barheight = 0.5)) +  #https://ggplot2.tidyverse.org/reference/guide_colourbar.html
+  # ggplot2::geom_point(ggplot2::aes(fill = mean_abundance), shape = 21, alpha = 0.5) +
+  geom_abline(slope=1, intercept=0, lty= "dashed")  +
+  ggplot2::labs(x = "Probability of persistence") +
+  ggplot2::labs(y = "Probability of a \n self-sustaining population") +
+  ggplot2::labs(size='Mean proportion of carrying capacity    ', fill='')  +
+  # ggplot2::ggtitle("Example from Go Big or Go Home Alternative Results") +
+  ggplot2::theme_bw() +
+  ggplot2::theme(
+    panel.grid.major = ggplot2::element_blank(),
+    panel.grid.minor = ggplot2::element_blank(),
+    strip.background = ggplot2::element_blank(),
+    panel.border = ggplot2::element_rect(colour = "black"),
+    text = ggplot2::element_text(size = 12),
+    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+    legend.position = "bottom"
+  )
+
+p_persis_vs_selfsustain
+
+filename <- paste("ForReport/graph_persis_vs_selfsustain", version, "_iter_", n_iter, ".tiff", sep="")
+tiff(filename, width=12, height=4, units="in",pointsize=8, compression="lzw", bg="white", res=600)
+print(p_persis_vs_selfsustain)
 dev.off()
 
 
@@ -1042,19 +1303,19 @@ dev.off()
 # First filter out so only looking at data where yoy mean is high enough to not be the main problem
 rows_yoybigenough <- which(parameterByIterTracking_this_alt_clean$s_mean_yoy_no_threats >= best_guess_input_yoy)
 rows_tadsmallenough <- which(parameterByIterTracking_this_alt_clean$s_mean_tadpoles_no_threats < best_guess_input_tad)
-# rows <- intersect(rows_yoybigenough , rows_tadsmallenough )
+rows <- intersect(rows_yoybigenough, rows_tadsmallenough)
 
-rows <- rows_yoybigenough 
+# rows <- intersect(iteration_numbers, rows_yoybigenough)
 # rows <- 1:nrow(parameterByIterTracking_this_alt_clean)
 
-test3 <- cbind(parameterByIterTracking_this_alt_clean[rows, c("s_mean_tadpoles_no_threats", "s_sd_tadpoles_no_threats")],
+test3 <- cbind(parameterByIterTracking_this_alt_clean[intersect(rows, iteration_numbers), c("s_mean_tadpoles_no_threats", "s_sd_tadpoles_no_threats")],
                as.data.frame(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])[rows,])
 # colnames(test3) <- c("s_tadpoles_mean", "prob_persist")
 colnames(test3) <- c("survival_tadpoles_mean","survival_tadpoles_sd", "prob_persist")
+which(is.na(test3$prob_persist) == TRUE)
 
-
-ggplot(test3, aes(x = survival_tadpoles_sd, y = prob_persist)) +
-  geom_point() + geom_smooth()
+ggplot2::ggplot(test3, ggplot2::aes(x = survival_tadpoles_sd, y = prob_persist)) +
+  ggplot2::geom_point() + ggplot2::geom_smooth()
 
 
 # change names later if stick, going fast
@@ -1125,17 +1386,41 @@ library(visreg)
 visreg(testglm , "survival_tadpoles_sd", by="survival_tadpoles_mean")
 visreg(testglm , "survival_tadpoles_mean", by="survival_tadpoles_sd")
 
-#---- Explore prob of persistence. ----
 
-prob_persist <- cbind(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])
-colnames(prob_persist) <- c("prob_persist")
 
-p_hist_prob_persist <- ggplot2::ggplot(prob_persist, ggplot2::aes(x = prob_persist)) +
-  ggplot2::geom_histogram(color="black", fill="grey", binwidth = 0.05) +
-  xlab("Probability of persistence") +
-  ylab("Number of Iterations") + 
-  geom_vline(aes(xintercept=mean(prob_persist)),
-             color="red", linetype="dashed", size=1) + 
+#---- Explore more traditional sensitivity analysis graphs. ----
+# Uses the same results RData file that was loaded above for the tornado
+# Confirmed can get simular insights to tornado, tornado is easier and clearer in my opinion :)
+
+
+int <- "s_mean_yoy_no_threats"
+test <- cbind(parameterByIterTracking_this_alt_clean[iteration_numbers,paste(int)],
+              results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])
+# colnames(test) <- c("s_tadpoles_mean", "prob_persist")
+colnames(test) <- c("survival", "prob_persist")
+
+best_guess_input <- as.numeric(as.character(inputs$best_guess[which(inputs$input == paste(int))]))
+min <- as.numeric(as.character(min(test$survival)))
+max <- as.numeric(as.character(max(test$survival)))
+P10_input <- as.numeric(as.character(quantile(test$survival, 0.1)))
+P90_input <- as.numeric(as.character(quantile(test$survival, 0.9)))
+
+ggplot2::ggplot(data = test, ggplot2::aes(x=survival, y = prob_persist)) +
+  ggplot2::geom_point() +
+  # ggplot2::geom_bin2d(bins = 50) + # from https://www.r-graph-gallery.com/2d-density-plot-with-ggplot2.html
+  # ggplot2::scale_fill_continuous(type = "viridis") +
+  ggplot2::stat_density_2d(ggplot2::aes(fill = ..level..), geom = "polygon", colour="white", alpha = 0.5) + 
+  # ggplot2::stat_density_2d(aes(fill = factor(stat(level))), geom = "polygon") +  # https://stackoverflow.com/questions/53172200/stat-density2d-what-does-the-legend-mean
+  # ggplot2::geom_density_2d_filled(alpha = 0.5) +
+  # ggplot2::geom_density_2d(size = 0.25, colour = "black") + 
+  # ggplot2:: stat_density2d(aes(alpha = ..density..), geom = "tile", contour = FALSE) + 
+  ggplot2::geom_tile() + 
+  ggplot2::geom_smooth(method = "lm") +
+  ggplot2::xlim(min, max) +
+  ggplot2::ylim(0,1) +
+  ggplot2::geom_vline(xintercept = best_guess_input, linetype = "dashed", color = "red") +
+  ggplot2::geom_vline(xintercept = P10_input, linetype = "dashed", color = "black") +
+  ggplot2::geom_vline(xintercept = P90_input, linetype = "dashed", color = "black") +
   ggplot2::theme_bw() +
   ggplot2::theme(
     panel.grid.major = ggplot2::element_blank(),
@@ -1144,67 +1429,8 @@ p_hist_prob_persist <- ggplot2::ggplot(prob_persist, ggplot2::aes(x = prob_persi
     panel.border = ggplot2::element_rect(colour = "black"),
     text = ggplot2::element_text(size = 12),
     axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
-    legend.position = "bottom" 
+    legend.position = "none" # density plot, light blue is the highest density, darker is lower density, white is lowest density
   )
-p_hist_prob_persist
-
-filename <- paste("ForReport/graph_hist_prob_persist", version,".tiff", sep="")
-tiff(filename, width=12, height=8, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600,
-     restoreConsole=TRUE)
-p_hist_prob_persist
-dev.off()
-
-rows_yoy_tad_surv_above_P50 <- which(test2$survival_tadpoles >= best_guess_input_tad & 
-                  test2$survival_yoy >= best_guess_input_yoy)
-test2$group <- "Tadpole or YOY survival below P50"# initalize
-test2$group[rows_yoy_tad_surv_above_P50] <- "Tadpole and YOY survival above P50"
-test2$group <- as.factor(test2$group)
-library(plyr)
-mu <- plyr::ddply(test2, "group", summarise, grp.mean=mean(prob_persist))
-
-
-# prob_persist_yoy_tad_surv_above_P50 <- as.data.frame(test2$prob_persist[rows_yoy_tad_surv_above_P50])
-# colnames(prob_persist_yoy_tad_surv_above_P50) <- c("prob_persist")
-
-p_hist_prob_persist_groups <- ggplot2::ggplot(test2 , ggplot2::aes(x = prob_persist, fill=group)) +
-  ggplot2::geom_histogram(position="dodge", binwidth = 0.05, alpha=0.5) + # http://www.sthda.com/english/wiki/ggplot2-histogram-plot-quick-start-guide-r-software-and-data-visualization
-  scale_color_brewer(palette="Dark2") + 
-  scale_fill_brewer(palette="Dark2") + 
-  xlab("Probability of persistence") +
-  ylab("Number of Iterations") + 
-  ggtitle( "B)") + 
-  labs(color = "", fill = "") + 
-  geom_vline(data=mu, aes(xintercept=grp.mean, color=group),
-             linetype= "dashed") + 
-  ggplot2::theme_bw() +
-  ggplot2::theme(
-    panel.grid.major = ggplot2::element_blank(),
-    panel.grid.minor = ggplot2::element_blank(),
-    strip.background = ggplot2::element_blank(),
-    panel.border = ggplot2::element_rect(colour = "black"),
-    text = ggplot2::element_text(size = 12),
-    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
-    legend.position = "bottom" 
-  )
-p_hist_prob_persist_groups
-
-
-filename <- paste("ForReport/graph_hist_prob_persist_sensSurv", version,".tiff", sep="")
-tiff(filename, width=12, height=8, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600,
-     restoreConsole=TRUE)
-grid.arrange(p_hist_prob_persist,  p_hist_prob_persist_groups ,
-             ncol = 1, nrow = 2)
-dev.off()
-
-filename <- paste("ForReport/graph_compare_yoyTadsurv_persist", version,".tiff", sep="")
-tiff(filename, width=12, height=8, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600,
-     restoreConsole=TRUE)
-grid.arrange(p_sens_tad_yoy_surv_persist,  p_hist_prob_persist_groups ,
-             ncol = 1, nrow = 2)
-dev.off()
 
 #---- Appendix: full tornado diagrams. ----
 
@@ -1655,51 +1881,6 @@ tiff(filename, width=12, height=8, units="in",
      restoreConsole=TRUE)
 grid.arrange(persistence_graph ,  selfsustaining_graph,
              ncol = 2, nrow = 1)
-dev.off()
-
-#---- Appendix: relationship between persistence and self-sustaining. ----
-
-# Load in GoBig alternative with lots of iterations
-load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test13_2Kit.RData")
-
-# Plot abundance vs persistence
-
-results_all_this_alt_yr50 <- as.data.frame(results_all_this_alt[,c( "iteration", "metric", "50")])
-colnames(results_all_this_alt_yr50) <- c( "iteration", "metric", "value")
-
-library(ggplot2)
-library(dplyr)
-library(tidyr)
-results_all_this_alt_yr50_wide <- results_all_this_alt_yr50 %>% 
-  pivot_wider(names_from = metric, values_from = value)
-colnames(results_all_this_alt_yr50_wide) <- c("iteration", "mean_abundance", "prob_of_persis", "prob_of_selfsustain")
-
-ggplot2::ggplot(results_all_this_alt_yr50_wide, ggplot2::aes(x = mean_abundance, y = prob_of_persis)) +
-  ggplot2::geom_point()
-
-ggplot2::ggplot(results_all_this_alt_yr50_wide, ggplot2::aes(x = mean_abundance, y = prob_of_selfsustain)) +
-  ggplot2::geom_point()
-
-p_persis_vs_selfsustain <- ggplot2::ggplot(results_all_this_alt_yr50_wide, ggplot2::aes(x = prob_of_persis, y = prob_of_selfsustain)) +
-  ggplot2::geom_point() +
-  geom_abline(slope=1, intercept=0, lty= "dashed")  +
-  ggplot2::labs(x = "Probability of Persistence") +
-  ggplot2::labs(y = "Probability of a Self-Sustaining Population") +
-  ggplot2::ggtitle("Example from Go Big or Go Home Alternative Results") +
-  ggplot2::theme_bw() +
-  ggplot2::theme(
-    panel.grid.major = ggplot2::element_blank(),
-    panel.grid.minor = ggplot2::element_blank(),
-    strip.background = ggplot2::element_blank(),
-    panel.border = ggplot2::element_rect(colour = "black"),
-    text = ggplot2::element_text(size = 12),
-    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
-    legend.position = "none"
-  )
-
-filename <- paste("ForReport/graph_persis_vs_selfsustain", version, "_iter_", n_iter, ".tiff", sep="")
-tiff(filename, width=12, height=6, units="in",pointsize=8, compression="lzw", bg="white", res=600)
-print(p_persis_vs_selfsustain)
 dev.off()
 
 
