@@ -9,6 +9,8 @@ library(gridExtra) # for grid.arrange
 
 #---- Specify the location where you saved the Rdata files. ----
 # Add a folder in there  called 'ForReport' to help organize the outputs.
+# max_mem_size <- memory.size(max = TRUE) #  On Windows, size in Mb (1048576 bytes), rounded to 0.01 Mb for memory.size and rounded down for memory.limit. 
+# memory.limit(max_mem_size)
 memory.limit(24000)
 path_to_results_folder <- "C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results"# on my work PC
 #path_to_results_folder <- "/Users/laurakeating/Documents/R/R_scripts/BTPD_PVA/Results/BTPD_baseline_results_march17"# on my mac
@@ -889,7 +891,8 @@ max(results_all_iter$iteration)
 path_to_results_folder <- "C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results"# on my work PC
 #path_to_results_folder <- "/Users/laurakeating/Documents/R/R_scripts/BTPD_PVA/Results/BTPD_baseline_results_march17"# on my mac
 setwd(path_to_results_folder) # on my mac
-file_goBig <-  list.files(path = ".","*goBig_vFinalJune2021_5K.RData", full.names="TRUE")
+# file_goBig <-  list.files(path = ".","*goBig_vFinalJune2021_5K.RData", full.names="TRUE")
+file_goBig <-  list.files(path = ".","*goBig_vFinalJune2021_10Kiter.RData", full.names="TRUE")
 load(file_goBig)
 
 # Do the sensitivity analyis (this is also in the main script but adding here since running code simultaneously right now on mac and just added the dummy variable)
@@ -1235,7 +1238,11 @@ dev.off()
 #---- Relationship between persistence and self-sustaining. ----
 
 # Load in GoBig alternative with lots of iterations
-load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_vFinalJune2021_5K.RData")
+# load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_vFinalJune2021_5K.RData")
+load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_vFinalJune2021_10Kiter.RData")
+
+
+
 
 # Plot abundance vs persistence
 
@@ -1492,7 +1499,8 @@ memory.limit(24000)# Pick some iterations that will show a range of outcomes
 # Once run, load it back in and use going forward
 # memory.limit() # check current memory limit
 #  # increase memory limit if need be to load the file
-load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test12_runConvTestResult.RData")
+# load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test12_runConvTestResult.RData")
+load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_vFinalJune2021_10Kiter.RData")
 
 # Remove eggs and tadpoles as they are intermediate stages in the year and we just want the pop size at the fall census
 results_all_iterations_fall <- results_all_iterations # initalize
@@ -1547,6 +1555,8 @@ dev.off()
 # For example, if using 500 iterations need to use a data set with e.g. 2500 iterations here
 # This one didn't have the min 300 runs per iteration so will need to be redone once rerun with that update
 load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test13_2Kit.RData")
+
+# goBig_vFinalJune2021_10Kiter.RData
 
 # Resample to visually inspect convergence
 convergence_test <- dapva::convergenceTestIterations(results_all_this_alt = results_summary_all_iterations_overall,
@@ -1942,6 +1952,8 @@ setwd(path_to_results_folder) # on my mac
 # on mac
 load("/Users/laurakeating/Documents/R/R_scripts/NLF_PVA/Results/goBig_v1test13_2Kit.RData")
 
+# goBig_vFinalJune2021_10Kiter.RData
+
 # Remove eggs and tadpoles as they are intermediate stages in the year and we just want the pop size at the fall census
 results_all_iterations_fall <- results_all_iterations # initalize
 
@@ -1990,6 +2002,10 @@ results_summary_prob_persist_unct_comb <- dapva::makeResultsSummaryMultipleAlt(r
 #load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_v1test13_2Kit.RData")
 # on mac
 load("/Users/laurakeating/Documents/R/R_scripts/NLF_PVA/Results/goBig_v1test13_2Kit.RData")
+
+# goBig_vFinalJune2021_10Kiter.RData
+
+
 
 # Summarize the 'by population' results into 'overall' results and export that
 write.csv(results_summary_all_iterations_overall, file = paste0("results_overall_", name, version,".csv"), row.names = FALSE)
@@ -2715,15 +2731,15 @@ results_all_for_this_iteration_fall[which(results_all_for_this_iteration_fall$cl
                                                        # title = 'B)'))
                                                        title = ''))
   
-  
+###### Trying to figure out One Wetland
   # Look at compared with wetland correlation/similarity
   path_to_results_folder <- "C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results"# on my work PC
   #path_to_results_folder <- "/Users/laurakeating/Documents/R/R_scripts/BTPD_PVA/Results/BTPD_baseline_results_march17"# on my mac
   setwd(path_to_results_folder) # on my mac
-  file_oneWet <-  list.files(path = ".","*goBigOneWetland_vFinalJune2021.RData", full.names="TRUE")
+  file_oneWet <-  list.files(path = ".","*goBigOneWetland_vFinalJune2021_2halfK.RData", full.names="TRUE")
   load(file_oneWet)
-   # file_goBig <-  list.files(path = ".","*goBig_vFinalJune2021.RData", full.names="TRUE")
-   # load(file_goBig)
+    file_goBig <-  list.files(path = ".","*goBig_vFinalJune2021_5K.RData", full.names="TRUE")
+    load(file_goBig)
   
   n_iter <- nrow(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])
   
@@ -2761,6 +2777,14 @@ results_all_for_this_iteration_fall[which(results_all_for_this_iteration_fall$cl
     # ggplot2::facet_grid(s_mean_tadpoles_no_threats_cat~wetland_eggTadSurv_TempCor_noEph_cat) 
      # ggplot2::facet_wrap(~s_mean_tadpoles_no_threats_cat)
    ggplot2::facet_grid(s_mean_tadpoles_no_threats_cat~s_mean_yoy_no_threats_cat) 
+  
+  # I don't think the correlation of the weltnads is a big factor here
+  # But for One wetland, prob persist when both yoy and tad is < P50 is almost 0, higher with Go Big (Trhree wetlands)
+  # For One Wetland, both > P50 is also higher than Go Big
+  # Think about that, maybe a clue, think about how to look at this more
+  # Maybe plot the two histograms to at least show this
+  # Maybe because with three wetlands morelikely one will take, so higher than one wetland if things are not goo
+  # But if things are good, then when you put them in one wetland it can really take off...
   
   test10 <- test9 # initalize
   test10$s_mean_tad_yoy_cat <- "s mean tad and yoy - one or both less than P50"
