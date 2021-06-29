@@ -1277,14 +1277,15 @@ ggplot2::ggplot(results_all_this_alt_yr50_wide, ggplot2::aes(x = mean_prop_K, y 
 
 p_persis_vs_selfsustain <- ggplot2::ggplot(results_all_this_alt_yr50_wide, ggplot2::aes(x = prob_of_persis, 
                                                                                         y = prob_of_selfsustain)) +
-  ggplot2::geom_point(ggplot2::aes(fill = mean_prop_K, size = mean_prop_K), shape = 21, alpha = 0.5) +
+  #ggplot2::geom_point(ggplot2::aes(fill = mean_prop_K, size = mean_prop_K), shape = 21, alpha = 0.5) +
+  ggplot2::geom_point(ggplot2::aes(fill = mean_prop_K), shape = 21, alpha = 0.5) +
   ggplot2::scale_fill_continuous(type = "viridis") +
   ggplot2::guides(fill = ggplot2::guide_colourbar(barwidth = 10, barheight = 0.5)) +  #https://ggplot2.tidyverse.org/reference/guide_colourbar.html
   # ggplot2::geom_point(ggplot2::aes(fill = mean_abundance), shape = 21, alpha = 0.5) +
   geom_abline(slope=1, intercept=0, lty= "dashed")  +
   ggplot2::labs(x = "Probability of persistence") +
   ggplot2::labs(y = "Probability of a \n self-sustaining population") +
-  ggplot2::labs(size='Mean proportion of carrying capacity    ', fill='')  +
+  ggplot2::labs(fill ='Mean proportion of carrying capacity    ', fill='')  +
   # ggplot2::ggtitle("Example from Go Big or Go Home Alternative Results") +
   ggplot2::theme_bw() +
   ggplot2::theme(
@@ -1410,10 +1411,11 @@ rows <- rows_yoybigenough
 
 test3b <- cbind(parameterByIterTracking_this_alt_clean2[rows, c("s_mean_tadpoles_no_threats",
                                                                "s_mean_ephWetlands_tadpoles_no_threats",
-                                                               "ephWetRest_effective")],
+                                                               "ephWetRest_effective",
+                                                               "ephemeral_freq_dry")],
                as.data.frame(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])[rows,])
 # colnames(test3) <- c("s_tadpoles_mean", "prob_persist")
-colnames(test3b) <- c( "survival_tadpoles_main","survival_tadpoles_ephemeral", "ephWetRest_effective", "prob_persist")
+colnames(test3b) <- c( "survival_tadpoles_main","survival_tadpoles_ephemeral", "ephWetRest_effective","ephemeral_freq_dry", "prob_persist")
 
 
 p_sens_tad_surv_main_vs_ephemeral_persist <- ggplot2::ggplot(data = test3b, ggplot2::aes(x=survival_tadpoles_main, y = survival_tadpoles_ephemeral)) +
@@ -1449,6 +1451,25 @@ p_sens_tad_surv_main_vs_ephemeral_persist <- ggplot2::ggplot(data = test3b, ggpl
 
 p_sens_tad_surv_main_vs_ephemeral_persist
 
+
+testglm <- glm(prob_persist ~ survival_tadpoles_ephemeral + survival_tadpoles_main + survival_tadpoles_main*survival_tadpoles_ephemeral
+               + ephemeral_freq_dry + survival_tadpoles_ephemeral * ephemeral_freq_dry , 
+               # family = binomial, data =  test3) # warning is ok, try quasibinomial instead to be sure
+               family = quasibinomial, data =  test3b)
+
+summary(testglm)
+library(visreg)
+
+# interaction is only significant when limit rows also to tadpole means below the P50
+# but even with all the tadpole mean data the trends look similar when we look at the grah
+# for large mean survival, sd doesn't matter
+# for small mean survival, larger standard deviation is worse for prob of persistence
+
+visreg(testglm , "survival_tadpoles_ephemeral", by="survival_tadpoles_main")
+#visreg(testglm , "survival_tadpoles_main", by="survival_tadpoles_ephemeral")
+
+visreg(testglm , "survival_tadpoles_ephemeral", by="ephemeral_freq_dry")
+visreg(testglm , "ephemeral_freq_dry", by="survival_tadpoles_ephemeral")
 
 #---- Explore more traditional sensitivity analysis graphs. ----
 # Uses the same results RData file that was loaded above for the tornado
