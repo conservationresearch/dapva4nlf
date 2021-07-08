@@ -2,21 +2,27 @@
 # wrapper script to extract and graph the results for the
 # 2021 SDM report.
 
+# Note that my current calgary zoo laptop can not handle the Go Big results file 
+# with 10K iterations. Therefore, this script needs to be run on my mac if 
+# graphing that set of results.
+
 #---- Load libraries. ----
 library(dapva)
 library(dapva4nlf)
 library(gridExtra) # for grid.arrange
 
 #---- Specify the location where you saved the Rdata files. ----
-# Add a folder in there  called 'ForReport' to help organize the outputs.
-# max_mem_size <- memory.size(max = TRUE) #  On Windows, size in Mb (1048576 bytes), rounded to 0.01 Mb for memory.size and rounded down for memory.limit. 
-# memory.limit(max_mem_size)
+# Note: Add a folder in there called 'ForReport' to help organize the outputs.
+
+# Increase computer memory size before loading the RData files
 memory.limit(24000)
-path_to_results_folder <- "C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results"# on my work PC
-#path_to_results_folder <- "/Users/laurakeating/Documents/R/R_scripts/BTPD_PVA/Results/BTPD_baseline_results_march17"# on my mac
+#path_to_results_folder <- "C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results"# on my work PC
+path_to_results_folder <- "/Users/laurakeating/Documents/R/R_scripts/NLF_PVA/Results/"# on my mac
 setwd(path_to_results_folder) # on my mac
 
+#---- Specify the number of years you ran the model for/want to see results for. ----
 yrs <- 50
+
 #---- Extract the results from the Rdata files saved for each scenario. ----
 # One by one, load in the Rdata files and then export the results to csvs
 
@@ -306,7 +312,6 @@ int2$alternative<- factor(int2$alternative, levels=c("Go Big or Go Home", "Middl
 
 
 # cumulative distribution function - to look at stochastic dominance
-
 (persistence_effort_CDF1 <- graphCDF(results_summary_all_iterations = int2,
          metric = "probability of persistence",
          year = yrs,
@@ -397,6 +402,7 @@ int2$alternative<- factor(int2$alternative, levels=c("Go Big or \n Go Home", "Mi
 #              ncol = 1, nrow = 2)
 # dev.off()
 
+
 #---- Make graphs for the report - level of effort, self-sustaining. ----
 # Get a fresh load of the results
 # Upload all of the results in the results folder and bind them together
@@ -480,22 +486,12 @@ int4$alternative <- factor(int4$alternative, levels=c("Go Big or Go Home", "Midd
                                                    # title = 'B)'))
                                                    title = 'B)'))
 
-# filename <- paste("ForReport/graph_panel_effort_selfsustain", version,".tiff", sep="")
-# tiff(filename, width=12, height=8, units="in",
-#      pointsize=8, compression="lzw", bg="white", res=600,
-#      restoreConsole=TRUE)
-# grid.arrange(selfsustain_effort_graph1, selfsustain_effort_flyingBars1,
-#              ncol = 1, nrow = 2)
-# dev.off()
-
 (selfsustain_effort_CDF1 <- graphCDF(results_summary_all_iterations = int4,
                                      metric = "probability of self-sustaining population",
                                      year = yrs,
                                      x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",
                                      y_axis_lab = "\n \n \n \n \n Cumulative Probability \n",
                                      title = 'D)'))
-
-
 
 # What if top shows just the box and whisker charts
 # Then the next shows the violin plots for just Middle of the Road and GO Big
@@ -535,31 +531,20 @@ int4$alternative<- factor(int4$alternative, levels=c("Go Big or \n Go Home", "Mi
                                      y_axis_lab = "\n \n \n \n \n Cumulative Probability \n",
                                      title = 'F)'))
 
-
 #---- Make graphs for the report - level of effort, graphs for export. ----
-
-# filename <- paste("ForReport/graph_panel_effort", version,".tiff", sep="")
-# tiff(filename, width=12, height=12, units="in",
-#      pointsize=8, compression="lzw", bg="white", res=600,
-#      restoreConsole=TRUE)
-# grid.arrange(persist_effort_graph1,  selfsustain_effort_graph1,
-#              persistence_effort_flyingBars1, selfsustain_effort_flyingBars1,
-#              persistence_effort_CDF1, selfsustain_effort_CDF1,
-#              ncol = 2, nrow = 3)
-# dev.off()
 
 filename <- paste("ForReport/graph_effort_time", version,".tiff", sep="")
 tiff(filename, width=12, height=4, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600,
-     restoreConsole=TRUE)
+     pointsize=8, compression="lzw", bg="white", res=600)
+    # restoreConsole=TRUE)
 grid.arrange(persist_effort_graph1,  selfsustain_effort_graph1,
              ncol = 2, nrow = 1)
 dev.off()
 
 filename <- paste("ForReport/graph_effort_year50", version,".tiff", sep="")
 tiff(filename, width=12, height=8, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600,
-     restoreConsole=TRUE)
+     pointsize=8, compression="lzw", bg="white", res=600)
+    # restoreConsole=TRUE)
 grid.arrange(persistence_effort_flyingBars1, selfsustain_effort_flyingBars1,
              persistence_effort_CDF1, selfsustain_effort_CDF1,
              ncol = 2, nrow = 2)
@@ -591,6 +576,7 @@ dev.off()
 # grid.arrange(persistence_effort_CDF1, selfsustain_effort_CDF1,
 #              ncol = 2, nrow = 1)
 # dev.off()
+
 
 #---- Make graphs for the report - variations on Go Big, persistence. ----
 
@@ -668,16 +654,7 @@ int6$alternative<- factor(int6$alternative, levels=c("Try Hard but No \n Bullfro
                                                    # title = 'B)'))
                                                    title = 'A)'))
 
-# filename <- paste("ForReport/graph_panel_effort_persist", version,".tiff", sep="")
-# tiff(filename, width=12, height=8, units="in",
-#      pointsize=8, compression="lzw", bg="white", res=600,
-#      restoreConsole=TRUE)
-# grid.arrange(persist_effort_graph1, persistence_effort_flyingBars1,
-#              ncol = 1, nrow = 2)
-# dev.off()
-
 # cumulative distribution function - to look at stochastic dominance
-
 (persistence_goBigVar_CDF1 <- graphCDF(results_summary_all_iterations = int6,
                                      metric = "probability of persistence",
                                      year = yrs,
@@ -774,12 +751,9 @@ int7$alternative<- factor(int7$alternative, levels=c("Go Big or Go Home", "Try H
 
 (selfsustain_goBigVar_graph1 <- graphResultsSummary(results_summary = int7,
                                                   overlap = FALSE,
-                                                  # title = 'A)',
                                                   title = 'B)',
                                                   x_axis_lab = "Year",
-                                                  # y_axis_lab = "Probability of a Self-Sustaining Population \n \n ")) # The extra lines push the title out to the same spot as in panel B)
                                                   y_axis_lab = "\n Probability of a Self-Sustaining Population \n")) # The extra lines push the title out to the same spot as in panel B)
-
 
 # Flying Bars
 
@@ -810,21 +784,12 @@ int8$alternative<- factor(int8$alternative, levels=c("Try Hard but No \n Bullfro
                                                    # title = 'B)'))
                                                    title = 'B)'))
 
-# filename <- paste("ForReport/graph_panel_effort_selfsustain", version,".tiff", sep="")
-# tiff(filename, width=12, height=8, units="in",
-#      pointsize=8, compression="lzw", bg="white", res=600,
-#      restoreConsole=TRUE)
-# grid.arrange(selfsustain_effort_graph1, selfsustain_effort_flyingBars1,
-#              ncol = 1, nrow = 2)
-# dev.off()
-
 (selfsustain_goBigVar_CDF1 <- graphCDF(results_summary_all_iterations = int8,
                                      metric = "probability of self-sustaining population",
                                      year = yrs,
                                      x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",
                                      y_axis_lab = "\n \n \n \n \n Cumulative Probability \n",
                                      title = 'D)'))
-
 
 # What if top shows just the box and whisker charts
 # Then the next shows the violin plots for just Middle of the Road and GO Big
@@ -870,20 +835,10 @@ int8$alternative<- factor(int8$alternative, levels=c("Try Hard but No \n Bullfro
 
 #---- Make graphs for the report -variations on Go Big, panel for export. ----
 
-# filename <- paste("ForReport/graph_panel_goBigVar", version,".tiff", sep="")
-# tiff(filename, width=12, height=14, units="in",
-#      pointsize=8, compression="lzw", bg="white", res=600,
-#      restoreConsole=TRUE)
-# grid.arrange(persist_goBigVar_graph1,  selfsustain_goBigVar_graph1,
-#              persistence_goBigVar_flyingBars1, selfsustain_goBigVar_flyingBars1,
-#              persistence_goBigVar_CDF1, selfsustain_goBigVar_CDF1,
-#              ncol = 2, nrow = 3)
-# dev.off()
-
 filename <- paste("ForReport/graph_goBigVar_time", version,".tiff", sep="")
 tiff(filename, width=12, height=6, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600,
-     restoreConsole=TRUE)
+     pointsize=8, compression="lzw", bg="white", res=600)
+     #restoreConsole=TRUE)
 grid.arrange(persist_goBigVar_graph1,  selfsustain_goBigVar_graph1,
              ncol = 2, nrow = 1)
 dev.off()
@@ -891,8 +846,8 @@ dev.off()
 
 filename <- paste("ForReport/graph_goBigVar_year50", version,".tiff", sep="")
 tiff(filename, width=12, height=8, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600,
-     restoreConsole=TRUE)
+     pointsize=8, compression="lzw", bg="white", res=600)
+    # restoreConsole=TRUE)
 grid.arrange(persistence_goBigVar_flyingBars1, selfsustain_goBigVar_flyingBars1,
              persistence_goBigVar_CDF1, selfsustain_goBigVar_CDF1,
              ncol = 2, nrow = 2)
@@ -940,7 +895,6 @@ int5b <- results_summary_prob_persist[c(which(results_summary_prob_persist$alter
 
 
 int5b$alternative <- factor(int5b$alternative, levels=c("Testing Existing Population",
-                                                     # "Testing Extreme Releases A",
                                                      "Testing Extreme Releases")) # reorder factor levels
 
 (persist_hypotheticals_graph1 <- graphResultsSummary(results_summary = int5b,
@@ -949,19 +903,15 @@ int5b$alternative <- factor(int5b$alternative, levels=c("Testing Existing Popula
                                                 x_axis_lab = "Year",
                                                 y_axis_lab = "\n Probability of Persistence \n ")) # The extra lines push the title out to the same spot as in panel B)
 
-
 # Flying Bars
 
 int6b <- results_all_iter[c(which(results_all_iter$alternative == existingPop_alt_name),
-                            # which(results_all_iter$alternative == extremeRelA_alt_name),
+                            # which(results_all_iter$alternative == extremeRelA_alt_name), # remove for report, B is enough
                             which(results_all_iter$alternative == extremeRelB_alt_name)),]
-# int6$alternative[which(int6$alternative == noBFM_alt_name)] <- "Try Hard but \n No Bullfrog Management" # put it on two lines
-
 
 int6b$alternative<- factor(int6b$alternative, levels=c("Testing Extreme Releases",
                                                      # "Testing Extreme Releases A", 
                                                      "Testing Existing Population")) # reorder factor levels
-
 
 (persistence_hypotheticals_flyingBars1 <- dapva::graphBoxandViolinPlot(results_summary_all_iterations = int6b,
                                                      metric = "probability of persistence",
@@ -972,21 +922,12 @@ int6b$alternative<- factor(int6b$alternative, levels=c("Testing Extreme Releases
                                                      # title = 'B)'))
                                                      title = 'A)'))
 
-# filename <- paste("ForReport/graph_panel_effort_persist", version,".tiff", sep="")
-# tiff(filename, width=12, height=8, units="in",
-#      pointsize=8, compression="lzw", bg="white", res=600,
-#      restoreConsole=TRUE)
-# grid.arrange(persist_effort_graph1, persistence_effort_flyingBars1,
-#              ncol = 1, nrow = 2)
-# dev.off()
-
 (persistence_hypotheticals_CDF1 <- graphCDF(results_summary_all_iterations = int6b,
                                        metric = "probability of persistence",
                                        year = yrs,
                                        x_axis_lab = "Probability of Persistence in Year 50",
                                        y_axis_lab = "\n \n \n \n \n Cumulative Probability \n",
                                        title = 'C)'))
-
 
 # What if top shows just the box and whisker charts
 # Then the next shows the violin plots for just Middle of the Road and GO Big
@@ -1017,7 +958,6 @@ int6b$alternative<- factor(int6b$alternative, levels=c("Testing Extreme Releases
                                             title = 'E)'))
 
 
-
 #---- Make graphs for the report - hypothetical scenarios, self-sustaining. ----
 # Get a fresh load of the results
 # Upload all of the results in the results folder and bind them together
@@ -1028,7 +968,6 @@ colnames(results_all_iter)[7:ncol(results_all_iter)] <- 1:50
 
 # Rename testing extreme releases B to just Extreme Releases
 results_all_iter$alternative[which(results_all_iter$alternative == "Testing Extreme Releases B")] <- "Testing Extreme Releases"
-
 
 # Graph over time
 # Pull out the results summary
@@ -1054,9 +993,7 @@ int7b$alternative<- factor(int7b$alternative, levels=c("Testing Existing Populat
                                                     # title = 'A)',
                                                     title = 'B)',
                                                     x_axis_lab = "Year",
-                                                    # y_axis_lab = "Probability of a Self-Sustaining Population \n \n ")) # The extra lines push the title out to the same spot as in panel B)
                                                     y_axis_lab = "\n Probability of a Self-Sustaining Population \n")) # The extra lines push the title out to the same spot as in panel B)
-
 
 # Flying Bars
 
@@ -1074,16 +1011,7 @@ int8b$alternative<- factor(int8b$alternative, levels=c("Testing Extreme Releases
                                                      credible_interval = 0.95,
                                                      x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",
                                                      y_axis_lab = "\n Management Alternative",
-                                                     # title = 'B)'))
                                                      title = 'B)'))
-
-# filename <- paste("ForReport/graph_panel_effort_selfsustain", version,".tiff", sep="")
-# tiff(filename, width=12, height=8, units="in",
-#      pointsize=8, compression="lzw", bg="white", res=600,
-#      restoreConsole=TRUE)
-# grid.arrange(selfsustain_effort_graph1, selfsustain_effort_flyingBars1,
-#              ncol = 1, nrow = 2)
-# dev.off()
 
 (selfsustain_hypotheticals_CDF1 <- graphCDF(results_summary_all_iterations = int8b,
                                        metric = "probability of self-sustaining population",
@@ -1126,20 +1054,10 @@ int8b$alternative<- factor(int8b$alternative, levels=c("Testing Extreme Releases
 
 #---- Make graphs for the report - hypothetical scenarios, panel for export. ----
 
-# filename <- paste("ForReport/graph_panel_hyptheticals", version,".tiff", sep="")
-# tiff(filename, width=12, height=10, units="in",
-#      pointsize=8, compression="lzw", bg="white", res=600,
-#      restoreConsole=TRUE)
-# grid.arrange(persist_hypotheticals_graph1,  selfsustain_hypotheticals_graph1,
-#              persistence_hypotheticals_flyingBars1, selfsustain_hypotheticals_flyingBars1,
-#              persistence_hypotheticals_CDF1, selfsustain_hypotheticals_CDF1,
-#              ncol = 2, nrow = 3)
-# dev.off()
-
 filename <- paste("ForReport/graph_hypotheticals_time", version,".tiff", sep="")
 tiff(filename, width=12, height=4, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600,
-     restoreConsole=TRUE)
+     pointsize=8, compression="lzw", bg="white", res=600)
+     #restoreConsole=TRUE)
 grid.arrange(persist_hypotheticals_graph1,  selfsustain_hypotheticals_graph1,
              ncol = 2, nrow = 1)
 dev.off()
@@ -1147,13 +1065,12 @@ dev.off()
 
 filename <- paste("ForReport/graph_hypotheticals_year50", version,".tiff", sep="")
 tiff(filename, width=12, height=6, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600,
-     restoreConsole=TRUE)
+     pointsize=8, compression="lzw", bg="white", res=600)
+     #restoreConsole=TRUE)
 grid.arrange(persistence_hypotheticals_flyingBars1, selfsustain_hypotheticals_flyingBars1,
              persistence_hypotheticals_CDF1, selfsustain_hypotheticals_CDF1,
              ncol = 2, nrow = 2)
 dev.off()
-
 
 filename <- paste("ForReport/graph_hypotheticals_year50_option2", version,".tiff", sep="")
 tiff(filename, width=12, height=8, units="in",
@@ -1170,17 +1087,13 @@ dev.off()
 
 # Of runs per iteration
 min(results_all_iter$n_runs_per_iter) #300
-max(results_all_iter$n_runs_per_iter) #363
+max(results_all_iter$n_runs_per_iter) #382
 
 # of iterations
 max(results_all_iter$iteration)
 
 #---- Make graphs for the report -goBig tornados, panel for export. ----
 
-path_to_results_folder <- "C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results"# on my work PC
-#path_to_results_folder <- "/Users/laurakeating/Documents/R/R_scripts/BTPD_PVA/Results/BTPD_baseline_results_march17"# on my mac
-setwd(path_to_results_folder) # on my mac
-# file_goBig <-  list.files(path = ".","*goBig_vFinalJune2021_5K.RData", full.names="TRUE")
 file_goBig <-  list.files(path = ".","*goBig_vFinalJune2021_10Kiter.RData", full.names="TRUE")
 load(file_goBig)
 
@@ -1216,14 +1129,11 @@ tornado_selfsustain_top10 <- dapva::drawTornado(paramSens = paramSens_selfsustai
 
 filename <- paste("ForReport/tornados_top10_goBigVar", version,".tiff", sep="")
 tiff(filename, width=12, height=8, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600,
-     restoreConsole=TRUE)
+     pointsize=8, compression="lzw", bg="white", res=600)
+     #restoreConsole=TRUE)
 grid.arrange(tornado_persist_top10,  tornado_selfsustain_top10,
              ncol = 1, nrow = 2)
 dev.off()
-
-
-
 
 #---- Explore yoy and tadpole survival vs prob of persistence. ----
 # Uses the same results RData file that was loaded above for the tornado
@@ -1236,7 +1146,7 @@ test2 <- cbind(parameterByIterTracking_this_alt_clean[iteration_numbers, c("s_me
                                                                            "s_mean_juv_no_threats",
                                                                            "bullfrogMgmt_effective")],
               results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])
-# colnames(test2) <- c("s_tadpoles_mean", "prob_persist")
+
 colnames(test2) <- c("survival_eggs", "survival_tadpoles","survival_yoy", "survival_juv", "bullfrogMgmt_effective", "prob_persist")
 
 best_guess_input_eggs <- as.numeric(as.character(inputs$best_guess[which(inputs$input == "s_mean_eggs_no_threats")]))
@@ -1264,21 +1174,12 @@ P10_input_juv <- as.numeric(as.character(quantile(test2$survival_juv, 0.1)))
 P90_input_juv <- as.numeric(as.character(quantile(test2$survival_juv, 0.9)))
 
 p_sens_tad_yoy_surv_persist <- ggplot2::ggplot(data = test2, ggplot2::aes(x=survival_tadpoles, y = survival_yoy)) +
-  ggplot2::geom_point(ggplot2::aes(fill = prob_persist, size = prob_persist), shape = 21, alpha = 0.5) +
+  #ggplot2::geom_point(ggplot2::aes(fill = prob_persist, size = prob_persist), shape = 21, alpha = 0.5) +
+  ggplot2::geom_point(ggplot2::aes(fill = prob_persist), shape = 21, alpha = 0.5) +
   ggplot2::scale_fill_continuous(type = "viridis") +
   ggplot2::guides(fill = ggplot2::guide_colourbar(barwidth = 10, barheight = 0.5)) +  #https://ggplot2.tidyverse.org/reference/guide_colourbar.html
-  # ggplot2::scale_fill_viridis_c(guide = "legend", name="Probability of persistence") + # https://community.rstudio.com/t/ggplot2-is-it-possible-to-combine-color-fill-and-size-legends/17072/2
-  # ggplot2::scale_size_continuous(range = c(1, 5), name="Probability of persistence") +
-  # ggplot2::xlim(P10_input_tad, P90_input_tad) +
-  # ggplot2::ylim(P10_input_yoy, P90_input_yoy) +
-  # ggplot2::xlim(min_tad, max_tad) +
-  # ggplot2::ylim(min_yoy, max_yoy) +
   ggplot2::geom_hline(yintercept = best_guess_input_yoy, linetype = "dashed", color = "red") +
-  # ggplot2::geom_hline(yintercept = P10_input_yoy, linetype = "dashed", color = "black") +
-  # ggplot2::geom_hline(yintercept = P90_input_yoy, linetype = "dashed", color = "black") +
   ggplot2::geom_vline(xintercept = best_guess_input_tad, linetype = "dashed", color = "red") +
-  # ggplot2::geom_vline(xintercept = P10_input_tad, linetype = "dashed", color = "black") +
-  # ggplot2::geom_vline(xintercept = P90_input_tad, linetype = "dashed", color = "black") +
   ggplot2::xlab("Mean tadpole survival\n (no threats)") +
   ggplot2::ylab( "Mean young of year survival\n (no threats)") + 
   ggplot2::ggtitle( "A)") + 
@@ -1295,14 +1196,6 @@ p_sens_tad_yoy_surv_persist <- ggplot2::ggplot(data = test2, ggplot2::aes(x=surv
   )
 
 p_sens_tad_yoy_surv_persist
-# 
-# filename <- paste("ForReport/graph_sens_tad_yoy_surv_persist", version,".tiff", sep="")
-# tiff(filename, width=12, height=4, units="in",
-#      pointsize=8, compression="lzw", bg="white", res=600,
-#      restoreConsole=TRUE)
-# p_sens_tad_yoy_surv_persist
-# dev.off()
-
 
 #---- Explore prob of persistence. ----
 
@@ -1327,13 +1220,6 @@ p_hist_prob_persist <- ggplot2::ggplot(prob_persist, ggplot2::aes(x = prob_persi
   )
 p_hist_prob_persist
 
-# filename <- paste("ForReport/graph_hist_prob_persist", version,".tiff", sep="")
-# tiff(filename, width=12, height=8, units="in",
-#      pointsize=8, compression="lzw", bg="white", res=600,
-#      restoreConsole=TRUE)
-# p_hist_prob_persist
-# dev.off()
-
 rows_yoy_tad_surv_above_P50 <- which(test2$survival_tadpoles >= best_guess_input_tad & 
                                        test2$survival_yoy >= best_guess_input_yoy)
 test2$group <- "Tadpole or YOY survival below P50"# initalize
@@ -1341,10 +1227,6 @@ test2$group[rows_yoy_tad_surv_above_P50] <- "Tadpole and YOY survival above P50"
 test2$group <- as.factor(test2$group)
 library(plyr)
 mu <- plyr::ddply(test2, "group", summarise, grp.mean=mean(prob_persist))
-
-
-# prob_persist_yoy_tad_surv_above_P50 <- as.data.frame(test2$prob_persist[rows_yoy_tad_surv_above_P50])
-# colnames(prob_persist_yoy_tad_surv_above_P50) <- c("prob_persist")
 
 p_hist_prob_persist_groups <- ggplot2::ggplot(test2 , ggplot2::aes(x = prob_persist, fill=group)) +
   ggplot2::geom_histogram(position="dodge", binwidth = 0.05, alpha=0.5) + # http://www.sthda.com/english/wiki/ggplot2-histogram-plot-quick-start-guide-r-software-and-data-visualization
@@ -1368,24 +1250,13 @@ p_hist_prob_persist_groups <- ggplot2::ggplot(test2 , ggplot2::aes(x = prob_pers
   )
 p_hist_prob_persist_groups
 
-# 
-# filename <- paste("ForReport/graph_hist_prob_persist_sensSurv", version,".tiff", sep="")
-# tiff(filename, width=12, height=8, units="in",
-#      pointsize=8, compression="lzw", bg="white", res=600,
-#      restoreConsole=TRUE)
-# grid.arrange(p_hist_prob_persist,  p_hist_prob_persist_groups ,
-#              ncol = 1, nrow = 2)
-# dev.off()
-
 filename <- paste("ForReport/graph_compare_yoyTadsurv_persist", version,".tiff", sep="")
 tiff(filename, width=12, height=8, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600,
-     restoreConsole=TRUE)
+     pointsize=8, compression="lzw", bg="white", res=600)
+     #restoreConsole=TRUE)
 grid.arrange(p_sens_tad_yoy_surv_persist,  p_hist_prob_persist_groups ,
              ncol = 1, nrow = 2)
 dev.off()
-
-
 
 #---- Relationship between bullfrog management and tadpole survival. ----
 test2b <- cbind(parameterByIterTracking_this_alt_clean[iteration_numbers, c("s_mean_eggs_no_threats",
@@ -1511,8 +1382,8 @@ p_sens_juv_surv_bullfrogMgmt
 
 filename <- paste("ForReport/graph_bullfrogMgt_vs_survival", version,".tiff", sep="")
 tiff(filename, width=12, height=8, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600,
-     restoreConsole=TRUE)
+     pointsize=8, compression="lzw", bg="white", res=600)
+     #restoreConsole=TRUE)
 grid.arrange(p_sens_eggs_surv_bullfrogMgmt, 
              p_sens_tad_surv_bullfrogMgmt,
              p_sens_yoy_surv_bullfrogMgmt,
@@ -1527,11 +1398,8 @@ dev.off()
 #---- Relationship between persistence and self-sustaining. ----
 
 # Load in GoBig alternative with lots of iterations
-# load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_vFinalJune2021_5K.RData")
-load("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/goBig_vFinalJune2021_10Kiter.RData")
-
-
-
+file_goBig <-  list.files(path = ".","*goBig_vFinalJune2021_10Kiter.RData", full.names="TRUE")
+load(file_goBig)
 
 # Plot abundance vs persistence
 
@@ -1563,15 +1431,15 @@ ggplot2::ggplot(results_all_this_alt_yr50_wide, ggplot2::aes(x = mean_prop_K, y 
 
 p_persis_vs_selfsustain <- ggplot2::ggplot(results_all_this_alt_yr50_wide, ggplot2::aes(x = prob_of_persis, 
                                                                                         y = prob_of_selfsustain)) +
-  ggplot2::geom_point(ggplot2::aes(fill = mean_prop_K, size = mean_prop_K), shape = 21, alpha = 0.5) +
+  #ggplot2::geom_point(ggplot2::aes(fill = mean_prop_K, size = mean_prop_K), shape = 21, alpha = 0.5) +
+  ggplot2::geom_point(ggplot2::aes(fill = mean_prop_K), shape = 21, alpha = 0.5) +
   ggplot2::scale_fill_continuous(type = "viridis") +
   ggplot2::guides(fill = ggplot2::guide_colourbar(barwidth = 10, barheight = 0.5)) +  #https://ggplot2.tidyverse.org/reference/guide_colourbar.html
   # ggplot2::geom_point(ggplot2::aes(fill = mean_abundance), shape = 21, alpha = 0.5) +
   geom_abline(slope=1, intercept=0, lty= "dashed")  +
   ggplot2::labs(x = "Probability of persistence") +
   ggplot2::labs(y = "Probability of a \n self-sustaining population") +
-  ggplot2::labs(size='Mean proportion of carrying capacity    ', fill='')  +
-  # ggplot2::ggtitle("Example from Go Big or Go Home Alternative Results") +
+  ggplot2::labs(fill ='Mean proportion of carrying capacity    ', fill='')  +
   ggplot2::theme_bw() +
   ggplot2::theme(
     panel.grid.major = ggplot2::element_blank(),
@@ -1591,20 +1459,24 @@ print(p_persis_vs_selfsustain)
 dev.off()
 
 
-#---- Explore tadpole survival mean and vs prob of persistence. ----
+#---- Explore tadpole survival mean and vs prob of persistence - includes temporal variation. ----
 # Uses the same results RData file that was loaded above for the tornado
 # Confirmed can get simular insights to tornado, tornado is easier and clearer in my opinion :)
-
+parameterByIterTracking_this_alt_clean2 <- parameterByIterTracking_this_alt_clean[iteration_numbers,]
 
 # First filter out so only looking at data where yoy mean is high enough to not be the main problem
-rows_yoybigenough <- which(parameterByIterTracking_this_alt_clean$s_mean_yoy_no_threats >= best_guess_input_yoy)
-rows_tadsmallenough <- which(parameterByIterTracking_this_alt_clean$s_mean_tadpoles_no_threats < best_guess_input_tad)
+rows_yoybigenough <- which(parameterByIterTracking_this_alt_clean2$s_mean_yoy_no_threats >= best_guess_input_yoy)
+rows_tadsmallenough <- which(parameterByIterTracking_this_alt_clean2$s_mean_tadpoles_no_threats < best_guess_input_tad)
 rows <- intersect(rows_yoybigenough, rows_tadsmallenough)
 
 # rows <- intersect(iteration_numbers, rows_yoybigenough)
-# rows <- 1:nrow(parameterByIterTracking_this_alt_clean)
+# rows <- 1:nrow(parameterByIterTracking_this_alt_clean2)
 
-test3 <- cbind(parameterByIterTracking_this_alt_clean[intersect(rows, iteration_numbers), c("s_mean_tadpoles_no_threats", "s_sd_tadpoles_no_threats")],
+rows <- rows_yoybigenough
+
+
+
+test3 <- cbind(parameterByIterTracking_this_alt_clean2[rows, c("s_mean_tadpoles_no_threats", "s_sd_tadpoles_no_threats")],
                as.data.frame(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])[rows,])
 # colnames(test3) <- c("s_tadpoles_mean", "prob_persist")
 colnames(test3) <- c("survival_tadpoles_mean","survival_tadpoles_sd", "prob_persist")
@@ -1628,20 +1500,14 @@ P10_input_sd <- as.numeric(as.character(quantile(test3$survival_tadpoles_sd, 0.1
 P90_input_sd <- as.numeric(as.character(quantile(test3$survival_tadpoles_sd, 0.9)))
 
 p_sens_tad_surv_mean_sd_persist <- ggplot2::ggplot(data = test3, ggplot2::aes(x=survival_tadpoles_mean, y = survival_tadpoles_sd)) +
-  ggplot2::geom_point(aes(fill = prob_persist, size = prob_persist), shape = 21, alpha = 0.7) +
+  #ggplot2::geom_point(aes(fill = prob_persist, size = prob_persist), shape = 21, alpha = 0.7) +
+  ggplot2::geom_point(aes(fill = prob_persist), shape = 21, alpha = 0.7) +
   scale_fill_viridis_c(guide = "legend", name="Probability of persistence") + # https://community.rstudio.com/t/ggplot2-is-it-possible-to-combine-color-fill-and-size-legends/17072/2
   scale_size_continuous(range = c(1, 5), name="Probability of persistence") +
-  # ggplot2::xlim(P10_input_mean, P90_input_mean) +
-  # ggplot2::ylim(P10_input_sd, P90_input_sd) +
-  # ggplot2::xlim(min_tad, best_guess_input_mean) +
    ggplot2::xlim(min_tad, max_tad) +
   ggplot2::ylim(min_sd, max_sd) +
   ggplot2::geom_hline(yintercept = best_guess_input_sd, linetype = "dashed", color = "red") +
-  # ggplot2::geom_hline(yintercept = P10_input_sd, linetype = "dashed", color = "black") +
-  # ggplot2::geom_hline(yintercept = P90_input_sd, linetype = "dashed", color = "black") +
   ggplot2::geom_vline(xintercept = best_guess_input_mean, linetype = "dashed", color = "red") +
-  # ggplot2::geom_vline(xintercept = P10_input_mean, linetype = "dashed", color = "black") +
-  # ggplot2::geom_vline(xintercept = P90_input_mean, linetype = "dashed", color = "black") +
   xlab("Mean tadpole survival\n (no threats)") +
   ylab( "SD tadpole survival\n (no threats)") + 
   ggtitle( "A)") + 
@@ -1660,8 +1526,8 @@ p_sens_tad_surv_mean_sd_persist
 
 filename <- paste("ForReport/graph_sens_tad_surv_mean_sd_persist", version,".tiff", sep="")
 tiff(filename, width=12, height=8, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600,
-     restoreConsole=TRUE)
+     pointsize=8, compression="lzw", bg="white", res=600)
+    # restoreConsole=TRUE)
 p_sens_tad_surv_mean_sd_persist
 dev.off()
 
@@ -1680,15 +1546,71 @@ library(visreg)
 # for small mean survival, larger standard deviation is worse for prob of persistence
 
 visreg(testglm , "survival_tadpoles_sd", by="survival_tadpoles_mean")
-visreg(testglm , "survival_tadpoles_mean", by="survival_tadpoles_sd")
+#visreg(testglm , "survival_tadpoles_mean", by="survival_tadpoles_sd")
 
 
+#---- Explore epehemeral wetlands and tadpole survival. ----
+
+rows <- rows_yoybigenough
+
+test3b <- cbind(parameterByIterTracking_this_alt_clean2[rows, c("s_mean_tadpoles_no_threats",
+                                                               "s_mean_ephWetlands_tadpoles_no_threats",
+                                                               "ephWetRest_effective",
+                                                               "ephemeral_freq_dry")],
+               as.data.frame(results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])[rows,])
+
+colnames(test3b) <- c( "survival_tadpoles_main","survival_tadpoles_ephemeral", "ephWetRest_effective","ephemeral_freq_dry", "prob_persist")
+
+
+p_sens_tad_surv_main_vs_ephemeral_persist <- ggplot2::ggplot(data = test3b, ggplot2::aes(x=survival_tadpoles_main, y = survival_tadpoles_ephemeral)) +
+  ggplot2::facet_wrap(~ephWetRest_effective) +
+  #ggplot2::geom_point(aes(fill = prob_persist, size = prob_persist), shape = 21, alpha = 0.7) +
+  ggplot2::geom_point(aes(fill = prob_persist), shape = 21, alpha = 0.7) +
+  scale_fill_viridis_c(guide = "legend", name="Probability of persistence") + # https://community.rstudio.com/t/ggplot2-is-it-possible-to-combine-color-fill-and-size-legends/17072/2
+  scale_size_continuous(range = c(1, 5), name="Probability of persistence") +
+  ggplot2::xlim(min_tad, max_tad) +
+  ggplot2::ylim(min_sd, max_sd) +
+  ggplot2::geom_hline(yintercept = best_guess_input_sd, linetype = "dashed", color = "red") +
+  ggplot2::geom_vline(xintercept = best_guess_input_mean, linetype = "dashed", color = "red") +
+  xlab("Mean tadpole survival (no threats)\n - Main Wetlands") +
+  ylab( "Mean tadpole survival (no threats)\n - Epehemeral Wetlands") + 
+  ggtitle( "A)") + 
+  ggplot2::theme_bw() +
+  ggplot2::theme(
+    panel.grid.major = ggplot2::element_blank(),
+    panel.grid.minor = ggplot2::element_blank(),
+    strip.background = ggplot2::element_blank(),
+    panel.border = ggplot2::element_rect(colour = "black"),
+    text = ggplot2::element_text(size = 12),
+    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+    legend.position = "bottom"
+  )
+
+p_sens_tad_surv_main_vs_ephemeral_persist
+
+
+testglm <- glm(prob_persist ~ survival_tadpoles_ephemeral + survival_tadpoles_main + survival_tadpoles_main*survival_tadpoles_ephemeral
+               + ephemeral_freq_dry + survival_tadpoles_ephemeral * ephemeral_freq_dry , 
+               # family = binomial, data =  test3) # warning is ok, try quasibinomial instead to be sure
+               family = quasibinomial, data =  test3b)
+
+summary(testglm)
+library(visreg)
+
+# interaction is only significant when limit rows also to tadpole means below the P50
+# but even with all the tadpole mean data the trends look similar when we look at the grah
+# for large mean survival, sd doesn't matter
+# for small mean survival, larger standard deviation is worse for prob of persistence
+
+visreg(testglm , "survival_tadpoles_ephemeral", by="survival_tadpoles_main")
+#visreg(testglm , "survival_tadpoles_main", by="survival_tadpoles_ephemeral")
+
+visreg(testglm , "survival_tadpoles_ephemeral", by="ephemeral_freq_dry")
+visreg(testglm , "ephemeral_freq_dry", by="survival_tadpoles_ephemeral")
 
 #---- Explore more traditional sensitivity analysis graphs. ----
 # Uses the same results RData file that was loaded above for the tornado
 # Confirmed can get simular insights to tornado, tornado is easier and clearer in my opinion :)
-
-
 int <- "s_mean_yoy_no_threats"
 test <- cbind(parameterByIterTracking_this_alt_clean[iteration_numbers,paste(int)],
               results_all_this_alt[which(results_all_this_alt$metric == "probability of persistence"), "50"])
@@ -1751,8 +1673,8 @@ tornado_selfsustain_all <- dapva::drawTornado(paramSens = paramSens_selfsustain,
 
 filename <- paste("ForReport/tornados_allBars_goBigVar", version,".tiff", sep="")
 tiff(filename, width=12, height=16, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600,
-     restoreConsole=TRUE)
+     pointsize=8, compression="lzw", bg="white", res=600)
+    # restoreConsole=TRUE)
 grid.arrange(tornado_persist_all,  tornado_selfsustain_all,
              ncol = 1, nrow = 2)
 dev.off()
@@ -1833,8 +1755,8 @@ graphs[[2]]
 # Export graph for appendix
 filename <- paste("ForReport/appendix_graph_convergence_runs", version,".tiff", sep="")
 tiff(filename, width=12, height= 8, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600,
-     restoreConsole=TRUE)
+     pointsize=8, compression="lzw", bg="white", res=600)
+     #restoreConsole=TRUE)
 graphs[[2]]
 dev.off()
 
@@ -1868,8 +1790,8 @@ graphs <- dapva::graphCongvTestIter(convergence_test, x_location_vertical_line =
 # Export graph for appendix
 filename <- paste("ForReport/appendix_graph_convergence_iterations", version,".tiff", sep="")
 tiff(filename, width=12, height= 8, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600,
-     restoreConsole=TRUE)
+     pointsize=8, compression="lzw", bg="white", res=600)
+     #restoreConsole=TRUE)
 p_prob_persist_conv_iter_mean 
 dev.off()
 
@@ -2048,8 +1970,8 @@ p_basecase_survival_means <- ggplot2::ggplot(survival_w_threats_comparison_long,
 
 filename <- paste("ForReport/appendix_graph_survival_means_basecase", version,".tiff", sep="")
 tiff(filename, width=12, height=8, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600,
-     restoreConsole=TRUE)
+     pointsize=8, compression="lzw", bg="white", res=600)
+     #restoreConsole=TRUE)
   p_basecase_survival_means
 dev.off()
 
@@ -2086,8 +2008,8 @@ p_basecase_runs_example <- ggplot2::ggplot(test2[which(test2$run <= 10),], ggplo
 
 filename <- paste("ForReport/appendix_graph_basecase_runs_example", version,".tiff", sep="")
 tiff(filename, width=12, height=8, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600,
-     restoreConsole=TRUE)
+     pointsize=8, compression="lzw", bg="white", res=600)
+     #restoreConsole=TRUE)
 p_basecase_runs_example
 dev.off()
 
@@ -2176,8 +2098,8 @@ results_summary_prob_selfsustaining <- dapva::makeResultsSummaryMultipleAlt(resu
 
 filename <- paste("ForReport/appendix_graph_basecase_iteration_example", version,".tiff", sep="")
 tiff(filename, width=12, height=8, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600,
-     restoreConsole=TRUE)
+     pointsize=8, compression="lzw", bg="white", res=600)
+     #restoreConsole=TRUE)
 grid.arrange(persistence_graph ,  selfsustaining_graph,
              ncol = 2, nrow = 1)
 dev.off()
@@ -2349,8 +2271,8 @@ results_summary_prob_persist_unct_tgth <- dapva::makeResultsSummaryMultipleAlt(r
 # Export the graphs using grid.arrange
 filename <- paste("C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results/ForReport/compare_persist_combineUnct", version,".tiff", sep="")
 tiff(filename, width=12, height=4, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600,
-     restoreConsole=TRUE)
+     pointsize=8, compression="lzw", bg="white", res=600)
+     #restoreConsole=TRUE)
 gridExtra:: grid.arrange(persistence_graph_basecase,  
                          persistence_graph_unct_comb,
                          persistence_graph_unct_tgth,
@@ -2466,8 +2388,8 @@ int9$alternative <- factor(int9$alternative, levels=c("Do Nothing", "Minimum Fun
 
 filename <- paste("ForReport/compare_persist_combineUnct", version,".tiff", sep="")
 tiff(filename, width=12, height=8, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600,
-     restoreConsole=TRUE)
+     pointsize=8, compression="lzw", bg="white", res=600)
+     #restoreConsole=TRUE)
 gridExtra:: grid.arrange(persist_effort_graph1,  
                          persist_effort_graph_combineUnct,
                          ncol = 2, nrow = 1)
@@ -2592,8 +2514,8 @@ files <-  list.files(path = ".","*.RData", full.names="TRUE")
 
 filename <- paste("ForReport/compare_persist_diffapproaches", version,".tiff", sep="")
 tiff(filename, width=12, height=8, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600,
-     restoreConsole=TRUE)
+     pointsize=8, compression="lzw", bg="white", res=600)
+     #restoreConsole=TRUE)
 gridExtra:: grid.arrange(persist_effort_graph_basecase, 
                          persist_effort_graph_combineUnct,
                          persist_effort_graph1,  
