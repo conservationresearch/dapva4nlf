@@ -314,8 +314,78 @@ int2$alternative<- factor(int2$alternative, levels=c("Go Big or Go Home", "Middl
          y_axis_lab = "\n \n \n \n \n Cumulative Probability \n",
          title = 'C)'))
 
+(persistence_effort_PDF1 <- graphPDF(results_summary_all_iterations = int2,
+                                     metric = "probability of persistence",
+                                     year = yrs,
+                                     x_axis_lab = "Probability of Persistence in Year 50",
+                                     title = 'C)'))
 
 
+# Trying to add in the pdf as per suggestion from Sarah
+# Still doesn't look very useful with all four alternatives in there as the left side for the low effort is really high 
+# and the rest try to scale to that
+# results_summary_all_iterations <- int2[which(int2$alternative != "Minimum Funding /\n Low Effort"  &
+#                                          int2$alternative != "Do Nothing"),]
+# metric = "probability of persistence"
+# year = yrs
+# results_summary_all_iterations_year <- results_summary_all_iterations[which(results_summary_all_iterations$metric == 
+#                                                                               metric), c(paste0(year), "alternative", "pop")]
+# colnames(results_summary_all_iterations_year) <- c("quantity", 
+#                                                    "alternative", "pop")
+# 
+# 
+# ggplot2::ggplot(data = results_summary_all_iterations_year, ggplot2::aes(x = quantity, color = alternative)) + 
+#   # ggplot2::stat_ecdf(data = results_summary_all_iterations_year, 
+#   #                                      ggplot2::aes(x = quantity, color = alternative)) + x_axis_lab1 + 
+#   # y_axis_lab1 + title1 + ggplot2::labs(colour = "") + 
+#   ggplot2::geom_density(ggplot2::aes(x=quantity)) + 
+#   # ggplot2::facet_wrap(~alternative) + 
+#   ggplot2::scale_color_hue(direction = -1, h.start = 90) + 
+#   ggplot2::guides(color = ggplot2::guide_legend(reverse = TRUE)) + 
+#   ggplot2::theme_bw() + ggplot2::theme(panel.grid.major = ggplot2::element_blank(), 
+#                                        panel.grid.minor = ggplot2::element_blank(), strip.background = ggplot2::element_blank(), 
+#                                        panel.border = ggplot2::element_rect(colour = "black"), 
+#                                        text = ggplot2::element_text(size = 12), axis.text.x = ggplot2::element_text(angle = 45, 
+#                                                                                                                     hjust = 1), legend.position = "bottom")
+# 
+# 
+
+# What if top shows just the box and whisker charts
+# Then the next shows the violin plots for just Middle of the Road and GO Big
+# Then have the CDFs on the bottom
+
+(persistence_effort_flyingBars1_opt2<- graphFlyingBars(results_summary_all_iterations = int2,
+                                                                metric = "probability of persistence",
+                                                                year = yrs,
+                                                                credible_interval = 0.95,
+                                                                x_axis_lab = "Probability of Persistence in Year 50",
+                                                                y_axis_lab = "\n Management Alternative",
+                                                                # title = 'B)'))
+                                                                title = 'A)'))
+
+(persistence_effort_violinPlot_opt2 <- graphViolinPlotSideways(results_summary_all_iterations = int2[which(int2$alternative != "Minimum Funding /\n Low Effort"  &
+                                                                                                               int2$alternative != "Do Nothing"),],
+                                                           metric = "probability of persistence",
+                                                           year = yrs,
+                                                           credible_interval = 0.95,
+                                                           x_axis_lab = "Probability of Persistence in Year 50",
+                                                           y_axis_lab = "\n Management Alternative",
+                                                           title = 'C)'))
+
+int2$alternative <- as.character(int2$alternative)
+int2$alternative[which(int2$alternative == "Go Big or Go Home")] <- "Go Big or \n Go Home"  # put it on two lines
+int2$alternative[which(int2$alternative == "Middle of the Road")] <- "Middle of \n the Road"  # put it on two lines
+int2$alternative <- as.factor(int2$alternative)
+int2$alternative<- factor(int2$alternative, levels=c("Go Big or \n Go Home", "Middle of \n the Road",
+                                                     "Minimum Funding /\n Low Effort",
+                                                     "Do Nothing" )) # reorder factor levels
+
+(persistence_effort_CDF1_opt2 <- graphCDF(results_summary_all_iterations = int2,
+                                     metric = "probability of persistence",
+                                     year = yrs,
+                                     x_axis_lab = "Probability of Persistence in Year 50",
+                                     y_axis_lab = "\n \n \n \n \n Cumulative Probability \n",
+                                     title = 'E)'))
 
 
 
@@ -427,6 +497,45 @@ int4$alternative <- factor(int4$alternative, levels=c("Go Big or Go Home", "Midd
 
 
 
+# What if top shows just the box and whisker charts
+# Then the next shows the violin plots for just Middle of the Road and GO Big
+# Then have the CDFs on the bottom
+
+
+(selfsustain_effort_flyingBars1_opt2 <- graphFlyingBars(results_summary_all_iterations = int4,
+                                                    metric = "probability of self-sustaining population",
+                                                    year = yrs,
+                                                    credible_interval = 0.95,
+                                                    x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",
+                                                    y_axis_lab = "\n Management Alternative",
+                                                    # title = 'B)'))
+                                                    title = 'B)'))
+
+(selfsustain_effort_violinPlot_opt2 <- graphViolinPlotSideways(results_summary_all_iterations = int4[which(int4$alternative != "Minimum Funding /\n Low Effort"  &
+                                                                                                        int4$alternative != "Do Nothing"),],
+                                                          metric = "probability of self-sustaining population",
+                                                          year = yrs,
+                                                          credible_interval = 0.95,
+                                                          x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",
+                                                          y_axis_lab = "\n Management Alternative",
+                                                          title = 'D)'))
+
+int4$alternative <- as.character(int4$alternative)
+int4$alternative[which(int4$alternative == "Go Big or Go Home")] <- "Go Big or \n Go Home"  # put it on two lines
+int4$alternative[which(int4$alternative == "Middle of the Road")] <- "Middle of \n the Road"  # put it on two lines
+int4$alternative <- as.factor(int4$alternative)
+int4$alternative<- factor(int4$alternative, levels=c("Go Big or \n Go Home", "Middle of \n the Road",
+                                                     "Minimum Funding /\n Low Effort",
+                                                     "Do Nothing" )) # reorder factor levels
+
+(selfsustain_effort_CDF1_opt2 <- graphCDF(results_summary_all_iterations = int4,
+                                     metric = "probability of self-sustaining population",
+                                     year = yrs,
+                                     x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",
+                                     y_axis_lab = "\n \n \n \n \n Cumulative Probability \n",
+                                     title = 'F)'))
+
+
 #---- Make graphs for the report - level of effort, graphs for export. ----
 
 # filename <- paste("ForReport/graph_panel_effort", version,".tiff", sep="")
@@ -454,6 +563,17 @@ tiff(filename, width=12, height=8, units="in",
 grid.arrange(persistence_effort_flyingBars1, selfsustain_effort_flyingBars1,
              persistence_effort_CDF1, selfsustain_effort_CDF1,
              ncol = 2, nrow = 2)
+dev.off()
+
+
+filename <- paste("ForReport/graph_effort_year50_option2", version,".tiff", sep="")
+tiff(filename, width=12, height=8, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600,
+     restoreConsole=TRUE)
+grid.arrange(persistence_effort_flyingBars1_opt2, selfsustain_effort_flyingBars1_opt2,
+             persistence_effort_violinPlot_opt2, selfsustain_effort_violinPlot_opt2,
+             persistence_effort_CDF1_opt2, selfsustain_effort_CDF1_opt2,
+             ncol = 2, nrow = 3)
 dev.off()
 
 # filename <- paste("ForReport/graph_effort_year50violin", version,".tiff", sep="")
@@ -565,6 +685,53 @@ int6$alternative<- factor(int6$alternative, levels=c("Try Hard but No \n Bullfro
                                      y_axis_lab = "\n \n \n \n \n Cumulative Probability \n",
                                      title = 'C)'))
 
+(persistence_goBigVar_PDF1 <- graphPDF(results_summary_all_iterations = int6,
+                                     metric = "probability of persistence",
+                                     year = yrs,
+                                     x_axis_lab = "Probability of Persistence in Year 50",
+                                     title = 'C)'))
+
+
+
+# What if top shows just the box and whisker charts
+# Then the next shows the violin plots for just Middle of the Road and GO Big
+# Then have the CDFs on the bottom
+
+(persistence_goBigVar_flyingBars1_opt2<- graphFlyingBars(results_summary_all_iterations = int6,
+                                                       metric = "probability of persistence",
+                                                       year = yrs,
+                                                       credible_interval = 0.95,
+                                                       x_axis_lab = "Probability of Persistence in Year 50",
+                                                       y_axis_lab = "\n Management Alternative",
+                                                       # title = 'B)'))
+                                                       title = 'A)'))
+
+(persistence_goBigVar_violinPlot_opt2 <- graphViolinPlotSideways(results_summary_all_iterations = int6,
+                                                               metric = "probability of persistence",
+                                                               year = yrs,
+                                                               credible_interval = 0.95,
+                                                               x_axis_lab = "Probability of Persistence in Year 50",
+                                                               y_axis_lab = "\n Management Alternative",
+                                                               title = 'C)'))
+
+int6$alternative <- as.character(int6$alternative)
+int6$alternative[which(int6$alternative == "Go Big or Go Home")] <- "Go Big or \n Go Home"  # put on two lines
+int6$alternative[which(int6$alternative == "Try Hard at One Wetland")] <- "Try Hard at \n One Wetland"  # put on two lines
+int6$alternative[which(int6$alternative == "Try Hard but No \n Bullfrog Management")] <- "Try Hard but No \n Bullfrog Manage."  # abbreviate management
+int6$alternative <- as.factor(int6$alternative)
+int6$alternative<- factor(int6$alternative, levels=c("Try Hard but No \n Bullfrog Manage.",
+                                                     "Try Hard but Few \n Tadpoles", 
+                                                     "Try Hard but Short",
+                                                     "Try Hard but No \n Habitat Restoration",
+                                                     "Try Hard at \n One Wetland",
+                                                     "Go Big or \n Go Home")) # reorder factor levels
+
+(persistence_goBigVar_CDF1_opt2 <- graphCDF(results_summary_all_iterations = int6,
+                                          metric = "probability of persistence",
+                                          year = yrs,
+                                          x_axis_lab = "Probability of Persistence in Year 50",
+                                          y_axis_lab = "\n \n \n \n \n Cumulative Probability \n",
+                                          title = 'E)'))
 
 
 #---- Make graphs for the report - variations on Go Big, self-sustaining. ----
@@ -659,6 +826,48 @@ int8$alternative<- factor(int8$alternative, levels=c("Try Hard but No \n Bullfro
                                      title = 'D)'))
 
 
+# What if top shows just the box and whisker charts
+# Then the next shows the violin plots for just Middle of the Road and GO Big
+# Then have the CDFs on the bottom
+
+
+(selfsustain_goBigVar_flyingBars1_opt2 <- graphFlyingBars(results_summary_all_iterations = int8,
+                                                        metric = "probability of self-sustaining population",
+                                                        year = yrs,
+                                                        credible_interval = 0.95,
+                                                        x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",
+                                                        y_axis_lab = "\n Management Alternative",
+                                                        # title = 'B)'))
+                                                        title = 'B)'))
+
+(selfsustain_goBigVar_violinPlot_opt2 <- graphViolinPlotSideways(results_summary_all_iterations = int8,
+                                                               metric = "probability of self-sustaining population",
+                                                               year = yrs,
+                                                               credible_interval = 0.95,
+                                                               x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",
+                                                               y_axis_lab = "\n Management Alternative",
+                                                               title = 'D)'))
+
+int8$alternative <- as.character(int8$alternative)
+int8$alternative[which(int8$alternative == "Go Big or Go Home")] <- "Go Big or \n Go Home"  # put on two lines
+int8$alternative[which(int8$alternative == "Try Hard at One Wetland")] <- "Try Hard at \n One Wetland"  # put on two lines
+int8$alternative[which(int8$alternative == "Try Hard but No \n Bullfrog Management")] <- "Try Hard but No \n Bullfrog Manage."  # abbreviate management
+int8$alternative <- as.factor(int8$alternative)
+int8$alternative<- factor(int8$alternative, levels=c("Try Hard but No \n Bullfrog Manage.",
+                                                     "Try Hard but Few \n Tadpoles", 
+                                                     "Try Hard but Short",
+                                                     "Try Hard but No \n Habitat Restoration",
+                                                     "Try Hard at \n One Wetland",
+                                                     "Go Big or \n Go Home")) # reorder factor levels
+
+(selfsustain_goBigVar_CDF1_opt2 <- graphCDF(results_summary_all_iterations = int8,
+                                          metric = "probability of self-sustaining population",
+                                          year = yrs,
+                                          x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",
+                                          y_axis_lab = "\n \n \n \n \n Cumulative Probability \n",
+                                          title = 'F)'))
+
+
 #---- Make graphs for the report -variations on Go Big, panel for export. ----
 
 # filename <- paste("ForReport/graph_panel_goBigVar", version,".tiff", sep="")
@@ -690,6 +899,15 @@ grid.arrange(persistence_goBigVar_flyingBars1, selfsustain_goBigVar_flyingBars1,
 dev.off()
 
 
+filename <- paste("ForReport/graph_goBigVar_year50_option2", version,".tiff", sep="")
+tiff(filename, width=12, height=10, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600,
+     restoreConsole=TRUE)
+grid.arrange(persistence_goBigVar_flyingBars1_opt2, selfsustain_goBigVar_flyingBars1_opt2,
+             persistence_goBigVar_violinPlot_opt2, selfsustain_goBigVar_violinPlot_opt2,
+             persistence_goBigVar_CDF1_opt2, selfsustain_goBigVar_CDF1_opt2,
+             ncol = 2, nrow = 3)
+dev.off()
 
 
 #---- Make graphs for the report - hypothetical scenarios, persistence. ----
@@ -770,6 +988,36 @@ int6b$alternative<- factor(int6b$alternative, levels=c("Testing Extreme Releases
                                        title = 'C)'))
 
 
+# What if top shows just the box and whisker charts
+# Then the next shows the violin plots for just Middle of the Road and GO Big
+# Then have the CDFs on the bottom
+
+(persistence_hypotheticals_flyingBars1_opt2<- graphFlyingBars(results_summary_all_iterations = int6b,
+                                                         metric = "probability of persistence",
+                                                         year = yrs,
+                                                         credible_interval = 0.95,
+                                                         x_axis_lab = "Probability of Persistence in Year 50",
+                                                         y_axis_lab = "\n Management Alternative",
+                                                         # title = 'B)'))
+                                                         title = 'A)'))
+
+(persistence_hypotheticals_violinPlot_opt2 <- graphViolinPlotSideways(results_summary_all_iterations = int6b,
+                                                                 metric = "probability of persistence",
+                                                                 year = yrs,
+                                                                 credible_interval = 0.95,
+                                                                 x_axis_lab = "Probability of Persistence in Year 50",
+                                                                 y_axis_lab = "\n Management Alternative",
+                                                                 title = 'C)'))
+
+(persistence_hypotheticals_CDF1_opt2 <- graphCDF(results_summary_all_iterations = int6b,
+                                            metric = "probability of persistence",
+                                            year = yrs,
+                                            x_axis_lab = "Probability of Persistence in Year 50",
+                                            y_axis_lab = "\n \n \n \n \n Cumulative Probability \n",
+                                            title = 'E)'))
+
+
+
 #---- Make graphs for the report - hypothetical scenarios, self-sustaining. ----
 # Get a fresh load of the results
 # Upload all of the results in the results folder and bind them together
@@ -844,6 +1092,38 @@ int8b$alternative<- factor(int8b$alternative, levels=c("Testing Extreme Releases
                                        y_axis_lab = "\n \n \n \n \n Cumulative Probability \n",
                                        title = 'D)'))
 
+
+# What if top shows just the box and whisker charts
+# Then the next shows the violin plots for just Middle of the Road and GO Big
+# Then have the CDFs on the bottom
+
+
+(selfsustain_hypotheticals_flyingBars1_opt2 <- graphFlyingBars(results_summary_all_iterations = int8b,
+                                                          metric = "probability of self-sustaining population",
+                                                          year = yrs,
+                                                          credible_interval = 0.95,
+                                                          x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",
+                                                          y_axis_lab = "\n Management Alternative",
+                                                          # title = 'B)'))
+                                                          title = 'B)'))
+
+(selfsustain_hypotheticals_violinPlot_opt2 <- graphViolinPlotSideways(results_summary_all_iterations = int8b,
+                                                                 metric = "probability of self-sustaining population",
+                                                                 year = yrs,
+                                                                 credible_interval = 0.95,
+                                                                 x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",
+                                                                 y_axis_lab = "\n Management Alternative",
+                                                                 title = 'D)'))
+
+(selfsustain_hypotheticals_CDF1_opt2 <- graphCDF(results_summary_all_iterations = int8b,
+                                            metric = "probability of self-sustaining population",
+                                            year = yrs,
+                                            x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",
+                                            y_axis_lab = "\n \n \n \n \n Cumulative Probability \n",
+                                            title = 'F)'))
+
+
+
 #---- Make graphs for the report - hypothetical scenarios, panel for export. ----
 
 # filename <- paste("ForReport/graph_panel_hyptheticals", version,".tiff", sep="")
@@ -875,6 +1155,15 @@ grid.arrange(persistence_hypotheticals_flyingBars1, selfsustain_hypotheticals_fl
 dev.off()
 
 
+filename <- paste("ForReport/graph_hypotheticals_year50_option2", version,".tiff", sep="")
+tiff(filename, width=12, height=8, units="in",
+     pointsize=8, compression="lzw", bg="white", res=600,
+     restoreConsole=TRUE)
+grid.arrange(persistence_hypotheticals_flyingBars1_opt2, selfsustain_hypotheticals_flyingBars1_opt2,
+             persistence_hypotheticals_violinPlot_opt2, selfsustain_hypotheticals_violinPlot_opt2,
+             persistence_hypotheticals_CDF1_opt2, selfsustain_hypotheticals_CDF1_opt2,
+             ncol = 2, nrow = 3)
+dev.off()
 
 
 #---- Check on number of runs per iteration and number of iterations. ----
