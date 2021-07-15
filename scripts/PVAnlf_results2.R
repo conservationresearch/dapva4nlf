@@ -16,8 +16,8 @@ library(gridExtra) # for grid.arrange
 
 # Increase computer memory size before loading the RData files
 memory.limit(24000)
-#path_to_results_folder <- "C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results"# on my work PC
-path_to_results_folder <- "/Users/laurakeating/Documents/R/R_scripts/NLF_PVA/Results/"# on my mac
+path_to_results_folder <- "C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results"# on my work PC
+# path_to_results_folder <- "/Users/laurakeating/Documents/R/R_scripts/NLF_PVA/Results/"# on my mac
 setwd(path_to_results_folder) # on my mac
 
 #---- Specify the number of years you ran the model for/want to see results for. ----
@@ -312,14 +312,14 @@ int2$alternative<- factor(int2$alternative, levels=c("Go Big or Go Home", "Middl
 
 
 # cumulative distribution function - to look at stochastic dominance
-(persistence_effort_CDF1 <- graphCDF(results_summary_all_iterations = int2,
+(persistence_effort_CDF1 <- dapva::graphCDF(results_summary_all_iterations = int2,
          metric = "probability of persistence",
          year = yrs,
          x_axis_lab = "Probability of Persistence in Year 50",
          y_axis_lab = "\n \n \n \n \n Cumulative Probability \n",
          title = 'C)'))
 
-(persistence_effort_PDF1 <- graphPDF(results_summary_all_iterations = int2,
+(persistence_effort_PDF1 <- dapva::graphPDF(results_summary_all_iterations = int2,
                                      metric = "probability of persistence",
                                      year = yrs,
                                      x_axis_lab = "Probability of Persistence in Year 50",
@@ -359,7 +359,7 @@ int2$alternative<- factor(int2$alternative, levels=c("Go Big or Go Home", "Middl
 # Then the next shows the violin plots for just Middle of the Road and GO Big
 # Then have the CDFs on the bottom
 
-(persistence_effort_flyingBars1_opt2<- graphFlyingBars(results_summary_all_iterations = int2,
+(persistence_effort_flyingBars1_opt2<- dapva::graphFlyingBars(results_summary_all_iterations = int2,
                                                                 metric = "probability of persistence",
                                                                 year = yrs,
                                                                 credible_interval = 0.95,
@@ -368,7 +368,7 @@ int2$alternative<- factor(int2$alternative, levels=c("Go Big or Go Home", "Middl
                                                                 # title = 'B)'))
                                                                 title = 'A)'))
 
-(persistence_effort_violinPlot_opt2 <- graphViolinPlotSideways(results_summary_all_iterations = int2[which(int2$alternative != "Minimum Funding /\n Low Effort"  &
+(persistence_effort_violinPlot_opt2 <- dapva::graphViolinPlotSideways(results_summary_all_iterations = int2[which(int2$alternative != "Minimum Funding /\n Low Effort"  &
                                                                                                                int2$alternative != "Do Nothing"),],
                                                            metric = "probability of persistence",
                                                            year = yrs,
@@ -385,7 +385,7 @@ int2$alternative<- factor(int2$alternative, levels=c("Go Big or \n Go Home", "Mi
                                                      "Minimum Funding /\n Low Effort",
                                                      "Do Nothing" )) # reorder factor levels
 
-(persistence_effort_CDF1_opt2 <- graphCDF(results_summary_all_iterations = int2,
+(persistence_effort_CDF1_opt2 <- dapva::graphCDF(results_summary_all_iterations = int2,
                                      metric = "probability of persistence",
                                      year = yrs,
                                      x_axis_lab = "Probability of Persistence in Year 50",
@@ -498,7 +498,7 @@ int4$alternative <- factor(int4$alternative, levels=c("Go Big or Go Home", "Midd
 # Then have the CDFs on the bottom
 
 
-(selfsustain_effort_flyingBars1_opt2 <- graphFlyingBars(results_summary_all_iterations = int4,
+(selfsustain_effort_flyingBars1_opt2 <- dapva::graphFlyingBars(results_summary_all_iterations = int4,
                                                     metric = "probability of self-sustaining population",
                                                     year = yrs,
                                                     credible_interval = 0.95,
@@ -507,7 +507,7 @@ int4$alternative <- factor(int4$alternative, levels=c("Go Big or Go Home", "Midd
                                                     # title = 'B)'))
                                                     title = 'B)'))
 
-(selfsustain_effort_violinPlot_opt2 <- graphViolinPlotSideways(results_summary_all_iterations = int4[which(int4$alternative != "Minimum Funding /\n Low Effort"  &
+(selfsustain_effort_violinPlot_opt2 <- dapva::graphViolinPlotSideways(results_summary_all_iterations = int4[which(int4$alternative != "Minimum Funding /\n Low Effort"  &
                                                                                                         int4$alternative != "Do Nothing"),],
                                                           metric = "probability of self-sustaining population",
                                                           year = yrs,
@@ -524,7 +524,7 @@ int4$alternative<- factor(int4$alternative, levels=c("Go Big or \n Go Home", "Mi
                                                      "Minimum Funding /\n Low Effort",
                                                      "Do Nothing" )) # reorder factor levels
 
-(selfsustain_effort_CDF1_opt2 <- graphCDF(results_summary_all_iterations = int4,
+(selfsustain_effort_CDF1_opt2 <- dapva::graphCDF(results_summary_all_iterations = int4,
                                      metric = "probability of self-sustaining population",
                                      year = yrs,
                                      x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",
@@ -674,7 +674,7 @@ int6$alternative<- factor(int6$alternative, levels=c("Try Hard but No \n Bullfro
 # Then the next shows the violin plots for just Middle of the Road and GO Big
 # Then have the CDFs on the bottom
 
-(persistence_goBigVar_flyingBars1_opt2<- graphFlyingBars(results_summary_all_iterations = int6,
+(persistence_goBigVar_flyingBars1_opt2<- dapva::graphFlyingBars(results_summary_all_iterations = int6,
                                                        metric = "probability of persistence",
                                                        year = yrs,
                                                        credible_interval = 0.95,
@@ -683,7 +683,7 @@ int6$alternative<- factor(int6$alternative, levels=c("Try Hard but No \n Bullfro
                                                        # title = 'B)'))
                                                        title = 'A)'))
 
-(persistence_goBigVar_violinPlot_opt2 <- graphViolinPlotSideways(results_summary_all_iterations = int6,
+(persistence_goBigVar_violinPlot_opt2 <- dapva::graphViolinPlotSideways(results_summary_all_iterations = int6,
                                                                metric = "probability of persistence",
                                                                year = yrs,
                                                                credible_interval = 0.95,
@@ -703,7 +703,7 @@ int6$alternative<- factor(int6$alternative, levels=c("Try Hard but No \n Bullfro
                                                      "Try Hard at \n One Wetland",
                                                      "Go Big or \n Go Home")) # reorder factor levels
 
-(persistence_goBigVar_CDF1_opt2 <- graphCDF(results_summary_all_iterations = int6,
+(persistence_goBigVar_CDF1_opt2 <- dapva::graphCDF(results_summary_all_iterations = int6,
                                           metric = "probability of persistence",
                                           year = yrs,
                                           x_axis_lab = "Probability of Persistence in Year 50",
@@ -796,7 +796,7 @@ int8$alternative<- factor(int8$alternative, levels=c("Try Hard but No \n Bullfro
 # Then have the CDFs on the bottom
 
 
-(selfsustain_goBigVar_flyingBars1_opt2 <- graphFlyingBars(results_summary_all_iterations = int8,
+(selfsustain_goBigVar_flyingBars1_opt2 <- dapva::graphFlyingBars(results_summary_all_iterations = int8,
                                                         metric = "probability of self-sustaining population",
                                                         year = yrs,
                                                         credible_interval = 0.95,
@@ -805,7 +805,7 @@ int8$alternative<- factor(int8$alternative, levels=c("Try Hard but No \n Bullfro
                                                         # title = 'B)'))
                                                         title = 'B)'))
 
-(selfsustain_goBigVar_violinPlot_opt2 <- graphViolinPlotSideways(results_summary_all_iterations = int8,
+(selfsustain_goBigVar_violinPlot_opt2 <- dapva::graphViolinPlotSideways(results_summary_all_iterations = int8,
                                                                metric = "probability of self-sustaining population",
                                                                year = yrs,
                                                                credible_interval = 0.95,
@@ -825,7 +825,7 @@ int8$alternative<- factor(int8$alternative, levels=c("Try Hard but No \n Bullfro
                                                      "Try Hard at \n One Wetland",
                                                      "Go Big or \n Go Home")) # reorder factor levels
 
-(selfsustain_goBigVar_CDF1_opt2 <- graphCDF(results_summary_all_iterations = int8,
+(selfsustain_goBigVar_CDF1_opt2 <- dapva::graphCDF(results_summary_all_iterations = int8,
                                           metric = "probability of self-sustaining population",
                                           year = yrs,
                                           x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",
@@ -933,7 +933,7 @@ int6b$alternative<- factor(int6b$alternative, levels=c("Testing Extreme Releases
 # Then the next shows the violin plots for just Middle of the Road and GO Big
 # Then have the CDFs on the bottom
 
-(persistence_hypotheticals_flyingBars1_opt2<- graphFlyingBars(results_summary_all_iterations = int6b,
+(persistence_hypotheticals_flyingBars1_opt2<- dapva::graphFlyingBars(results_summary_all_iterations = int6b,
                                                          metric = "probability of persistence",
                                                          year = yrs,
                                                          credible_interval = 0.95,
@@ -942,7 +942,7 @@ int6b$alternative<- factor(int6b$alternative, levels=c("Testing Extreme Releases
                                                          # title = 'B)'))
                                                          title = 'A)'))
 
-(persistence_hypotheticals_violinPlot_opt2 <- graphViolinPlotSideways(results_summary_all_iterations = int6b,
+(persistence_hypotheticals_violinPlot_opt2 <- dapva::graphViolinPlotSideways(results_summary_all_iterations = int6b,
                                                                  metric = "probability of persistence",
                                                                  year = yrs,
                                                                  credible_interval = 0.95,
@@ -950,7 +950,7 @@ int6b$alternative<- factor(int6b$alternative, levels=c("Testing Extreme Releases
                                                                  y_axis_lab = "\n Management Alternative",
                                                                  title = 'C)'))
 
-(persistence_hypotheticals_CDF1_opt2 <- graphCDF(results_summary_all_iterations = int6b,
+(persistence_hypotheticals_CDF1_opt2 <- dapva::graphCDF(results_summary_all_iterations = int6b,
                                             metric = "probability of persistence",
                                             year = yrs,
                                             x_axis_lab = "Probability of Persistence in Year 50",
@@ -1026,7 +1026,7 @@ int8b$alternative<- factor(int8b$alternative, levels=c("Testing Extreme Releases
 # Then have the CDFs on the bottom
 
 
-(selfsustain_hypotheticals_flyingBars1_opt2 <- graphFlyingBars(results_summary_all_iterations = int8b,
+(selfsustain_hypotheticals_flyingBars1_opt2 <- dapva::graphFlyingBars(results_summary_all_iterations = int8b,
                                                           metric = "probability of self-sustaining population",
                                                           year = yrs,
                                                           credible_interval = 0.95,
@@ -1035,7 +1035,7 @@ int8b$alternative<- factor(int8b$alternative, levels=c("Testing Extreme Releases
                                                           # title = 'B)'))
                                                           title = 'B)'))
 
-(selfsustain_hypotheticals_violinPlot_opt2 <- graphViolinPlotSideways(results_summary_all_iterations = int8b,
+(selfsustain_hypotheticals_violinPlot_opt2 <- dapva::graphViolinPlotSideways(results_summary_all_iterations = int8b,
                                                                  metric = "probability of self-sustaining population",
                                                                  year = yrs,
                                                                  credible_interval = 0.95,
@@ -1043,7 +1043,7 @@ int8b$alternative<- factor(int8b$alternative, levels=c("Testing Extreme Releases
                                                                  y_axis_lab = "\n Management Alternative",
                                                                  title = 'D)'))
 
-(selfsustain_hypotheticals_CDF1_opt2 <- graphCDF(results_summary_all_iterations = int8b,
+(selfsustain_hypotheticals_CDF1_opt2 <- dapva::graphCDF(results_summary_all_iterations = int8b,
                                             metric = "probability of self-sustaining population",
                                             year = yrs,
                                             x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",

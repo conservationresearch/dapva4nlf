@@ -271,7 +271,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                          colnames(sigma) <- c("cells3and4", "cell7")
                                                                          rownames(sigma) <- c("cells3and4", "cell7")
                                                                          
-                                                                         percentilesEV_survival_eggs_tad <- dapva::selectEVPercentilesNormal(cor_mat = sigma, n_years = parameterByIterTracking$yrs[i]) # note: increase yrs to see that the data is really has roughly the appropriate correlations
+                                                                         percentilesEV_survival_eggs_tad <- dapva::selectEVPercentilesUniform_correlated(cor_mat = sigma, n_years = parameterByIterTracking$yrs[i]) # note: increase yrs to see that the data is really has roughly the appropriate correlations
                                                                          
                                                                          # Separate out the EVs so that each wetland has its own col that can be called later
                                                                          percentilesEV_survival_eggs_tad$cell3 <- percentilesEV_survival_eggs_tad$cells3and4
@@ -285,20 +285,22 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                          colnames(sigma) <- c("cells3and4", "cell7", "ephemeral_wetlands")
                                                                          rownames(sigma) <- c("cells3and4", "cell7", "ephemeral_wetlands")
                                                                          
-                                                                         percentilesEV_survival_eggs_tad <- dapva::selectEVPercentilesNormal(cor_mat = sigma, n_years = parameterByIterTracking$yrs[i])
+                                                                         percentilesEV_survival_eggs_tad <- dapva::selectEVPercentilesUniform_correlated(cor_mat = sigma, n_years = parameterByIterTracking$yrs[i])
                                                                          
                                                                          # Separate out the EVs so that each wetland has its own col that can be called later
                                                                          percentilesEV_survival_eggs_tad$cell3 <- percentilesEV_survival_eggs_tad$cells3and4
                                                                          percentilesEV_survival_eggs_tad$cell4 <- percentilesEV_survival_eggs_tad$cells3and4
                                                                          percentilesEV_survival_eggs_tad <- percentilesEV_survival_eggs_tad[,c("cell3", "cell4", "cell7", "ephemeral_wetlands")]
                                                                        }
+                                                                       
+                                                                       # These are not correlated with anything but still need random percentiles to apply for EV
                                                                 
-                                                                       sigma3 <- rbind(c(1,1), c(1,1)) # create the variance covariance matrix; make 2 fully correlated vectors and just use one, when time update code so that it can have just one var
-                                                                       percentilesEV_survival_yoy_adult <- dapva::selectEVPercentilesNormal(cor_mat = sigma3, n_years = parameterByIterTracking$yrs[i])
+                                                                       percentilesEV_survival_yoy_adult <- dapva::selectEVPercentilesUniform(n_years = parameterByIterTracking$yrs[i])
+                                                                       percentilesEV_survival_yoy_adult <- as.data.frame(percentilesEV_survival_yoy_adult)
                                                                        colnames(percentilesEV_survival_yoy_adult)[1] <- c("all_wetlands")
 
-                                                                       sigma4 <- rbind(c(1,1), c(1,1)) # create the variance covariance matrix; make 2 fully correlated vectors and just use one, when time update code so that it can have just one var
-                                                                       percentilesEV_reproduction <- dapva::selectEVPercentilesNormal(cor_mat = sigma4, n_years = parameterByIterTracking$yrs[i])
+                                                                       percentilesEV_reproduction <- dapva::selectEVPercentilesUniform(n_years = parameterByIterTracking$yrs[i])
+                                                                       percentilesEV_reproduction <- as.data.frame(percentilesEV_reproduction)
                                                                        colnames(percentilesEV_reproduction)[1] <- c("all_wetlands")
                                                                        
                                                                        # Check if there is an existing population in this alternative or not
