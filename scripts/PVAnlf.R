@@ -58,7 +58,7 @@ n_iter  <- 1000 #5000# 10000 #1500 #2000# 500
 
 # Specify if you want to allow it to stop early or not using the flexible iteration criteria
 flexible_convergence_iteration_on <- "yes" # 'yes' or 'no', generally choose yes unless you are running a tornado and want to specify a # of iter
-max_n_runs_per_iter <- 1000 # flexible convergence is always on at the run level
+max_n_runs_per_iter <- 1000 # flexible convergence is always on at the run level unless specified below
 
 # Tweak other things if doing specific testing or convergence graphs, etc.
 flexible_convergence_run_on <- 'yes' # always yes unless doing a run test as below

@@ -368,14 +368,50 @@ int2$alternative<- factor(int2$alternative, levels=c("Go Big or Go Home", "Middl
                                                                 # title = 'B)'))
                                                                 title = 'A)'))
 
-(persistence_effort_violinPlot_opt2 <- dapva::graphViolinPlotSideways(results_summary_all_iterations = int2[which(int2$alternative != "Minimum Funding /\n Low Effort"  &
-                                                                                                               int2$alternative != "Do Nothing"),],
-                                                           metric = "probability of persistence",
-                                                           year = yrs,
-                                                           credible_interval = 0.95,
-                                                           x_axis_lab = "Probability of Persistence in Year 50",
-                                                           y_axis_lab = "\n Management Alternative",
-                                                           title = 'C)'))
+# (persistence_effort_violinPlot_opt2 <- dapva::graphViolinPlotSideways(results_summary_all_iterations = int2[which(int2$alternative != "Minimum Funding /\n Low Effort"  &
+#                                                                                                                int2$alternative != "Do Nothing"),],
+#                                                            metric = "probability of persistence",
+#                                                            year = yrs,
+#                                                            credible_interval = 0.95,
+#                                                            x_axis_lab = "Probability of Persistence in Year 50",
+#                                                            y_axis_lab = "\n Management Alternative",
+#                                                            title = 'C)'))
+
+
+# Doing manually so can get the colors to match the ones with all four alternatives
+x_axis_lab1 <- ggplot2::labs(y = "Probability of Persistence in Year 50")
+y_axis_lab1 <- ggplot2::labs(x = "\n Management Alternative")
+title1 <- ggplot2::ggtitle(paste0('C)'))
+
+int2b <- int2[which(int2$alternative != "Minimum Funding /\n Low Effort"  &
+                      int2$alternative != "Do Nothing"),]
+
+results_summary_all_iterations_year <- int2b[which(int2b$metric == "probability of persistence"), 
+                                                                      c(paste0(50), "alternative", "pop")]
+colnames(results_summary_all_iterations_year) <- c("quantity", 
+                                                   "alternative", "pop")
+
+persistence_effort_violinPlot_opt2 <- ggplot2::ggplot(results_summary_all_iterations_year, 
+                ggplot2::aes(x = alternative, y = quantity, col = alternative)) + 
+  ggplot2::geom_violin() + 
+  ggplot2::stat_summary(fun = median, colour = "blue", geom = "point", shape = 17, size = 3) + 
+  ggplot2::stat_summary(fun = mean, colour = "darkred", geom = "point", shape = 18, size = 4) + 
+  ggplot2::scale_y_continuous() + 
+  ggplot2::scale_color_hue(direction = 1, h = c(270, 180)) +
+  # ggthemes::scale_colour_colorblind() + 
+  # ggthemes::scale_fill_colorblind() + 
+  x_axis_lab1 + y_axis_lab1 + title1 + 
+  ggplot2::coord_flip() + 
+  ggplot2::theme_bw() + 
+  ggplot2::theme(panel.grid.major = ggplot2::element_blank(), 
+                                                               panel.grid.minor = ggplot2::element_blank(), strip.background = ggplot2::element_blank(), 
+                                                               panel.border = ggplot2::element_rect(colour = "black"), 
+                                                               text = ggplot2::element_text(size = 12), axis.text.x = ggplot2::element_text(angle = 45, 
+                                                                                                                                            hjust = 1), legend.position = "none")
+
+
+
+
 
 int2$alternative <- as.character(int2$alternative)
 int2$alternative[which(int2$alternative == "Go Big or Go Home")] <- "Go Big or \n Go Home"  # put it on two lines
@@ -507,14 +543,50 @@ int4$alternative <- factor(int4$alternative, levels=c("Go Big or Go Home", "Midd
                                                     # title = 'B)'))
                                                     title = 'B)'))
 
-(selfsustain_effort_violinPlot_opt2 <- dapva::graphViolinPlotSideways(results_summary_all_iterations = int4[which(int4$alternative != "Minimum Funding /\n Low Effort"  &
-                                                                                                        int4$alternative != "Do Nothing"),],
-                                                          metric = "probability of self-sustaining population",
-                                                          year = yrs,
-                                                          credible_interval = 0.95,
-                                                          x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",
-                                                          y_axis_lab = "\n Management Alternative",
-                                                          title = 'D)'))
+# (selfsustain_effort_violinPlot_opt2 <- dapva::graphViolinPlotSideways(results_summary_all_iterations = int4[which(int4$alternative != "Minimum Funding /\n Low Effort"  &
+#                                                                                                         int4$alternative != "Do Nothing"),],
+#                                                           metric = "probability of self-sustaining population",
+#                                                           year = yrs,
+#                                                           credible_interval = 0.95,
+#                                                           x_axis_lab = "Probability of a Self-Sustaining Population in Year 50",
+#                                                           y_axis_lab = "\n Management Alternative",
+#                                                           title = 'D)'))
+
+# Doing manually so can get the colors to match the ones with all four alternatives
+x_axis_lab1 <- ggplot2::labs(y = "Probability of a Self-Sustaining Population in Year 50")
+y_axis_lab1 <- ggplot2::labs(x = "\n Management Alternative")
+title1 <- ggplot2::ggtitle(paste0('D)'))
+
+int4b <- int4[which(int4$alternative != "Minimum Funding /\n Low Effort"  &
+                      int4$alternative != "Do Nothing"),]
+
+results_summary_all_iterations_year <- int4b[which(int4b$metric == "probability of self-sustaining population"), 
+                                             c(paste0(50), "alternative", "pop")]
+colnames(results_summary_all_iterations_year) <- c("quantity", 
+                                                   "alternative", "pop")
+
+selfsustain_effort_violinPlot_opt2 <- ggplot2::ggplot(results_summary_all_iterations_year, 
+                                                      ggplot2::aes(x = alternative, y = quantity, col = alternative)) + 
+  ggplot2::geom_violin() + 
+  ggplot2::stat_summary(fun = median, colour = "blue", geom = "point", shape = 17, size = 3) + 
+  ggplot2::stat_summary(fun = mean, colour = "darkred", geom = "point", shape = 18, size = 4) + 
+  ggplot2::scale_y_continuous() + 
+  ggplot2::scale_color_hue(direction = 1, h = c(270, 180)) +
+  # ggthemes::scale_colour_colorblind() + 
+  # ggthemes::scale_fill_colorblind() + 
+  x_axis_lab1 + y_axis_lab1 + title1 + 
+  ggplot2::coord_flip() + 
+  ggplot2::theme_bw() + 
+  ggplot2::theme(panel.grid.major = ggplot2::element_blank(), 
+                 panel.grid.minor = ggplot2::element_blank(), strip.background = ggplot2::element_blank(), 
+                 panel.border = ggplot2::element_rect(colour = "black"), 
+                 text = ggplot2::element_text(size = 12), axis.text.x = ggplot2::element_text(angle = 45, 
+                                                                                              hjust = 1), legend.position = "none")
+
+
+
+
+
 
 int4$alternative <- as.character(int4$alternative)
 int4$alternative[which(int4$alternative == "Go Big or Go Home")] <- "Go Big or \n Go Home"  # put it on two lines
