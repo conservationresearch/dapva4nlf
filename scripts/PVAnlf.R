@@ -15,7 +15,7 @@ system.time({ # turn on the timer
 
 #---- Clear the workspace. ----
 rm(list = ls())
-version <- "_vFinalJune2021" # insert short description to append to results to help identify what it is
+version <- "_vFinalJuly2021TESTING" # insert short description to append to results to help identify what it is
 
 #---- Load libraries, and set the random seed.  -------------
 ## Import libraries
@@ -78,10 +78,6 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   print(paste0("Running alternative ", alternatives_to_run$alt_name_short[row_to_run]))
   alternative_details <- alternatives_to_run[row_to_run,]
   
-  
-  # Testing One Wetland with the Extreme number of tadpoles
-  alternative_details$n_tadpoles_per_year <- 500000
-  
   #---- Get the inputs.  -------------
   inputs_all <- dapva4nlf::getNLFIdahoFeasinputs()
   inputs <- inputs_all[[1]]
@@ -135,7 +131,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   # This happens rarely but still once and a while (e.g. p of A2 females laying eggs 
   # really small with relatively large sd)
 
-  parameterByIterTracking_orig <- parameterByIterTracking # keep the orig in case want to refer back later
+  parameterByIterTracking_orig <- parameterByIterTracking # keep the orig in case want to refer back later; in results file will check to see how many iterations this applied to
   parameterByIterTracking <- dapva::parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
                                                                                      mean = "p_females_lay_eggs_mean_A2",
                                                                                      sd = "p_females_lay_eggs_sd_A2")
@@ -171,6 +167,8 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
   parameterByIterTracking <- dapva::parameterByIterTracking_replace_invalid_beta_shapeParam(parameterByIterTracking,
                                                                                      mean = "s_mean_adult_no_threats",
                                                                                      sd = "s_sd_adult_no_threats")
+  
+
   
   #---- Update  parameters with the condition of ephemeral wetland restoration being effective. ----
   # Replace any iterations where habitat restoration is not effective to NA for the freq of dry events
@@ -231,7 +229,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                      # Inputs for convergence criteria at the run level
                                                                      convergence_band_halfwidth <- 0.025 # between 0 and 1 since will base it on the probability objective metrics
                                                                      convergence_band_length <- 100 #50 # number of run
-                                                                     burnin <- 200 #100 # this plus convergence_band_length is min number of runs (should rename, not true burn in because we do not discard these)
+                                                                     burnin <- 200 # this plus convergence_band_length is min number of runs (should rename, not true burn in because we do not discard these)
                                                                      convergence_tracking_persis <- c(vector(), rep(NA, max_n_runs_per_iter)) # initalize
                                                                      convergence_tracking_selfsustain <- c(vector(), rep(NA, max_n_runs_per_iter)) # initalize
                                                                      converged_for_persist <- "no"
@@ -529,9 +527,7 @@ for(m in 1:length(rows_to_run)){ # loop through the different scenarios requeste
                                                                            levels = c("no", "yes"))
   parameterByIterTracking_this_alt_clean$bullfrogMgmt_effective <- ordered(parameterByIterTracking_this_alt_clean$bullfrogMgmt_effective, 
                                                                            levels = c("no", "yes"))
-  # parameterByIterTracking_this_alt_clean$dispersal_allowed_outside <- ordered(parameterByIterTracking_this_alt_clean$dispersal_allowed_outside, 
-  #                                                                          levels = c("no", "yes"))
-  
+
   # Make tornado parameter labels
   tornado_parameter_labels <- dapva4nlf::makeTornadoParameterLabels(parameterByIterTracking = parameterByIterTracking_this_alt_clean)
   

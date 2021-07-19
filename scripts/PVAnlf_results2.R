@@ -1092,9 +1092,11 @@ max(results_all_iter$n_runs_per_iter) #382
 # of iterations
 max(results_all_iter$iteration)
 
+
 #---- Make graphs for the report -goBig tornados, panel for export. ----
 
-file_goBig <-  list.files(path = ".","*goBig_vFinalJune2021_10Kiter.RData", full.names="TRUE")
+# file_goBig <-  list.files(path = ".","*goBig_vFinalJune2021_10Kiter.RData", full.names="TRUE")
+file_goBig <-  list.files(path = ".","*goBig_vFinalJuly2021TEST2Kiter.RData", full.names="TRUE")
 load(file_goBig)
 
 # Do the sensitivity analyis (this is also in the main script but adding here since running code simultaneously right now on mac and just added the dummy variable)
@@ -1134,6 +1136,20 @@ tiff(filename, width=12, height=8, units="in",
 grid.arrange(tornado_persist_top10,  tornado_selfsustain_top10,
              ncol = 1, nrow = 2)
 dev.off()
+
+#---- Check to see which, if any, paramaters got replaced because beta shape parameters were not valid - do for goBig as an example and include in report. ----
+
+which((parameterByIterTracking_orig$p_females_lay_eggs_mean_A2 - parameterByIterTracking$p_females_lay_eggs_mean_A2)!= 0)
+which((parameterByIterTracking_orig$p_females_lay_eggs_mean_A3_A4plus - parameterByIterTracking$p_females_lay_eggs_mean_A3_A4plus)!= 0)
+which((parameterByIterTracking_orig$s_mean_eggs_no_threats - parameterByIterTracking$s_mean_eggs_no_threats)!= 0)
+which((parameterByIterTracking_orig$s_mean_tadpoles_no_threats - parameterByIterTracking$s_mean_tadpoles_no_threats)!= 0)
+which((parameterByIterTracking_orig$s_mean_ephWetlands_eggs_no_threats - parameterByIterTracking$s_mean_ephWetlands_eggs_no_threats)!= 0)
+which((parameterByIterTracking_orig$s_mean_ephWetlands_tadpoles_no_threats - parameterByIterTracking$s_mean_ephWetlands_tadpoles_no_threats)!= 0)
+which((parameterByIterTracking_orig$s_mean_yoy_no_threats - parameterByIterTracking$s_mean_yoy_no_threats)!= 0)
+which((parameterByIterTracking_orig$s_mean_juv_no_threats - parameterByIterTracking$s_mean_juv_no_threats)!= 0)
+which((parameterByIterTracking_orig$s_mean_adult_no_threats - parameterByIterTracking$s_mean_adult_no_threats)!= 0)
+
+
 
 #---- Explore yoy and tadpole survival vs prob of persistence. ----
 # Uses the same results RData file that was loaded above for the tornado
@@ -1649,6 +1665,153 @@ ggplot2::ggplot(data = test, ggplot2::aes(x=survival, y = prob_persist)) +
     axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
     legend.position = "none" # density plot, light blue is the highest density, darker is lower density, white is lowest density
   )
+#---- Explore why changing selecting EV from normal to uniform changed the results upwards - YOY/ADULT. ----
+
+# Set up
+n_years_for_example <- 1000 # more than 50 so we can really look at distribution
+
+wetlands_without_outside <- c("cell3", "cell4", "cell7", "ephemeral_wetlands")
+
+s_yoy_mean <- 0.1 # example; P50
+s_yoy_sd <-  0.07 # example; P50
+s_yoy_no_threats_dist <- dapva::estBetaParams(mean = s_yoy_mean, sd = s_yoy_sd)
+
+# Visualize this beta distribution
+x_beta <- seq(0, 1, by = 0.001)                     # Specify x-values for beta function
+y_beta <- dbeta(x_beta, shape1 = s_tadpoles_no_threats_dist$alpha, shape2 = s_tadpoles_no_threats_dist$beta)    # Apply beta function
+plot(x_beta, y_beta, xlab = 'Survival', ylab = "Density")          
+
+# Current approach
+percentilesEV_survival_yoy_adult <- dapva::selectEVPercentilesUniform(n_years = n_years_for_example)
+
+# OLD approach; need to uncomment out and get from the dapva inputs file to show this, commented out there so don't use it again by accident
+# sigma <- rbind(c(1,0), c(0,1))
+# percentilesEV_survival_yoy_adult <- selectEVPercentilesNormal(cor_mat = sigma, n_years = n_years_for_example)
+# percentilesEV_survival_yoy_adult  <- percentilesEV_survival_yoy_adult[,1]
+
+# Run the rest
+percentilesEV_survival_yoy_adult <- as.data.frame(percentilesEV_survival_yoy_adult)
+colnames(percentilesEV_survival_yoy_adult)[1] <- c("all_wetlands")
+
+s_yoy_all <- as.data.frame(matrix(nrow = n_years_for_example, ncol = 4))
+colnames(s_yoy_all) <- wetlands_without_outside
+
+for(j in 1:n_years_for_example){
+  s_yoy <- unlist(lapply(1:length(wetlands_without_outside), function(x) {
+    
+    if(wetlands_without_outside[x] != "ephemeral_wetlands"){
+      s_yoy_this_wetland <- dapva::selectPercentileBetaDistribution(
+        mean = s_yoy_mean,
+        sd = s_yoy_sd,
+        EV_percentile = percentilesEV_survival_yoy_adult[j,1]
+      )
+    }
+    
+    if(wetlands_without_outside[x] == "ephemeral_wetlands"){
+      s_yoy_this_wetland <- dapva::selectPercentileBetaDistribution(
+        mean = s_yoy_mean,
+        sd = s_yoy_sd,
+        EV_percentile = percentilesEV_survival_yoy_adult[j,1]
+      )
+    }
+    return(s_yoy_this_wetland)
+  }))   
+  s_yoy_all[j,] <- s_yoy
+  
+}
+
+# for demo, remove the strange few where survival is one
+# Otherwise the ones are too distracting from the point, which is that the old is narrower than the new
+
+# s_yoy_all <- s_yoy_all[-which(s_yoy_all == 1),]
+
+# Graph the results
+pairs(s_yoy_all,  # Creating the scatter plot matrix
+      upper.panel = NULL,         # Disabling the upper panel
+      diag.panel = panel.hist)    # Adding the histograms
+
+library(PerformanceAnalytics)
+chart.Correlation(s_yoy_all, histogram = TRUE, method = "pearson")
+
+mean(s_yoy_all[,1])
+
+#---- Explore why changing selecting EV from normal to uniform changed the results upwards - EGGs/TAD. ----
+
+# Set up
+n_years_for_example <- 1000 # more than 50 so we can really look at distribution
+
+correlation <- 0.9 # example
+s_tadpoles_mean <- 0.04 # example; P50
+s_tadpoles_mean_ephWetlands <- 0.04 # example; P50
+s_tadpoles_sd <-  0.06 # example; P50
+
+s_tadpoles_no_threats_dist <- dapva::estBetaParams(mean = s_tadpoles_mean, sd = s_tadpoles_sd)
+
+sigma <- rbind(c(1,correlation,0), c(correlation,1, 0), c(0,0,1)) # create the variance covariance matrix
+colnames(sigma) <- c("cells3and4", "cell7", "ephemeral_wetlands")
+rownames(sigma) <- c("cells3and4", "cell7", "ephemeral_wetlands")
+
+wetlands_without_outside <- c("cell3", "cell4", "cell7", "ephemeral_wetlands")
+
+
+
+# Visualize this beta distribution
+x_beta <- seq(0, 1, by = 0.001)                     # Specify x-values for beta function
+y_beta <- dbeta(x_beta, shape1 = s_tadpoles_no_threats_dist$alpha, shape2 = s_tadpoles_no_threats_dist$beta)    # Apply beta function
+plot(x_beta, y_beta, xlab = 'Survival', ylab = "Density")          
+
+# Current approach
+ percentilesEV_survival_eggs_tad <- dapva::selectEVPercentilesUniform_correlated(cor_mat = sigma, n_years = n_years_for_example ) # do 5000 to see that it is in fact from a uniform distribution
+
+# OLD approach; need to uncomment out and get from the dapva inputs file to show this, commented out there so don't use it again by accident
+# percentilesEV_survival_eggs_tad <- selectEVPercentilesNormal(cor_mat = sigma, n_years = n_years_for_example) # do 5000 to see that it is in fact from a uniform distribution
+
+
+# Run the rest
+
+percentilesEV_survival_eggs_tad$cell3 <- percentilesEV_survival_eggs_tad$cells3and4 # Separate out the EVs so that each wetland has its own col that can be called later
+percentilesEV_survival_eggs_tad$cell4 <- percentilesEV_survival_eggs_tad$cells3and4
+percentilesEV_survival_eggs_tad <- percentilesEV_survival_eggs_tad[,c("cell3", "cell4", "cell7", "ephemeral_wetlands")]
+
+s_tadpoles_all <- as.data.frame(matrix(nrow = n_years_for_example, ncol = 4))
+colnames(s_tadpoles_all) <- wetlands_without_outside
+
+for(j in 1:n_years_for_example){
+  s_tadpoles <- unlist(lapply(1:length(wetlands_without_outside), function(x) {
+    
+    if(wetlands_without_outside[x] != "ephemeral_wetlands"){
+      s_tadpoles_this_wetland <- dapva::selectPercentileBetaDistribution(
+        mean = s_tadpoles_mean,
+        sd = s_tadpoles_sd,
+        EV_percentile = percentilesEV_survival_eggs_tad[j, paste(wetlands_without_outside[x])]
+      )
+    }
+    
+    if(wetlands_without_outside[x] == "ephemeral_wetlands"){
+      s_tadpoles_this_wetland <- dapva::selectPercentileBetaDistribution(
+        mean = s_tadpoles_mean_ephWetlands,
+        sd = s_tadpoles_sd,
+        EV_percentile = percentilesEV_survival_eggs_tad[j, paste(wetlands_without_outside[x])]
+      )
+    }
+    return(s_tadpoles_this_wetland)
+  }))   
+  s_tadpoles_all[j,] <- s_tadpoles
+  
+}
+
+# s_tadpoles_all <- s_tadpoles_all[-which(s_tadpoles_all == 1),]
+
+
+# Graph the results
+pairs(s_tadpoles_all,  # Creating the scatter plot matrix
+      upper.panel = NULL,         # Disabling the upper panel
+      diag.panel = panel.hist)    # Adding the histograms
+
+library(PerformanceAnalytics)
+chart.Correlation(s_tadpoles_all, histogram = TRUE, method = "pearson")
+
+
 
 #---- Appendix: full tornado diagrams. ----
 
