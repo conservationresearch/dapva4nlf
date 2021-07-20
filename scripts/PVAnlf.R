@@ -15,7 +15,7 @@ system.time({ # turn on the timer
 
 #---- Clear the workspace. ----
 rm(list = ls())
-version <- "_vFinalJuly2021TESTING" # insert short description to append to results to help identify what it is
+version <- "_vFinalJuly2021" # insert short description to append to results to help identify what it is
 
 #---- Load libraries, and set the random seed.  -------------
 ## Import libraries
@@ -38,8 +38,8 @@ clusterSetRNGStream(cl, iseed = 30) # without parallel computing can just do set
 #---- Specify the alternatives to run.  -------------
 alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are preloaded in for easy calling
 
-# For Travis on IBEST - do 10000 iterations of the GoBig or Go Home for sensitivity analysis
-rows_to_run <- c(9)
+# For Travis on University of Idaho computing core - do 10000 iterations of the GoBig or Go Home for sensitivity analysis
+rows_to_run <- c(2)
 
 # For Laura, remember to change to flexible # of iterations
 # Effort-based
@@ -49,15 +49,15 @@ rows_to_run <- c(9)
 #rows_to_run <- c(6:9)
 
 # Hypothetical scenarios
-#rows_to_run <- c(10, 12) # run No bullfrog plus the three hypothetical scenarios
+#rows_to_run <- c(10, 12)
 
 #---- Specify number of iterations and number of runs per iterations.  -------------
 
 # Set the number of iterations. If using flexible conv below, this is the max # of iterations. 
-n_iter  <- 1000 #5000# 10000 #1500 #2000# 500
+n_iter  <- 10000 #5000# 10000 #1500 #2000# 500
 
 # Specify if you want to allow it to stop early or not using the flexible iteration criteria
-flexible_convergence_iteration_on <- "yes" # 'yes' or 'no', generally choose yes unless you are running a tornado and want to specify a # of iter
+flexible_convergence_iteration_on <- "no" # 'yes' or 'no', generally choose yes unless you are running a tornado and want to specify a # of iter
 max_n_runs_per_iter <- 1000 # flexible convergence is always on at the run level unless specified below
 
 # Tweak other things if doing specific testing or convergence graphs, etc.

@@ -1168,7 +1168,7 @@ max(results_all_iter$iteration)
 #---- Make graphs for the report -goBig tornados, panel for export. ----
 
 # file_goBig <-  list.files(path = ".","*goBig_vFinalJune2021_10Kiter.RData", full.names="TRUE")
-file_goBig <-  list.files(path = ".","*goBig_vFinalJuly2021TEST2Kiter.RData", full.names="TRUE")
+file_goBig <-  list.files(path = ".","*goBig_vFinalJuly2021TESTING.RData", full.names="TRUE")
 load(file_goBig)
 
 # Do the sensitivity analyis (this is also in the main script but adding here since running code simultaneously right now on mac and just added the dummy variable)
@@ -1486,7 +1486,7 @@ dev.off()
 #---- Relationship between persistence and self-sustaining. ----
 
 # Load in GoBig alternative with lots of iterations
-file_goBig <-  list.files(path = ".","*goBig_vFinalJune2021_10Kiter.RData", full.names="TRUE")
+file_goBig <-  list.files(path = ".","*goBig_vFinalJuly2021TESTING.RData", full.names="TRUE")
 load(file_goBig)
 
 # Plot abundance vs persistence
