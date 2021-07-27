@@ -15,7 +15,7 @@ system.time({ # turn on the timer
 
 #---- Clear the workspace. ----
 rm(list = ls())
-version <- "_vFinalJuly2021_10Kit" # insert short description to append to results to help identify what it is
+version <- "_vFinalJuly2021" # insert short description to append to results to help identify what it is
 
 #---- Load libraries, and set the random seed.  -------------
 ## Import libraries
