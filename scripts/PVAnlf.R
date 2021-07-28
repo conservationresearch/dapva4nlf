@@ -39,7 +39,7 @@ clusterSetRNGStream(cl, iseed = 30) # without parallel computing can just do set
 alternatives_to_run <- dapva4nlf::dat_alternatives_to_run # some scenarios are preloaded in for easy calling
 
 # For Travis on University of Idaho computing core - do 10000 iterations of the GoBig or Go Home for sensitivity analysis
-rows_to_run <- c(2)
+#rows_to_run <- c(2)
 
 # For Laura, remember to change to flexible # of iterations
 # Effort-based
@@ -49,15 +49,15 @@ rows_to_run <- c(2)
 #rows_to_run <- c(6:9)
 
 # Hypothetical scenarios
-#rows_to_run <- c(10, 12)
+rows_to_run <- c(10, 12)
 
 #---- Specify number of iterations and number of runs per iterations.  -------------
 
 # Set the number of iterations. If using flexible conv below, this is the max # of iterations. 
-n_iter  <- 10000 #5000# 10000 #1500 #2000# 500
+n_iter  <- 1000 #5000# 10000 #1500 #2000# 500
 
 # Specify if you want to allow it to stop early or not using the flexible iteration criteria
-flexible_convergence_iteration_on <- "no" # 'yes' or 'no', generally choose yes unless you are running a tornado and want to specify a # of iter
+flexible_convergence_iteration_on <- "yes" # 'yes' or 'no', generally choose yes unless you are running a tornado and want to specify a # of iter
 max_n_runs_per_iter <- 1000 # flexible convergence is always on at the run level unless specified below
 
 # Tweak other things if doing specific testing or convergence graphs, etc.

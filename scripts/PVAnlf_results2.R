@@ -15,9 +15,9 @@ library(gridExtra) # for grid.arrange
 # Note: Add a folder in there called 'ForReport' to help organize the outputs.
 
 # Increase computer memory size before loading the RData files
-memory.limit(24000)
-path_to_results_folder <- "C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results"# on my work PC
-# path_to_results_folder <- "/Users/laurakeating/Documents/R/R_scripts/NLF_PVA/Results/"# on my mac
+#memory.limit(24000)
+#path_to_results_folder <- "C:/Users/LauraK/The Calgary Zoological Society/Conservation Research - NLF feas. ID/SDM 2021/model_results"# on my work PC
+path_to_results_folder <- "/Users/laurakeating/Documents/R/R_scripts/NLF_PVA/Results/"# on my mac
 setwd(path_to_results_folder) # on my mac
 
 #---- Specify the number of years you ran the model for/want to see results for. ----
@@ -625,8 +625,7 @@ dev.off()
 
 filename <- paste("ForReport/graph_effort_year50_option2", version,".tiff", sep="")
 tiff(filename, width=12, height=8, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600,
-     restoreConsole=TRUE)
+     pointsize=8, compression="lzw", bg="white", res=600)
 grid.arrange(persistence_effort_flyingBars1_opt2, selfsustain_effort_flyingBars1_opt2,
              persistence_effort_violinPlot_opt2, selfsustain_effort_violinPlot_opt2,
              persistence_effort_CDF1_opt2, selfsustain_effort_CDF1_opt2,
@@ -905,7 +904,7 @@ int8$alternative<- factor(int8$alternative, levels=c("Try Hard but No \n Bullfro
                                           title = 'F)'))
 
 
-#---- Make graphs for the report -variations on Go Big, panel for export. ----
+#---- Make graphs for the report - variations on Go Big, panel for export. ----
 
 filename <- paste("ForReport/graph_goBigVar_time", version,".tiff", sep="")
 tiff(filename, width=12, height=6, units="in",
@@ -928,8 +927,8 @@ dev.off()
 
 filename <- paste("ForReport/graph_goBigVar_year50_option2", version,".tiff", sep="")
 tiff(filename, width=12, height=10, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600,
-     restoreConsole=TRUE)
+     pointsize=8, compression="lzw", bg="white", res=600)
+     # restoreConsole=TRUE)
 grid.arrange(persistence_goBigVar_flyingBars1_opt2, selfsustain_goBigVar_flyingBars1_opt2,
              persistence_goBigVar_violinPlot_opt2, selfsustain_goBigVar_violinPlot_opt2,
              persistence_goBigVar_CDF1_opt2, selfsustain_goBigVar_CDF1_opt2,
@@ -1146,8 +1145,8 @@ dev.off()
 
 filename <- paste("ForReport/graph_hypotheticals_year50_option2", version,".tiff", sep="")
 tiff(filename, width=12, height=8, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600,
-     restoreConsole=TRUE)
+     pointsize=8, compression="lzw", bg="white", res=600)
+     #restoreConsole=TRUE)
 grid.arrange(persistence_hypotheticals_flyingBars1_opt2, selfsustain_hypotheticals_flyingBars1_opt2,
              persistence_hypotheticals_violinPlot_opt2, selfsustain_hypotheticals_violinPlot_opt2,
              persistence_hypotheticals_CDF1_opt2, selfsustain_hypotheticals_CDF1_opt2,
@@ -1159,7 +1158,7 @@ dev.off()
 
 # Of runs per iteration
 min(results_all_iter$n_runs_per_iter) #300
-max(results_all_iter$n_runs_per_iter) #382
+max(results_all_iter$n_runs_per_iter) #376
 
 # of iterations
 max(results_all_iter$iteration)
@@ -1168,7 +1167,7 @@ max(results_all_iter$iteration)
 #---- Make graphs for the report -goBig tornados, panel for export. ----
 
 # file_goBig <-  list.files(path = ".","*goBig_vFinalJune2021_10Kiter.RData", full.names="TRUE")
-file_goBig <-  list.files(path = ".","*goBig_vFinalJuly2021TESTING.RData", full.names="TRUE")
+file_goBig <-  list.files(path = ".","*goBig_vFinalJuly2021_10Kiter.RData", full.names="TRUE")
 load(file_goBig)
 
 # Do the sensitivity analyis (this is also in the main script but adding here since running code simultaneously right now on mac and just added the dummy variable)
@@ -1221,7 +1220,7 @@ which((parameterByIterTracking_orig$s_mean_yoy_no_threats - parameterByIterTrack
 which((parameterByIterTracking_orig$s_mean_juv_no_threats - parameterByIterTracking$s_mean_juv_no_threats)!= 0)
 which((parameterByIterTracking_orig$s_mean_adult_no_threats - parameterByIterTracking$s_mean_adult_no_threats)!= 0)
 
-
+# none
 
 #---- Explore yoy and tadpole survival vs prob of persistence. ----
 # Uses the same results RData file that was loaded above for the tornado
@@ -1486,7 +1485,7 @@ dev.off()
 #---- Relationship between persistence and self-sustaining. ----
 
 # Load in GoBig alternative with lots of iterations
-file_goBig <-  list.files(path = ".","*goBig_vFinalJuly2021TESTING.RData", full.names="TRUE")
+file_goBig <-  list.files(path = ".","*goBig_vFinalJuly2021_10Kiter.RData", full.names="TRUE")
 load(file_goBig)
 
 # Plot abundance vs persistence
@@ -1932,7 +1931,7 @@ for(j in 1:yrs){
 
 #---- Appendix: convergence plots - number of runs per iteration. ----
 
-memory.limit(24000)# Pick some iterations that will show a range of outcomes
+#memory.limit(24000)# Pick some iterations that will show a range of outcomes
 # 1570 has prob of persistence 1
 # 1131 has prob of persistence of approx 0.97
 # 495 has prob of persistence of approx 0.5
