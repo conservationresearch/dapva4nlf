@@ -932,6 +932,7 @@ dev.off()
 
 
 
+
 #---- Clear the environment. ----
 rm(list=ls())
 yrs <- 50
@@ -1157,6 +1158,7 @@ dev.off()
 
 
 
+
 #---- Load Go Big results and use that for the remaining. ----
 # clear workspace
 rm(list=ls())
@@ -1235,6 +1237,7 @@ tiff(filename, width=12, height=8, units="in",
      pointsize=8, compression="lzw", bg="white", res=600)
 tornado_persist_selfsust
 dev.off()
+
 
 #---- Explore yoy and tadpole survival vs prob of persistence - plot points. ----
 # Correct for potential for parallel computing to skip iterations
@@ -1359,6 +1362,7 @@ tiff(filename, width=12, height=8, units="in",
 grid.arrange(p_sens_tad_yoy_surv_persist,  p_hist_prob_persist_groups ,
              ncol = 1, nrow = 2)
 dev.off()
+
 
 #---- Explore relationship between bullfrog management and tadpole survival. ----
 test2b <- cbind(parameterByIterTracking_this_alt_clean[iteration_numbers, c("s_mean_eggs_no_threats",
@@ -1497,6 +1501,7 @@ grid.arrange(p_sens_eggs_surv_bullfrogMgmt,
 dev.off()
 
 
+
 #---- Explore relationship between persistence and self-sustaining. ----
 # Plot abundance vs persistence
 
@@ -1554,6 +1559,7 @@ filename <- paste("ForReport/graph_persis_vs_selfsustain", version, "_iter_", n_
 tiff(filename, width=12, height=4, units="in",pointsize=8, compression="lzw", bg="white", res=600)
 print(p_persis_vs_selfsustain)
 dev.off()
+
 
 
 #---- Explore tadpole survival mean and vs prob of persistence - includes temporal variation. ----
