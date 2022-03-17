@@ -376,7 +376,7 @@ tornado_persist_top10
 # dev.off()
 
 
-filename <- paste("ForManuscript/tornado_top10_goBig", version,".pdf", sep="")
+filename <- paste("ForManuscript/tornado_top10_goBig", version,".eps", sep="")
 tornado_persist_top10
 ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
 
@@ -504,7 +504,7 @@ p_hist_prob_persist_groups
 #                    labels = c("A", "B"))
 # dev.off()
 
-filename <- paste("ForManuscript/graph_compare_yoyTadsurv_persist", version,".pdf", sep="")
+filename <- paste("ForManuscript/graph_compare_yoyTadsurv_persist", version,".eps", sep="")
 cowplot::plot_grid(p_sens_tad_yoy_surv_persist,  p_hist_prob_persist_groups ,
                    ncol = 1, nrow = 2,
                    labels = c("A", "B"))
