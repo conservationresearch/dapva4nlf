@@ -20,6 +20,7 @@ library(gridExtra) # for grid.arrange
 library(plyr)
 library(dplyr)
 
+
 #---- Specify the location where you saved the Rdata files. ----
 # Note: Add a folder in there called 'ForReport' to help organize the outputs.
 
@@ -79,7 +80,7 @@ int$alternative<- factor(int$alternative, levels=c("Do Nothing", "Minimum Fundin
                                        overlap = FALSE,
                                        title = 'A)',
                                        x_axis_lab = "Year",
-                                       y_axis_lab = "\n Probability of Persistence \n ")) # The extra lines push the title out to the same spot as in panel B)
+                                       y_axis_lab = "Probability of Persistence "))
 
 
 # Flying Bars
@@ -98,11 +99,12 @@ int2 <- results_all_iter[c(which(results_all_iter$alternative == goBig_alt_name)
                            which(results_all_iter$alternative == mostReal_alt_name),
                            which(results_all_iter$alternative == lowEffort_alt_name),
                            which(results_all_iter$alternative == doNothing_alt_name)),]
-int2$alternative[which(int2$alternative == goBig_alt_name)] <- "Go Big or Go Home" # get rid of the extra space
-int2$alternative[which(int2$alternative == lowEffort_alt_name)] <- "Minimum Funding /\n Low Effort" # put it on two lines
+int2$alternative[which(int2$alternative == goBig_alt_name)] <- "Go Big or\n Go Home" # get rid of the extra space
+int2$alternative[which(int2$alternative == lowEffort_alt_name)] <- "Minimum \n Funding /\n Low Effort" # put it on two lines
+int2$alternative[which(int2$alternative == mostReal_alt_name)] <- "Middle of\n the Road" # put it on two lines
 
-int2$alternative<- factor(int2$alternative, levels=c("Go Big or Go Home", "Middle of the Road",
-                                                    "Minimum Funding /\n Low Effort",
+int2$alternative <- factor(int2$alternative, levels=c("Go Big or\n Go Home", "Middle of\n the Road",
+                                                    "Minimum \n Funding /\n Low Effort",
                                                     "Do Nothing" )) # reorder factor levels
 
 (persistence_effort_flyingBars1 <- dapva::graphBoxandViolinPlot(results_summary_all_iterations = int2,
@@ -121,7 +123,7 @@ int2$alternative<- factor(int2$alternative, levels=c("Go Big or Go Home", "Middl
          year = yrs,
          x_axis_lab = "Probability of Persistence in Year 50",
          y_axis_lab = "\n \n \n \n \n Cumulative Probability \n",
-         title = 'C)'))
+         title = 'B)'))
 
 (persistence_effort_PDF1 <- dapva::graphPDF(results_summary_all_iterations = int2,
                                      metric = "probability of persistence",
@@ -154,8 +156,8 @@ int2$alternative<- factor(int2$alternative, levels=c("Go Big or Go Home", "Middl
 
 # Doing manually so can get the colors to match the ones with all four alternatives
 x_axis_lab1 <- ggplot2::labs(y = "Probability of Persistence in Year 50")
-y_axis_lab1 <- ggplot2::labs(x = "\n Management Alternative")
-title1 <- ggplot2::ggtitle(paste0('C)'))
+y_axis_lab1 <- ggplot2::labs(x = "Management Alternative")
+title1 <- ggplot2::ggtitle(paste0('B)\n'))
 
 # int2b <- int2[which(int2$alternative != "Minimum Funding /\n Low Effort"  &
 #                       int2$alternative != "Do Nothing"),]
@@ -194,20 +196,22 @@ persistence_effort_violinPlot_opt2 <- ggplot2::ggplot(results_summary_all_iterat
 
 # CDF
 
-int2$alternative <- as.character(int2$alternative)
-int2$alternative[which(int2$alternative == "Go Big or Go Home")] <- "Go Big or \n Go Home"  # put it on two lines
-int2$alternative[which(int2$alternative == "Middle of the Road")] <- "Middle of \n the Road"  # put it on two lines
-int2$alternative <- as.factor(int2$alternative)
-int2$alternative<- factor(int2$alternative, levels=c("Go Big or \n Go Home", "Middle of \n the Road",
-                                                     "Minimum Funding /\n Low Effort",
-                                                     "Do Nothing" )) # reorder factor levels
+# Adjust the spacing in the alternative names
+int3 <- int2
+int3$alternative <- as.character(int3$alternative)
+int3$alternative[which(int3$alternative == "Minimum \n Funding /\n Low Effort")] <- "Min. Funding\n/Low Effort"
+int3$alternative[which(int3$alternative == "Do Nothing")] <- "Do \n Nothing"
 
-(persistence_effort_CDF1_opt2 <- dapva::graphCDF(results_summary_all_iterations = int2,
+(persistence_effort_CDF1_opt2 <- dapva::graphCDF_labelled(results_summary_all_iterations = int3,
                                      metric = "probability of persistence",
                                      year = yrs,
                                      x_axis_lab = "Probability of Persistence in Year 50",
-                                     y_axis_lab = "\n \n \n \n \n Cumulative Probability \n",
-                                     title = 'E)'))
+                                     y_axis_lab = "Cumulative Probability",
+                                     title = 'C)\n',
+                                     label_y_location = c(0.8, 0.6, 0.4, 0.2),
+                                     label_x_nudge = 0.3,
+                                     label_y_nudge = -0.6)
+)
 
 #---- Make graphs for the report - level of effort, graphs for export. ----
 
@@ -221,16 +225,16 @@ int2$alternative<- factor(int2$alternative, levels=c("Go Big or \n Go Home", "Mi
 
 
 filename <- paste("ForManuscript/graph_effort_year50_option2", version,".tiff", sep="")
-tiff(filename, width=12, height=8, units="in",
+tiff(filename, width=12, height=4, units="in",
      pointsize=8, compression="lzw", bg="white", res=600)
 grid.arrange(persist_effort_graph1,
              # persistence_effort_flyingBars1_opt2, 
              persistence_effort_violinPlot_opt2, 
              persistence_effort_CDF1_opt2,
-             ncol = 1, nrow = 3)
+             ncol = 3, nrow = 1)
 dev.off()
 
-
+### CONTINUE HERE NEXT; NOTE ALSO THAT THE COLORS IN THE ABOVE PANEL NEED TO BE FIXED TO BE CONSISTENT
 
 #---- Load Go Big results and use that for the remaining. ----
 # clear workspace
