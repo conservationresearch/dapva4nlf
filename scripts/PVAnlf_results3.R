@@ -224,41 +224,112 @@ int3$alternative[which(int3$alternative == "Do Nothing")] <- "Do \n Nothing"
 #              ncol = 1, nrow = 1)
 # dev.off()
 
-filename <- paste("ForManuscript/graph_effort_year50_option1", version,".pdf", sep="")
-pdf(filename, width=6.5, height=6) # assume 8.5 by 11 page, 1 inch margin on all sides, want fill width and a third of the height
-#filename <- paste("ForManuscript/graph_effort_year50_option2", version,".eps", sep="")
-#postscript(file=filename,horiz=FALSE,onefile=FALSE,width=6.5,height=3)
-cowplot::plot_grid(persist_effort_graph1,
-             # persistence_effort_flyingBars1_opt2, 
-             persistence_effort_violinPlot_opt2, 
-             persistence_effort_CDF1_opt2,
-             ncol = 2, nrow = 2,
-             labels = c("A", "B", "C"))
-dev.off()
+# filename <- paste("ForManuscript/graph_effort_year50_option1", version,".pdf", sep="")
+# pdf(filename, width=6.5, height=6) # assume 8.5 by 11 page, 1 inch margin on all sides, want fill width and a third of the height
+# #filename <- paste("ForManuscript/graph_effort_year50_option2", version,".eps", sep="")
+# #postscript(file=filename,horiz=FALSE,onefile=FALSE,width=6.5,height=3)
+# cowplot::plot_grid(persist_effort_graph1,
+#              # persistence_effort_flyingBars1_opt2, 
+#              persistence_effort_violinPlot_opt2, 
+#              persistence_effort_CDF1_opt2,
+#              ncol = 2, nrow = 2,
+#              labels = c("A", "B", "C"))
+# dev.off()
 
-filename <- paste("ForManuscript/graph_effort_year50_option2", version,".pdf", sep="")
-pdf(filename, width=6.5, height=3) # assume 8.5 by 11 page, 1 inch margin on all sides, want fill width and a third of the height
-#filename <- paste("ForManuscript/graph_effort_year50_option2", version,".eps", sep="")
-#postscript(file=filename,horiz=FALSE,onefile=FALSE,width=6.5,height=3)
+
+# filename <- paste("ForManuscript/graph_effort_year50_option1", version,".eps", sep="")
+# #filename <- paste("ForManuscript/graph_effort_year50_option2", version,".eps", sep="")
+# #postscript(file=filename,horiz=FALSE,onefile=FALSE,width=6.5,height=3)
+# postscript(filename, width = 6.5, height = 6.0,
+#            horizontal = FALSE, onefile = FALSE)
+# 
+# cowplot::plot_grid(persist_effort_graph1,
+#                    # persistence_effort_flyingBars1_opt2, 
+#                    persistence_effort_violinPlot_opt2, 
+#                    persistence_effort_CDF1_opt2,
+#                    ncol = 2, nrow = 2,
+#                    labels = c("A", "B", "C"))
+# 
+# dev.off()
+
+# filename <- paste("ForManuscript/graph_effort_year50_option1", version,".eps", sep="")
+# #filename <- paste("ForManuscript/graph_effort_year50_option2", version,".eps", sep="")
+# #postscript(file=filename,horiz=FALSE,onefile=FALSE,width=6.5,height=3)
+# cairo_ps(filename = filename,
+#          width = 6.5, height = 6, pointsize = 12,
+#          fallback_resolution = 300)
+# cowplot::plot_grid(persist_effort_graph1,
+#                    # persistence_effort_flyingBars1_opt2, 
+#                    persistence_effort_violinPlot_opt2, 
+#                    persistence_effort_CDF1_opt2,
+#                    ncol = 2, nrow = 2,
+#                    labels = c("A", "B", "C"))
+# 
+# dev.off()
+
+filename <- paste("ForManuscript/graph_effort_year50_option1", version,".eps", sep="")
+cowplot::plot_grid(persist_effort_graph1,
+                   # persistence_effort_flyingBars1_opt2, 
+                   persistence_effort_violinPlot_opt2, 
+                   persistence_effort_CDF1_opt2,
+                   ncol = 2, nrow = 2,
+                   labels = c("A", "B", "C"))
+ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
+
+
+
+
+
+
+
+# filename <- paste("ForManuscript/graph_effort_year50_option2", version,".eps", sep="")
+# postscript(filename, width = 6.5, height = 3.0,
+#            horizontal = FALSE, onefile = FALSE) # assume 8.5 by 11 page, 1 inch margin on all sides, want fill width and a third of the height
+# #filename <- paste("ForManuscript/graph_effort_year50_option2", version,".eps", sep="")
+# #postscript(file=filename,horiz=FALSE,onefile=FALSE,width=6.5,height=3)
+# cowplot::plot_grid(persist_effort_graph1,
+#                    # persistence_effort_flyingBars1_opt2, 
+#                    persistence_effort_violinPlot_opt2, 
+#                    persistence_effort_CDF1_opt2,
+#                    ncol = 3, nrow = 1,
+#                    labels = c("A", "B", "C"))
+# dev.off()
+
+filename <- paste("ForManuscript/graph_effort_year50_option2", version,".eps", sep="")
 cowplot::plot_grid(persist_effort_graph1,
                    # persistence_effort_flyingBars1_opt2, 
                    persistence_effort_violinPlot_opt2, 
                    persistence_effort_CDF1_opt2,
                    ncol = 3, nrow = 1,
                    labels = c("A", "B", "C"))
-dev.off()
+ggplot2::ggsave(filename = filename, width = 6.5, height = 3.0)
 
-filename <- paste("ForManuscript/graph_effort_year50_option3", version,".pdf", sep="")
-pdf(filename, width=3.25, height=9) # assume 8.5 by 11 page, 1 inch margin on all sides, want fill width and a third of the height
-#filename <- paste("ForManuscript/graph_effort_year50_option2", version,".eps", sep="")
-#postscript(file=filename,horiz=FALSE,onefile=FALSE,width=6.5,height=3)
+
+
+
+
+# filename <- paste("ForManuscript/graph_effort_year50_option3", version,".eps", sep="")
+# postscript(filename, width = 3.25, height = 9.0,
+#            horizontal = FALSE, onefile = FALSE) # assume 8.5 by 11 page, 1 inch margin on all sides, want fill width and a third of the height
+# #filename <- paste("ForManuscript/graph_effort_year50_option2", version,".eps", sep="")
+# #postscript(file=filename,horiz=FALSE,onefile=FALSE,width=6.5,height=3)
+# cowplot::plot_grid(persist_effort_graph1,
+#                    # persistence_effort_flyingBars1_opt2, 
+#                    persistence_effort_violinPlot_opt2, 
+#                    persistence_effort_CDF1_opt2,
+#                    ncol = 1, nrow = 3,
+#                    labels = c("A", "B", "C"))
+# dev.off()
+
+filename <- paste("ForManuscript/graph_effort_year50_option3", version,".eps", sep="")
 cowplot::plot_grid(persist_effort_graph1,
                    # persistence_effort_flyingBars1_opt2, 
                    persistence_effort_violinPlot_opt2, 
                    persistence_effort_CDF1_opt2,
                    ncol = 1, nrow = 3,
                    labels = c("A", "B", "C"))
-dev.off()
+ggplot2::ggsave(filename = filename, width = 3.25, height = 9)
+
 
 #---- Load Go Big results and use that for the remaining. ----
 # clear workspace
@@ -298,11 +369,17 @@ tornado_persist_top10 <- dapva::drawTornado(paramSens = paramSens_persist,
                                             num_bars_to_show = 10)
 tornado_persist_top10
 # Export the tornado diagrams - main report
+# filename <- paste("ForManuscript/tornado_top10_goBig", version,".pdf", sep="")
+# pdf(filename, width=6.5, height=6)
+#      #restoreConsole=TRUE)
+# tornado_persist_top10
+# dev.off()
+
+
 filename <- paste("ForManuscript/tornado_top10_goBig", version,".pdf", sep="")
-pdf(filename, width=6.5, height=6)
-     #restoreConsole=TRUE)
 tornado_persist_top10
-dev.off()
+ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
+
 
 #---- Explore yoy and tadpole survival vs prob of persistence - plot points. ----
 # Correct for potential for parallel computing to skip iterations
@@ -420,17 +497,22 @@ p_hist_prob_persist_groups
 
 #---- Export pannel graph for report: yoy and tadpole survival vs prob of persistence. ----
 
+# filename <- paste("ForManuscript/graph_compare_yoyTadsurv_persist", version,".pdf", sep="")
+# pdf(filename, width=6.5, height=6)
+# cowplot::plot_grid(p_sens_tad_yoy_surv_persist,  p_hist_prob_persist_groups ,
+#                    ncol = 1, nrow = 2,
+#                    labels = c("A", "B"))
+# dev.off()
+
 filename <- paste("ForManuscript/graph_compare_yoyTadsurv_persist", version,".pdf", sep="")
-pdf(filename, width=6.5, height=6)
 cowplot::plot_grid(p_sens_tad_yoy_surv_persist,  p_hist_prob_persist_groups ,
                    ncol = 1, nrow = 2,
                    labels = c("A", "B"))
-dev.off()
+ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
 
 
 
-
-pdf(filename, width=3.25, height=9) # assume 8.5 by 11 page, 1 inch margin on all sides, want fill width and a third of the height
+# pdf(filename, width=3.25, height=9) # assume 8.5 by 11 page, 1 inch margin on all sides, want fill width and a third of the height
 #filename <- paste("ForManuscript/graph_effort_year50_option2", version,".eps", sep="")
 #postscript(file=filename,horiz=FALSE,onefile=FALSE,width=6.5,height=3)
 
