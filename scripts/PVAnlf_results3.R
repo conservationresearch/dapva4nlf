@@ -276,7 +276,14 @@ cowplot::plot_grid(persist_effort_graph1,
                    labels = c("A", "B", "C"))
 ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
 
-
+filename <- paste("ForManuscript/graph_effort_year50_option1", version,".png", sep="")
+cowplot::plot_grid(persist_effort_graph1,
+                   # persistence_effort_flyingBars1_opt2, 
+                   persistence_effort_violinPlot_opt2, 
+                   persistence_effort_CDF1_opt2,
+                   ncol = 2, nrow = 2,
+                   labels = c("A", "B", "C"))
+ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
 
 
 
@@ -305,7 +312,14 @@ cowplot::plot_grid(persist_effort_graph1,
 ggplot2::ggsave(filename = filename, width = 6.5, height = 3.0)
 
 
-
+filename <- paste("ForManuscript/graph_effort_year50_option2", version,".png", sep="")
+cowplot::plot_grid(persist_effort_graph1,
+                   # persistence_effort_flyingBars1_opt2, 
+                   persistence_effort_violinPlot_opt2, 
+                   persistence_effort_CDF1_opt2,
+                   ncol = 3, nrow = 1,
+                   labels = c("A", "B", "C"))
+ggplot2::ggsave(filename = filename, width = 6.5, height = 3.0)
 
 
 # filename <- paste("ForManuscript/graph_effort_year50_option3", version,".eps", sep="")
@@ -330,6 +344,14 @@ cowplot::plot_grid(persist_effort_graph1,
                    labels = c("A", "B", "C"))
 ggplot2::ggsave(filename = filename, width = 3.25, height = 9)
 
+filename <- paste("ForManuscript/graph_effort_year50_option3", version,".png", sep="")
+cowplot::plot_grid(persist_effort_graph1,
+                   # persistence_effort_flyingBars1_opt2, 
+                   persistence_effort_violinPlot_opt2, 
+                   persistence_effort_CDF1_opt2,
+                   ncol = 1, nrow = 3,
+                   labels = c("A", "B", "C"))
+ggplot2::ggsave(filename = filename, width = 3.25, height = 9)
 
 #---- Load Go Big results and use that for the remaining. ----
 # clear workspace
@@ -376,10 +398,13 @@ tornado_persist_top10
 # dev.off()
 
 
-filename <- paste("ForManuscript/tornado_top10_goBig", version,".eps", sep="")
-tornado_persist_top10
-ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
+# filename <- paste("ForManuscript/tornado_top10_goBig", version,".eps", sep="")
+# tornado_persist_top10
+# ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
 
+filename <- paste("ForManuscript/tornado_top10_goBig", version,".png", sep="")
+tornado_persist_top10
+ggplot2::ggsave(filename = filename, width = 6.5, height = 4)
 
 #---- Explore yoy and tadpole survival vs prob of persistence - plot points. ----
 # Correct for potential for parallel computing to skip iterations
@@ -504,13 +529,17 @@ p_hist_prob_persist_groups
 #                    labels = c("A", "B"))
 # dev.off()
 
-filename <- paste("ForManuscript/graph_compare_yoyTadsurv_persist", version,".eps", sep="")
+# filename <- paste("ForManuscript/graph_compare_yoyTadsurv_persist", version,".eps", sep="")
+# cowplot::plot_grid(p_sens_tad_yoy_surv_persist,  p_hist_prob_persist_groups ,
+#                    ncol = 1, nrow = 2,
+#                    labels = c("A", "B"))
+# ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
+
+filename <- paste("ForManuscript/graph_compare_yoyTadsurv_persist", version,".png", sep="")
 cowplot::plot_grid(p_sens_tad_yoy_surv_persist,  p_hist_prob_persist_groups ,
                    ncol = 1, nrow = 2,
                    labels = c("A", "B"))
 ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
-
-
 
 # pdf(filename, width=3.25, height=9) # assume 8.5 by 11 page, 1 inch margin on all sides, want fill width and a third of the height
 #filename <- paste("ForManuscript/graph_effort_year50_option2", version,".eps", sep="")
@@ -518,7 +547,6 @@ ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
 
 
 
-#### BELOW HERE CURRENTY ISN"T IN THE MANUSCRIPT, DELETE ONCE CONFIRM
 
 #---- Explore relationship between bullfrog management and tadpole survival. ----
 test2b <- cbind(parameterByIterTracking_this_alt_clean[iteration_numbers, c("s_mean_eggs_no_threats",
@@ -604,7 +632,7 @@ p_sens_yoy_surv_bullfrogMgmt <- ggplot2::ggplot(data = test2, ggplot2::aes(x=sur
   ggplot2::xlab("Mean young-of-year survival\n (no threats)") +
   ggplot2::ylab( "Probability of persistence") + 
   ggplot2::ggtitle( "") + 
-  ggplot2::labs(size='', fill='Bullfrog management effective    ')  +
+ # ggplot2::labs(size='', fill='Bullfrog management effective    ')  +
   ggplot2::theme_bw() +
   ggplot2::theme(
     panel.grid.major = ggplot2::element_blank(),
@@ -613,7 +641,7 @@ p_sens_yoy_surv_bullfrogMgmt <- ggplot2::ggplot(data = test2, ggplot2::aes(x=sur
     panel.border = ggplot2::element_rect(colour = "black"),
     text = ggplot2::element_text(size = 12),
     axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
-    legend.position = "bottom"
+    legend.position = "none"
   )
 
 p_sens_yoy_surv_bullfrogMgmt
@@ -628,7 +656,7 @@ p_sens_juv_surv_bullfrogMgmt <- ggplot2::ggplot(data = test2, ggplot2::aes(x=sur
   ggplot2::xlab("Mean juvenile survival\n (no threats)") +
   ggplot2::ylab( "Probability of persistence") + 
   ggplot2::ggtitle( "") + 
-  ggplot2::labs(size='', fill='Bullfrog management effective    ')  +
+  # ggplot2::labs(size='', fill='Bullfrog management effective    ')  +
   ggplot2::theme_bw() +
   ggplot2::theme(
     panel.grid.major = ggplot2::element_blank(),
@@ -637,7 +665,7 @@ p_sens_juv_surv_bullfrogMgmt <- ggplot2::ggplot(data = test2, ggplot2::aes(x=sur
     panel.border = ggplot2::element_rect(colour = "black"),
     text = ggplot2::element_text(size = 12),
     axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
-    legend.position = "bottom"
+    legend.position = "none"
   )
 
 p_sens_juv_surv_bullfrogMgmt
@@ -645,17 +673,32 @@ p_sens_juv_surv_bullfrogMgmt
 #---- Export panel graph for report: relationship between bullfrog management and tadpole survival. ----
 
 # Export panel graph for report
-filename <- paste("ForReport/graph_bullfrogMgt_vs_survival", version,".tiff", sep="")
-tiff(filename, width=12, height=8, units="in",
-     pointsize=8, compression="lzw", bg="white", res=600)
-     #restoreConsole=TRUE)
-grid.arrange(p_sens_eggs_surv_bullfrogMgmt, 
-             p_sens_tad_surv_bullfrogMgmt,
-             p_sens_yoy_surv_bullfrogMgmt,
-             p_sens_juv_surv_bullfrogMgmt,
-             ncol = 2, nrow = 2)
-dev.off()
+# filename <- paste("ForReport/graph_bullfrogMgt_vs_survival", version,".tiff", sep="")
+# tiff(filename, width=12, height=8, units="in",
+#      pointsize=8, compression="lzw", bg="white", res=600)
+#      #restoreConsole=TRUE)
+# grid.arrange(p_sens_eggs_surv_bullfrogMgmt, 
+#              p_sens_tad_surv_bullfrogMgmt,
+#              p_sens_yoy_surv_bullfrogMgmt,
+#              p_sens_juv_surv_bullfrogMgmt,
+#              ncol = 2, nrow = 2)
+# dev.off()
 
+
+filename <- paste("ForManuscript/graph_bullfrogMgt_vs_survival", version,".png", sep="")
+cowplot::plot_grid(p_sens_eggs_surv_bullfrogMgmt, 
+                   p_sens_tad_surv_bullfrogMgmt,
+                   p_sens_yoy_surv_bullfrogMgmt,
+                   p_sens_juv_surv_bullfrogMgmt,
+                   ncol = 2, nrow = 2)
+ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
+
+
+
+
+
+
+#### BELOW HERE CURRENTY ISN"T IN THE MANUSCRIPT, DELETE ONCE CONFIRM
 
 
 #---- Explore relationship between persistence and self-sustaining. ----
