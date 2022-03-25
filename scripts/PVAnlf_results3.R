@@ -175,13 +175,13 @@ colnames(results_summary_all_iterations_year) <- c("quantity",
 
 
 
-persistence_effort_violinPlot_opt2 <- ggplot2::ggplot(results_summary_all_iterations_year, 
+(persistence_effort_violinPlot_opt2 <- ggplot2::ggplot(results_summary_all_iterations_year, 
                 ggplot2::aes(x = alternative, y = quantity, col = alternative)) + 
   ggplot2::geom_violin() + 
   ggplot2::stat_summary(fun = median, colour = "blue", geom = "point", shape = 17, size = 3) + 
   ggplot2::stat_summary(fun = mean, colour = "darkred", geom = "point", shape = 18, size = 4) + 
   ggplot2::scale_y_continuous() + 
-  ggplot2::scale_color_hue(direction = 1, h = c(270, 180)) +
+  ggplot2::scale_color_hue(direction = -1) +
   # ggthemes::scale_colour_colorblind() + 
   # ggthemes::scale_fill_colorblind() + 
   x_axis_lab1 + y_axis_lab1 + title1 + 
@@ -192,27 +192,41 @@ persistence_effort_violinPlot_opt2 <- ggplot2::ggplot(results_summary_all_iterat
                                                                panel.border = ggplot2::element_rect(colour = "black"), 
                                                                text = ggplot2::element_text(size = 12), axis.text.x = ggplot2::element_text(angle = 45, 
                                                                                                                                             hjust = 1), legend.position = "none")
-
+)
 
 
 # CDF
 
 # Adjust the spacing in the alternative names
-int3 <- int2
-int3$alternative <- as.character(int3$alternative)
-int3$alternative[which(int3$alternative == "Minimum \n Funding /\n Low Effort")] <- "Min. Funding\n/Low Effort"
-int3$alternative[which(int3$alternative == "Do Nothing")] <- "Do \n Nothing"
+# int3 <- int2
+# int3$alternative <- as.character(int3$alternative)
+# #int3$alternative[which(int3$alternative == "Do Nothing")] <- "Do \n Nothing"
+# int3$alternative[which(int3$alternative == "Go Big or\n Go Home")] <- "Go Big or Go Home"
+# int3$alternative[which(int3$alternative == "Middle of\n the Road")] <- "Middle of the Road"
+# int3$alternative[which(int3$alternative == "Minimum \n Funding /\n Low Effort")] <- "Min. Funding / Low Effort"
+# int3$alternative <- as.factor(int3$alternative)
 
-(persistence_effort_CDF1_opt2 <- dapva::graphCDF_labelled(results_summary_all_iterations = int3,
-                                     metric = "probability of persistence",
-                                     year = yrs,
-                                     x_axis_lab = "Probability of Persistence\nin Year 50",
-                                     y_axis_lab = "Cumulative Probability",
-                                     title = '',
-                                     label_y_location = c(0.8, 0.6, 0.4, 0.2),
-                                     label_x_nudge = 0.3,
-                                     label_y_nudge = -0.6)
+
+# (persistence_effort_CDF1_opt2 <- dapva::graphCDF_labelled(results_summary_all_iterations = int3,
+#                                      metric = "probability of persistence",
+#                                      year = yrs,
+#                                      x_axis_lab = "Probability of Persistence\nin Year 50",
+#                                      y_axis_lab = "Cumulative Probability",
+#                                      title = '',
+#                                      label_y_location = c(0.8, 0.6, 0.4, 0.2),
+#                                      label_x_nudge = 0.3,
+#                                      label_y_nudge = -0.6)
+# )
+
+(persistence_effort_CDF1_opt2 <- dapva::graphCDF(results_summary_all_iterations = int2,
+                                                          metric = "probability of persistence",
+                                                          year = yrs,
+                                                          x_axis_lab = "Probability of Persistence\nin Year 50",
+                                                          y_axis_lab = "Cumulative Probability",
+                                                          title = '',
+                                                 legend_position = "none")
 )
+
 
 #---- Make graphs for the report - level of effort, graphs for export. ----
 
@@ -266,26 +280,42 @@ int3$alternative[which(int3$alternative == "Do Nothing")] <- "Do \n Nothing"
 #                    labels = c("A", "B", "C"))
 # 
 # dev.off()
+# 
+# filename <- paste("ForManuscript/graph_effort_year50_option1", version,".eps", sep="")
+# cowplot::plot_grid(persist_effort_graph1,
+#                    # persistence_effort_flyingBars1_opt2, 
+#                    persistence_effort_violinPlot_opt2, 
+#                    persistence_effort_CDF1_opt2,
+#                    ncol = 2, nrow = 2,
+#                    labels = c("A", "B", "C"))
+# ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
 
-filename <- paste("ForManuscript/graph_effort_year50_option1", version,".eps", sep="")
-cowplot::plot_grid(persist_effort_graph1,
-                   # persistence_effort_flyingBars1_opt2, 
-                   persistence_effort_violinPlot_opt2, 
-                   persistence_effort_CDF1_opt2,
-                   ncol = 2, nrow = 2,
-                   labels = c("A", "B", "C"))
-ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
+# filename <- paste("ForManuscript/graph_effort_year50_option1", version,".png", sep="")
+# cowplot::plot_grid(persist_effort_graph1,
+#                    # persistence_effort_flyingBars1_opt2, 
+#                    persistence_effort_violinPlot_opt2, 
+#                    persistence_effort_CDF1_opt2,
+#                    ncol = 2, nrow = 2,
+#                    labels = c("A", "B", "C"))
+# ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
 
-filename <- paste("ForManuscript/graph_effort_year50_option1", version,".png", sep="")
-cowplot::plot_grid(persist_effort_graph1,
-                   # persistence_effort_flyingBars1_opt2, 
-                   persistence_effort_violinPlot_opt2, 
-                   persistence_effort_CDF1_opt2,
-                   ncol = 2, nrow = 2,
-                   labels = c("A", "B", "C"))
-ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
+# filename <- paste("ForManuscript/graph_effort_year50_option1", version,".pdf", sep="")
+# cowplot::plot_grid(persist_effort_graph1,
+#                    # persistence_effort_flyingBars1_opt2, 
+#                    persistence_effort_violinPlot_opt2, 
+#                    persistence_effort_CDF1_opt2,
+#                    ncol = 2, nrow = 2,
+#                    labels = c("A", "B", "C"))
+# ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
 
 
+# filename <- paste("ForManuscript/graph_effort_year50_option1", version,".pdf", sep="")
+# top <- plot_grid(persist_effort_graph1, persistence_effort_violinPlot_opt2, ncol = 2)
+# bottom <- plot_grid(persistence_effort_CDF1_opt2, ncol = 1)
+# cowplot::plot_grid(plot_grid(top, bottom,
+#           ncol=1, rel_heights=c(1,1),
+#           labels = c("A", "B", "C")))
+# ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
 
 
 
@@ -302,24 +332,24 @@ ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
 #                    labels = c("A", "B", "C"))
 # dev.off()
 
-filename <- paste("ForManuscript/graph_effort_year50_option2", version,".eps", sep="")
-cowplot::plot_grid(persist_effort_graph1,
-                   # persistence_effort_flyingBars1_opt2, 
-                   persistence_effort_violinPlot_opt2, 
-                   persistence_effort_CDF1_opt2,
-                   ncol = 3, nrow = 1,
-                   labels = c("A", "B", "C"))
-ggplot2::ggsave(filename = filename, width = 6.5, height = 3.0)
-
-
-filename <- paste("ForManuscript/graph_effort_year50_option2", version,".png", sep="")
-cowplot::plot_grid(persist_effort_graph1,
-                   # persistence_effort_flyingBars1_opt2, 
-                   persistence_effort_violinPlot_opt2, 
-                   persistence_effort_CDF1_opt2,
-                   ncol = 3, nrow = 1,
-                   labels = c("A", "B", "C"))
-ggplot2::ggsave(filename = filename, width = 6.5, height = 3.0)
+# filename <- paste("ForManuscript/graph_effort_year50_option2", version,".eps", sep="")
+# cowplot::plot_grid(persist_effort_graph1,
+#                    # persistence_effort_flyingBars1_opt2, 
+#                    persistence_effort_violinPlot_opt2, 
+#                    persistence_effort_CDF1_opt2,
+#                    ncol = 3, nrow = 1,
+#                    labels = c("A", "B", "C"))
+# ggplot2::ggsave(filename = filename, width = 6.5, height = 3.0)
+# 
+# 
+# filename <- paste("ForManuscript/graph_effort_year50_option2", version,".png", sep="")
+# cowplot::plot_grid(persist_effort_graph1,
+#                    # persistence_effort_flyingBars1_opt2, 
+#                    persistence_effort_violinPlot_opt2, 
+#                    persistence_effort_CDF1_opt2,
+#                    ncol = 3, nrow = 1,
+#                    labels = c("A", "B", "C"))
+# ggplot2::ggsave(filename = filename, width = 6.5, height = 3.0)
 
 
 # filename <- paste("ForManuscript/graph_effort_year50_option3", version,".eps", sep="")
@@ -335,23 +365,60 @@ ggplot2::ggsave(filename = filename, width = 6.5, height = 3.0)
 #                    labels = c("A", "B", "C"))
 # dev.off()
 
-filename <- paste("ForManuscript/graph_effort_year50_option3", version,".eps", sep="")
+# filename <- paste("ForManuscript/graph_effort_year50_option3", version,".pdf", sep="")
+# cowplot::plot_grid(persist_effort_graph1,
+#                    # persistence_effort_flyingBars1_opt2, 
+#                    persistence_effort_violinPlot_opt2, 
+#                    persistence_effort_CDF1_opt2,
+#                    ncol = 1, nrow = 3,
+#                    labels = c("A", "B", "C"))
+# ggplot2::ggsave(filename = filename, width = 6.5, height = 9)
+# 
+# filename <- paste("ForManuscript/graph_effort_year50_option3", version,".png", sep="")
+# cowplot::plot_grid(persist_effort_graph1,
+#                    # persistence_effort_flyingBars1_opt2, 
+#                    persistence_effort_violinPlot_opt2, 
+#                    persistence_effort_CDF1_opt2,
+#                    ncol = 1, nrow = 3,
+#                    labels = c("A", "B", "C"))
+# ggplot2::ggsave(filename = filename, width = 6.5, height = 9)
+
+# filename <- paste("ForManuscript/graph_effort_year50_option3", version,".png", sep="")
+# cowplot::plot_grid(persist_effort_graph1,
+#                    # persistence_effort_flyingBars1_opt2, 
+#                    persistence_effort_violinPlot_opt2, 
+#                    persistence_effort_CDF1_opt2,
+#                    ncol = 1, nrow = 3,
+#                    labels = c("A", "B", "C"))
+# ggplot2::ggsave(filename = filename, width = 3.25, height = 9)
+filename <- paste("ForManuscript/graph_effort_year50_option3", version,".pdf", sep="")
 cowplot::plot_grid(persist_effort_graph1,
-                   # persistence_effort_flyingBars1_opt2, 
-                   persistence_effort_violinPlot_opt2, 
+                   persistence_effort_violinPlot_opt2,
                    persistence_effort_CDF1_opt2,
                    ncol = 1, nrow = 3,
                    labels = c("A", "B", "C"))
 ggplot2::ggsave(filename = filename, width = 3.25, height = 9)
 
-filename <- paste("ForManuscript/graph_effort_year50_option3", version,".png", sep="")
-cowplot::plot_grid(persist_effort_graph1,
-                   # persistence_effort_flyingBars1_opt2, 
-                   persistence_effort_violinPlot_opt2, 
-                   persistence_effort_CDF1_opt2,
-                   ncol = 1, nrow = 3,
-                   labels = c("A", "B", "C"))
-ggplot2::ggsave(filename = filename, width = 3.25, height = 9)
+# 
+# filename <- paste("ForManuscript/graph_effort_year50_option3a", version,".pdf", sep="")
+# cowplot::plot_grid(persist_effort_graph1,
+#                    ncol = 1, nrow = 1,
+#                    labels = c("A"))
+# ggplot2::ggsave(filename = filename, width = 3.25, height = 3)
+# 
+# filename <- paste("ForManuscript/graph_effort_year50_option3b", version,".pdf", sep="")
+# cowplot::plot_grid(
+#                    persistence_effort_violinPlot_opt2, 
+#                    ncol = 1, nrow = 1,
+#                    labels = c("B"))
+# ggplot2::ggsave(filename = filename, width = 3.25, height = 3)
+# 
+# filename <- paste("ForManuscript/graph_effort_year50_option3c", version,".pdf", sep="")
+# cowplot::plot_grid(
+#   persistence_effort_CDF1_opt2,
+#   ncol = 1, nrow = 1,
+#   labels = c("C"))
+# ggplot2::ggsave(filename = filename, width = 6.5, height = 3)
 
 #---- Load Go Big results and use that for the remaining. ----
 # clear workspace
@@ -367,9 +434,9 @@ load(file_goBig)
 
 # Put some of the labels on two rows
 tornado_parameter_labels$label[which(tornado_parameter_labels$label == "tadpole survival in existing wetlands - mean")] <-  "tadpole survival in\nexisting wetlands - mean"
-tornado_parameter_labels$label[which(tornado_parameter_labels$label == "bullfrog mgmt. effective (yes = high, no = low)")] <-  "bullfrog mgmt. effective"
+tornado_parameter_labels$label[which(tornado_parameter_labels$label == "bullfrog mgmt. effective (yes = high, no = low)")] <-  "bullfrog mgmt. effective\n(yes = high, no = low)"
 tornado_parameter_labels$label[which(tornado_parameter_labels$label == "egg survival in existing wetlands - mean")] <-  "egg survival in existing\nwetlands - mean"
-tornado_parameter_labels$label[which(tornado_parameter_labels$label == "egg survival reduction (pct) if bullfrogMgt not effective")] <-  "egg survival reduction if\nbullfrogMgt not effective (pct)"
+tornado_parameter_labels$label[which(tornado_parameter_labels$label == "egg survival reduction (pct) if bullfrogMgt not effective")] <-  "egg survival reduction if\nbullfrog mgmt. not effective (pct)"
 tornado_parameter_labels$label[which(tornado_parameter_labels$label == "adult survival reduction (pct) from roads")] <-  "adult survival reduction\nfrom roads (pct) "
 tornado_parameter_labels$label[which(tornado_parameter_labels$label == "proportion of A3 and A4plus lay eggs - mean")] <-  "proportion of A3 and A4plus\nwho lay eggs - mean"
 tornado_parameter_labels$label[which(tornado_parameter_labels$label == "yoy survival reduction (pct) from roads")] <-  "yoy survival reduction\nfrom roads (pct)"
@@ -402,7 +469,7 @@ tornado_persist_top10
 # tornado_persist_top10
 # ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
 
-filename <- paste("ForManuscript/tornado_top10_goBig", version,".png", sep="")
+filename <- paste("ForManuscript/tornado_top10_goBig", version,".pdf", sep="")
 tornado_persist_top10
 ggplot2::ggsave(filename = filename, width = 6.5, height = 4)
 
