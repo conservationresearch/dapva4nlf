@@ -483,9 +483,44 @@ tornado_persist_top10
 # tornado_persist_top10
 # ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
 
+# filename <- paste("ForManuscript/tornado_top10_goBig", version,".pdf", sep="")
+# tornado_persist_top10
+# ggplot2::ggsave(filename = filename, width = 6.5, height = 4)
+# 
+# ggplot2::ggsave(filename = "ForManuscript/testing.svg")
+
+pdf(NULL)
+options(bitmapType = 'cairo', device = 'pdf')
+ggplot2::ggsave(filename = "ForManuscript/testing.pdf", 
+                width = 6.5, height = 4, device = cairo_pdf)
+
+pdf(NULL)
 filename <- paste("ForManuscript/tornado_top10_goBig", version,".pdf", sep="")
 tornado_persist_top10
+options(bitmapType = 'cairo', device = 'pdf')
 ggplot2::ggsave(filename = filename, width = 6.5, height = 4)
+
+
+
+filename <- paste("ForManuscript/tornado_top10_goBig", version,".pdf", sep="")
+pdf(file=filename,onefile=FALSE,width=6.5,height=3)
+tornado_persist_top10
+dev.off()
+
+Cairo::CairoPDF(file = "ForManuscript/testing.pdf", width=6.5,height=3)
+
+
+# #filename <- paste("ForManuscript/graph_effort_year50_option2", version,".eps", sep="")
+# #postscript(file=filename,horiz=FALSE,onefile=FALSE,width=6.5,height=3)
+# cowplot::plot_grid(persist_effort_graph1,
+#                    # persistence_effort_flyingBars1_opt2, 
+#                    persistence_effort_violinPlot_opt2, 
+#                    persistence_effort_CDF1_opt2,
+#                    ncol = 1, nrow = 3,
+#                    labels = c("A", "B", "C"))
+# dev.off()
+
+
 
 #---- Explore yoy and tadpole survival vs prob of persistence - plot points. ----
 # Correct for potential for parallel computing to skip iterations
