@@ -432,14 +432,22 @@ load(file_goBig)
 
 #---- Make graphs for the report -goBig tornados, panel for export. ----
 
+# update wording
+tornado_parameter_labels$label <- gsub("yoy", "young of year", tornado_parameter_labels$label)
+tornado_parameter_labels$label <- gsub("juv", "juvenile", tornado_parameter_labels$label)
+tornado_parameter_labels$label <- gsub("A3 and A4plus", "adults 4 years or older", tornado_parameter_labels$label)
+tornado_parameter_labels$label <- gsub("pct", "", tornado_parameter_labels$label)
+
 # Put some of the labels on two rows
 tornado_parameter_labels$label[which(tornado_parameter_labels$label == "tadpole survival in existing wetlands - mean")] <-  "tadpole survival in\nexisting wetlands - mean"
 tornado_parameter_labels$label[which(tornado_parameter_labels$label == "bullfrog mgmt. effective (yes = high, no = low)")] <-  "bullfrog mgmt. effective\n(yes = high, no = low)"
 tornado_parameter_labels$label[which(tornado_parameter_labels$label == "egg survival in existing wetlands - mean")] <-  "egg survival in existing\nwetlands - mean"
-tornado_parameter_labels$label[which(tornado_parameter_labels$label == "egg survival reduction (pct) if bullfrogMgt not effective")] <-  "egg survival reduction if\nbullfrog mgmt. not effective (pct)"
-tornado_parameter_labels$label[which(tornado_parameter_labels$label == "adult survival reduction (pct) from roads")] <-  "adult survival reduction\nfrom roads (pct) "
-tornado_parameter_labels$label[which(tornado_parameter_labels$label == "proportion of A3 and A4plus lay eggs - mean")] <-  "proportion of A3 and A4plus\nwho lay eggs - mean"
-tornado_parameter_labels$label[which(tornado_parameter_labels$label == "yoy survival reduction (pct) from roads")] <-  "yoy survival reduction\nfrom roads (pct)"
+tornado_parameter_labels$label[which(tornado_parameter_labels$label == "egg survival reduction () if bullfrogMgt not effective")] <-  "egg survival reduction if\nbullfrog mgmt. not effective"
+tornado_parameter_labels$label[which(tornado_parameter_labels$label == "adult survival reduction () from roads")] <-  "adult survival reduction\nfrom roads "
+tornado_parameter_labels$label[which(tornado_parameter_labels$label == "proportion of adults 4 years or older lay eggs - mean")] <-  "proportion of adults 4 years or\nolder who lay eggs - mean"
+tornado_parameter_labels$label[which(tornado_parameter_labels$label == "young of year survival reduction () from roads")] <-  "young of year survival\nreduction from roads"
+tornado_parameter_labels$label[which(tornado_parameter_labels$label == "young of year survival - mean")] <-  "young of year\nsurvival - mean"
+
 
 # Do the sensitivity analysis
 paramSens_persist <- dapva::makeParameterSens(parameterByIterTracking = parameterByIterTracking_this_alt_clean,
@@ -448,6 +456,12 @@ paramSens_persist <- dapva::makeParameterSens(parameterByIterTracking = paramete
                                               start_year = 1,
                                               nyrs = 50,
                                               parameter_labels = tornado_parameter_labels)
+
+# Change all percent values to proportions
+
+rows <- which(grepl('reduction', paramSens_persist[[1]]$input) == TRUE)
+paramSens_persist[[1]]$low_p_10[rows] <- as.character(as.numeric(paramSens_persist[[1]]$low_p_10[rows])/100)
+paramSens_persist[[1]]$high_p_90[rows] <- as.character(as.numeric(paramSens_persist[[1]]$high_p_90[rows])/100)
 
 # Draw the associated tornado
 
