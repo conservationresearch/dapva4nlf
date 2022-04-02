@@ -395,9 +395,9 @@ filename <- paste("ForManuscript/graph_effort_year50_option3", version,".pdf", s
 cowplot::plot_grid(persist_effort_graph1,
                    persistence_effort_violinPlot_opt2,
                    persistence_effort_CDF1_opt2,
-                   ncol = 1, nrow = 3,
+                   ncol = 2, nrow = 2,
                    labels = c("A", "B", "C"))
-ggplot2::ggsave(filename = filename, width = 3.25, height = 9)
+ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
 
 # 
 # filename <- paste("ForManuscript/graph_effort_year50_option3a", version,".pdf", sep="")
@@ -491,25 +491,25 @@ tornado_persist_top10
 
 pdf(NULL)
 options(bitmapType = 'cairo', device = 'pdf')
-ggplot2::ggsave(filename = "ForManuscript/testing.pdf", 
-                width = 6.5, height = 4, device = cairo_pdf)
+# ggplot2::ggsave(filename = "ForManuscript/testing.pdf", 
+#                 width = 6.5, height = 4, device = cairo_pdf)
+# 
+# pdf(NULL)
+# filename <- paste("ForManuscript/tornado_top10_goBig", version,".pdf", sep="")
+# tornado_persist_top10
+# options(bitmapType = 'cairo', device = 'pdf')
+# ggplot2::ggsave(filename = filename, width = 6.5, height = 4)
+# 
+# 
+# 
+# filename <- paste("ForManuscript/tornado_top10_goBig", version,".pdf", sep="")
+# pdf(file=filename,onefile=FALSE,width=6.5,height=3)
+# tornado_persist_top10
+# dev.off()
 
-pdf(NULL)
-filename <- paste("ForManuscript/tornado_top10_goBig", version,".pdf", sep="")
+Cairo::CairoPDF(file = "ForManuscript/tornado_top10_goBig.pdf", width=6.5,height=4)
 tornado_persist_top10
-options(bitmapType = 'cairo', device = 'pdf')
-ggplot2::ggsave(filename = filename, width = 6.5, height = 4)
-
-
-
-filename <- paste("ForManuscript/tornado_top10_goBig", version,".pdf", sep="")
-pdf(file=filename,onefile=FALSE,width=6.5,height=3)
-tornado_persist_top10
-dev.off()
-
-Cairo::CairoPDF(file = "ForManuscript/testing.pdf", width=6.5,height=3)
-
-
+dev.off() 
 # #filename <- paste("ForManuscript/graph_effort_year50_option2", version,".eps", sep="")
 # #postscript(file=filename,horiz=FALSE,onefile=FALSE,width=6.5,height=3)
 # cowplot::plot_grid(persist_effort_graph1,
@@ -651,7 +651,7 @@ p_hist_prob_persist_groups
 #                    labels = c("A", "B"))
 # ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
 
-filename <- paste("ForManuscript/graph_compare_yoyTadsurv_persist", version,".png", sep="")
+filename <- paste("ForManuscript/graph_compare_yoyTadsurv_persist", version,".pdf", sep="")
 cowplot::plot_grid(p_sens_tad_yoy_surv_persist,  p_hist_prob_persist_groups ,
                    ncol = 1, nrow = 2,
                    labels = c("A", "B"))
@@ -801,7 +801,7 @@ p_sens_juv_surv_bullfrogMgmt
 # dev.off()
 
 
-filename <- paste("ForManuscript/graph_bullfrogMgt_vs_survival", version,".png", sep="")
+filename <- paste("ForManuscript/graph_bullfrogMgt_vs_survival", version,".pdf", sep="")
 cowplot::plot_grid(p_sens_eggs_surv_bullfrogMgmt, 
                    p_sens_tad_surv_bullfrogMgmt,
                    p_sens_yoy_surv_bullfrogMgmt,
