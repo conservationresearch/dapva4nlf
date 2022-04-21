@@ -399,6 +399,26 @@ cowplot::plot_grid(persist_effort_graph1,
                    labels = c("A", "B", "C"))
 ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
 
+library(patchwork)
+filename <- paste("ForManuscript/graph_effort_year50_option3b", version,".pdf", sep="")
+(persist_effort_graph1 | (persistence_effort_violinPlot_opt2 / persistence_effort_CDF1_opt2)) + 
+  patchwork::plot_layout(guides = 'collect') +
+  patchwork::plot_annotation(tag_levels = 'A')
+ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
+
+
+# Better descriptor of bimodal results low and high as per Sarah's comment
+
+colnames(int2)
+rows <- which(int2$metric == "probability of persistence" & int2$alternative == "Go Big or\n Go Home")
+(n_iter <- length(rows))
+hist(int2$'50'[rows])
+length(which(int2$'50'[rows] <= 0.05))
+length(which(int2$'50'[rows] < 0.05))/n_iter * 100 #approx 45% of iterations less than 5% prob of persistence
+length(which(int2$'50'[rows] > 0.95))
+length(which(int2$'50'[rows] > 0.95)) /n_iter * 100 #approx 25% of iterations greater than 95% prob of persistence
+
+
 # 
 # filename <- paste("ForManuscript/graph_effort_year50_option3a", version,".pdf", sep="")
 # cowplot::plot_grid(persist_effort_graph1,
