@@ -227,6 +227,15 @@ colnames(results_summary_all_iterations_year) <- c("quantity",
                                                  legend_position = "none")
 )
 
+# Graph the excess probability distribution instead of the cumulative to show stochastic dominance
+(persistence_effort_EDF1_opt2 <- dapva::graphEDF(results_summary_all_iterations = int2,
+                                                 metric = "probability of persistence",
+                                                 year = yrs,
+                                                 x_axis_lab = "Probability of Persistence\nin Year 50",
+                                                 y_axis_lab = "Excess Probability",
+                                                 title = '',
+                                                 legend_position = "none")
+)
 
 #---- Make graphs for the report - level of effort, graphs for export. ----
 
@@ -391,20 +400,30 @@ colnames(results_summary_all_iterations_year) <- c("quantity",
 #                    ncol = 1, nrow = 3,
 #                    labels = c("A", "B", "C"))
 # ggplot2::ggsave(filename = filename, width = 3.25, height = 9)
-filename <- paste("ForManuscript/graph_effort_year50_option3", version,".pdf", sep="")
-cowplot::plot_grid(persist_effort_graph1,
-                   persistence_effort_violinPlot_opt2,
-                   persistence_effort_CDF1_opt2,
-                   ncol = 2, nrow = 2,
-                   labels = c("A", "B", "C"))
-ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
+
+
+# filename <- paste("ForManuscript/graph_effort_year50_option3", version,".pdf", sep="")
+# cowplot::plot_grid(persist_effort_graph1,
+#                    persistence_effort_violinPlot_opt2,
+#                    persistence_effort_CDF1_opt2,
+#                    ncol = 2, nrow = 2,
+#                    labels = c("A", "B", "C"))
+# ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
 
 library(patchwork)
-filename <- paste("ForManuscript/graph_effort_year50_option3b", version,".pdf", sep="")
-(persist_effort_graph1 | (persistence_effort_violinPlot_opt2 / persistence_effort_CDF1_opt2)) + 
+# filename <- paste("ForManuscript/graph_effort_year50_option3b", version,".pdf", sep="")
+# (persist_effort_graph1 | (persistence_effort_violinPlot_opt2 / persistence_effort_CDF1_opt2)) + 
+#   patchwork::plot_layout(guides = 'collect') +
+#   patchwork::plot_annotation(tag_levels = 'A')
+# ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
+# 
+
+filename <- paste("ForManuscript/graph_effort_year50_option3c", version,".pdf", sep="")
+(persist_effort_graph1 | (persistence_effort_violinPlot_opt2 / persistence_effort_EDF1_opt2)) + 
   patchwork::plot_layout(guides = 'collect') +
   patchwork::plot_annotation(tag_levels = 'A')
 ggplot2::ggsave(filename = filename, width = 6.5, height = 6)
+
 
 
 # Better descriptor of bimodal results low and high as per Sarah's comment
@@ -418,6 +437,8 @@ length(which(int2$'50'[rows] < 0.05))/n_iter * 100 #approx 45% of iterations les
 length(which(int2$'50'[rows] > 0.95))
 length(which(int2$'50'[rows] > 0.95)) /n_iter * 100 #approx 25% of iterations greater than 95% prob of persistence
 
+
+length(which(int2$'50'[rows] <= 0.95 & int2$'50'[rows] >= 0.05))/n_iter * 100 # approx 30% in between
 
 # 
 # filename <- paste("ForManuscript/graph_effort_year50_option3a", version,".pdf", sep="")
