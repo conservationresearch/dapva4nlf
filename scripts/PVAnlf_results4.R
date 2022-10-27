@@ -590,10 +590,11 @@ paramSens_persist[[1]]$high_p_90[rows] <- as.character(as.numeric(paramSens_pers
 tornado_persist_top10 <- dapva::drawTornado(paramSens = paramSens_persist,
                                             metric = "Probability of persistence",
                                             year = 50,
-                                            x_axis_label = "Probability of Persistence in Year 50",
-                                            title = "", breaks = 0.2,
+                                            x_axis_label = "Probability of Persistence in Year 50 (Mean)",
+                                            title = "", 
                                             num_bars_to_show = 10,
-                                            labels = "no")
+                                            labels = "no and format for nlf feasability decision analysis paper",
+                                            legend_position = "bottom")
 tornado_persist_top10
 # Export the tornado diagrams - main report
 # filename <- paste("ForManuscript/tornado_top10_goBig", version,".pdf", sep="")
