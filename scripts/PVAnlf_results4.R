@@ -645,7 +645,25 @@ dev.off()
 #                    labels = c("A", "B", "C"))
 # dev.off()
 
+#---- Calculate the value of control . ----
 
+# for each parameter, identify the max expected value and then subtract the overall expected value from it
+parameter <- unique(paramSens_persist[[1]]$input)
+overall_ev <- paramSens_persist[[1]]$EV_overall[1]
+VOC <- as.data.frame(matrix(nrow = length(parameter), ncol = 4))
+VOC[,1]<- parameter
+VOC[,2] <- overall_ev 
+colnames(VOC) <- c("parameter","overall_ev", "max_ev", "value_of_control")
+
+for(i in 1:length(parameter_list)){
+  rows <- which(paramSens_persist[[1]]$input == VOC$parameter[i])
+  VOC$max_ev[i] <- max(paramSens_persist[[1]]$value[rows])
+  VOC$value_of_control[i] <-  VOC$max_ev[i] - VOC$overall_ev[i]
+}
+
+# top 2 VOC:
+# young of year survival - 0.42
+# tadpole survival - 0.34
 
 #---- Explore yoy and tadpole survival vs prob of persistence - plot points. ----
 # Correct for potential for parallel computing to skip iterations
